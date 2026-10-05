@@ -1,0 +1,25 @@
+# Secret dan konfigurasi lokal
+.env
+*.env
+!.env.example
+*.pem
+*.key
+rclone.conf
+
+# Dump database dan backup
+*.sql
+*.sql.gz
+*.dump
+backups/
+
+# Python
+__pycache__/
+*.pyc
+venv/
+.venv/
+
+# Editor dan OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
