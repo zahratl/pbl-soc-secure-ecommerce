@@ -23,3 +23,15 @@ venv/
 .idea/
 .DS_Store
 Thumbs.db
+
+# Logs
+*.log
+backup.log
+
+# Credentials tambahan
+credentials.json
+token.json
+config.json
+
+# Docker override
+docker-compose.override.yml
