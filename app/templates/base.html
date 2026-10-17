@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}KURO WEAR - Fall Collection 2026{% endblock %}</title>
+    <!-- Bootstrap 5 CDN -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <!-- SweetAlert2 -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="{{ url_for('static', filename='js/search.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/wishlist.js') }}"></script>
+</head>
+<body>
+
+    <!-- NAVBAR (81px height) -->
+    <nav class="navbar navbar-expand-lg navbar-custom sticky-top">
+        <div class="container-fluid px-lg-4">
+            <!-- LOGO -->
+            <a class="navbar-brand navbar-brand-figma" href="{{ url_for('shop.index') }}">
+                LOGO
+            </a>
+
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navMenu">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+
+            <!-- MENU TENGAH -->
+            <div class="collapse navbar-collapse" id="navMenu">
+                <ul class="navbar-nav mx-auto mb-2 mb-lg-0">
+                    <li class="nav-item"><a class="nav-link nav-link-figma {{ 'active-nav-link' if request.endpoint == 'shop.index' else '' }}" href="{{ url_for('shop.index') }}">HOME</a></li>
+                    <li class="nav-item"><a class="nav-link nav-link-figma {{ 'active-nav-link' if request.endpoint == 'shop.women' else '' }}" href="{{ url_for('shop.women') }}">WOMEN</a></li>
+                    <li class="nav-item"><a class="nav-link nav-link-figma {{ 'active-nav-link' if request.endpoint == 'shop.man' else '' }}" href="{{ url_for('shop.man') }}">MAN</a></li>
+                    <li class="nav-item"><a class="nav-link nav-link-figma {{ 'active-nav-link' if request.endpoint == 'shop.catalog_all' else '' }}" href="{{ url_for('shop.catalog_all') }}">ALL</a></li>
+                </ul>
+
+                <!-- SISI KANAN -->
+                <div class="d-flex align-items-center gap-3">
+                    <!-- SEARCH PRODUK KURO WEAR -->
+                    <form
+                        id="kuroSearchForm"
+                        class="kuro-search-form"
+                        action="{{ url_for('shop.search') }}"
+                        method="GET"
+                        role="search"
+                        autocomplete="off"
+                    >
+
+                        <input
+                            type="search"
+                            id="kuroSearchInput"
+                            name="q"
+                            placeholder="Cari..."
+                            value="{{ request.args.get('q', '') }}"
+                            maxlength="80"
+                            aria-label="Cari produk KURO WEAR"
+                            aria-controls="kuroSearchSuggestions"
+                            aria-autocomplete="list"
+                        >
+
+                        <button
+                            type="submit"
+                            class="kuro-search-button"
+                            aria-label="Cari produk"
+                        >
+                            <i class="bi bi-search"></i>
+                        </button>
+
+                        <!-- DROPDOWN HASIL PENCARIAN -->
+                        <div
+                            id="kuroSearchSuggestions"
+                            class="kuro-search-suggestions"
+                            role="listbox"
+                            hidden
+                        ></div>
+                    </form>
+                
+                    <!-- WISHLIST NAVBAR -->
+                    <a
+                        href="{% if current_user.is_authenticated %}{{ url_for('shop.wishlist') }}{% else %}javascript:void(0){% endif %}"
+                        {% if not current_user.is_authenticated %}
+                        onclick="requireLogin('Wishlist')"
+                        {% endif %}
+                        class="text-dark position-relative text-decoration-none"
+                        aria-label="Wishlist Saya"
+                    >
+                        <i class="bi bi-heart fs-5"></i>
+
+                        <span
+                            id="wishlist-badge"
+                            class="position-absolute top-0 start-100 translate-middle badge badge-figma-maroon"
+                            data-wishlist-count
+                        >
+                            {{ wishlist_count }}
+                        </span>
+                    </a>
+
+                    <!-- Cart Icon -->
+                    <a href="javascript:void(0)" onclick="handleCartClick()" class="text-dark position-relative text-decoration-none">
+                        <i class="bi bi-handbag fs-5"></i>
+                        <span id="cart-badge" class="position-absolute top-0 start-100 translate-middle badge badge-figma-maroon">0</span>
+                    </a>
+
+                    <!-- Profil User / Login Button -->
+                    {% if current_user.is_authenticated %}
+                        <div class="dropdown">
+                            <div class="user-profile-pill dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">      
+                    <!-- AVATAR NAVBAR DINAMIS -->
+                    {% if current_user.is_authenticated %}
+
+                        {% set navbar_profile = current_user.customer_profile %}
+
+                        {% if navbar_profile and navbar_profile.avatar_filename %}
+
+                            <!-- Foto dari Profil Saya -->
+                            <img
+                                src="{{ url_for('static', filename='uploads/avatars/' ~ navbar_profile.avatar_filename) }}"
+                                alt="Foto profil {{ current_user.name }}"
+                                class="kw-navbar-avatar"
+                            >
+
+                        {% elif current_user.avatar_path %}
+
+                            <!-- Fallback foto dari User -->
+                            <img
+                                src="{{ url_for('static', filename=current_user.avatar_path) }}"
+                                alt="Foto profil {{ current_user.name }}"
+                                class="kw-navbar-avatar"
+                            >
+
+                        {% else %}
+
+                            <!-- Avatar default jika belum upload -->
+                            <span class="kw-navbar-avatar kw-navbar-avatar-default">
+                                <i class="bi bi-person-fill"></i>
+                            </span>
+
+                        {% endif %}
+
+                    {% endif %}
+                                <div class="user-info-col d-none d-sm-flex">
+                                    <span class="user-name-text">{{ current_user.name.split()[0] }}</span>
+                                    <span class="user-role-text">{{ current_user.role.capitalize() }}</span>
+                                </div>
+                                <i class="bi bi-chevron-down ms-1" style="font-size: 10px; color: #575E70;"></i>
+                            </div>
+                            <ul class="dropdown-menu dropdown-menu-end shadow-sm border-0 mt-2" style="font-size: 13px; border-radius: 2px;">
+                                <li><a class="dropdown-item py-2" href="{{ url_for('customer.profile') }}"><i class="bi bi-person me-2"></i>Profil Saya</a></li>
+                                <li><a class="dropdown-item py-2" href="{{ url_for('customer.order_history') }}"><i class="bi bi-bag-check me-2"></i>Riwayat Pesanan</a></li>
+                                {% if current_user.role == 'admin' %}
+                                    <li><hr class="dropdown-divider"></li>
+                                    <li><a class="dropdown-item py-2 text-danger fw-bold" href="{{ url_for('admin.dashboard') }}"><i class="bi bi-speedometer2 me-2"></i>Panel Admin</a></li>
+                                {% endif %}
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item py-2 text-muted" href="{{ url_for('auth.logout') }}"><i class="bi bi-box-arrow-right me-2"></i>Logout</a></li>
+                            </ul>
+                        </div>
+                    {% else %}
+                        <a href="{{ url_for('auth.login') }}" class="btn btn-sm btn-dark px-3 py-1 fw-bold" style="font-size: 0.75rem; letter-spacing: 0.05em; border-radius: 0;">
+                            LOGIN
+                        </a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- CONTENT -->
+    {% block content %}{% endblock %}
+
+    <!-- FOOTER (Exact Figma) -->
+    <footer class="footer-figma">
+        <div class="container-fluid px-lg-4">
+            <div class="row g-4">
+                <div class="col-6 col-lg-3">
+                    <h6 class="footer-heading-figma">KATEGORI PILIHAN</h6>
+                    <ul class="footer-list-figma">
+                        <li><a href="#">Koleksi Linen Pria</a></li>
+                        <li><a href="#">Supima Cotton Wanita</a></li>
+                        <li><a href="#">Koleksi Essentials Minimalis</a></li>
+                        <li><a href="#">Sale & Penawaran Terbatas</a></li>
+                        <li><a href="#">Pakaian Anak Nyaman</a></li>
+                    </ul>
+                </div>
+                <div class="col-6 col-lg-3">
+                    <h6 class="footer-heading-figma">BANTUAN & LAYANAN</h6>
+                    <ul class="footer-list-figma">
+                        <li><a href="#">Status Pengiriman</a></li>
+                        <li><a href="#">Konfirmasi & Bukti Pembayaran</a></li>
+                        <li><a href="#">Panduan Ukuran (Size Guide)</a></li>
+                        <li><a href="#">Kebijakan Garansi 14 Hari</a></li>
+                        <li><a href="#">Hubungi Layanan Konsumen</a></li>
+                    </ul>
+                </div>
+                <div class="col-12 col-lg-3">
+                    <h6 class="footer-heading-figma">TENTANG KURO WEAR</h6>
+                    <p class="mb-2" style="font-size: 12px; line-height: 20px; color: var(--figma-text-secondary);">
+                        Terinspirasi dari filosofi desain minimalis Jepang, mengedepankan siluet esensial, material alami berkualitas, dan kejujuran fungsi tanpa ornamen berlebih.
+                    </p>
+                    <p class="fw-bold mb-0" style="font-size: 12px; color: var(--figma-dark);">
+                        EST. 2026 &nbsp;&bull;&nbsp; JAKARTA, INDONESIA
+                    </p>
+                </div>
+                <div class="col-12 col-lg-3">
+                    <h6 class="footer-heading-figma">METODE PEMBAYARAN & KEAMANAN</h6>
+                    <p class="mb-2" style="font-size: 12px; line-height: 18px; color: var(--figma-text-secondary);">
+                        Transaksi aman terenkripsi didukung oleh Payment Gateway resmi.
+                    </p>
+                    <div class="d-flex flex-wrap gap-1">
+                        <span class="badge-payment-figma">MIDTRANS SANDBOX</span>
+                        <span class="badge-payment-figma">BCA VA</span>
+                        <span class="badge-payment-figma">MANDIRI</span>
+                        <span class="badge-payment-figma">QRIS</span>
+                        <span class="badge-payment-figma">GOPAY</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="footer-bottom-figma">
+                <span>&copy; 2026 All rights reserved.</span>
+                <div class="d-flex gap-3">
+                    <a href="#">Kebijakan Privasi</a>
+                    <a href="#">Syarat & Ketentuan</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Bootstrap 5 JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+        <!-- Gantikan bagian JS interaktif Anda dengan script ini -->
+    <script>
+        const isAuthenticated = "{{ 'true' if current_user.is_authenticated else 'false' }}" === "true";
+        const loginUrl = "{{ url_for('auth.login') }}";
+        const cartUrl = "{{ url_for('cart.view_cart') }}";
+
+        let cartCounter = 0; // Biarkan cart menggunakan logika lama sementara
+
+        function requireLogin(fitur) {
+            Swal.fire({
+                title: 'Login Diperlukan',
+                html: `
+                    <div class="mb-2">
+                        <span style="background: #810100; color: #FFFFFF; font-size: 10px; font-weight: 700; letter-spacing: 0.8px; padding: 3px 8px; text-transform: uppercase;">GUEST MODE</span>
+                    </div>
+                    <p style="color: #575E70; font-size: 13px; line-height: 20px; margin-bottom: 0;">
+                        Kamu sedang dalam <strong>Guest Mode</strong>.<br>
+                        Silakan masuk atau daftar terlebih dahulu untuk menggunakan fitur <strong>${fitur}</strong> & berbelanja!
+                    </p>
+                `,
+                icon: 'info',
+                showCancelButton: true,
+                confirmButtonText: 'Login Sekarang',
+                cancelButtonText: 'Nanti Dulu',
+                buttonsStyling: false,
+                customClass: {
+                    popup: 'kuro-swal-popup',
+                    title: 'kuro-swal-title',
+                    confirmButton: 'kuro-swal-confirm',
+                    cancelButton: 'kuro-swal-cancel'
+                }
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    window.location.href = loginUrl;
+                }
+            });
+        }
+
+        // Fungsi Notifikasi Toast Elegan Kuro Wear
+        function showKuroToast(message) {
+            let existingToast = document.getElementById('kuro-toast');
+            if (existingToast) existingToast.remove();
+
+            const toast = document.createElement('div');
+            toast.id = 'kuro-toast';
+            toast.className = 'kuro-toast';
+            toast.innerHTML = `<i class="bi bi-check-circle-fill kuro-toast-icon"></i><span>${message}</span>`;
+            document.body.appendChild(toast);
+
+            setTimeout(() => toast.classList.add('show'), 10);
+            setTimeout(() => {
+                toast.classList.remove('show');
+                setTimeout(() => toast.remove(), 300);
+            }, 2500);
+        }
+
+        // Fungsi Tambah Keranjang
+        function addToCart(productName) {
+            if (!isAuthenticated) {
+                requireLogin('Keranjang');
+            } else {
+                cartCounter++;
+                document.getElementById('cart-badge').innerText = cartCounter;
+
+                Swal.fire({
+                    title: 'BERHASIL DITAMBAHKAN',
+                    html: `<p style="color: #575E70; font-size: 13px;"><strong>${productName}</strong> telah dimasukkan ke keranjang belanja Anda.</p>`,
+                    icon: 'success',
+                    confirmButtonText: 'LIHAT KERANJANG',
+                    showCancelButton: true,
+                    cancelButtonText: 'LANJUT BELANJA',
+                    buttonsStyling: false,
+                    customClass: {
+                        popup: 'kuro-swal-popup',
+                        title: 'kuro-swal-title',
+                        confirmButton: 'kuro-swal-confirm',
+                        cancelButton: 'kuro-swal-cancel'
+                    }
+                }).then((res) => {
+                    if (res.isConfirmed) {
+                        window.location.href = cartUrl;
+                    }
+                });
+            }
+        }
+
+        // Fungsi Klik Ikon Keranjang di Navbar
+        function handleCartClick() {
+            if (!isAuthenticated) {
+                requireLogin('Keranjang');
+            } else {
+                window.location.href = cartUrl;
+            }
+        }
+    </script>
+</body>
+</html>

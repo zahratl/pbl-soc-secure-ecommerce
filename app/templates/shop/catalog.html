@@ -1,0 +1,135 @@
+
+{% extends 'base.html' %}
+
+{% block title %}
+ALL COLLECTION - KURO WEAR
+{% endblock %}
+
+{% block content %}
+
+{% set collection_type = 'all' %}
+
+<link
+    rel="stylesheet"
+    href="{{ url_for('static', filename='css/collection-unified.css') }}"
+>
+
+<div class="catalog-page-container kw-collection-page">
+
+    <div class="container-fluid px-lg-5">
+
+        <!-- BREADCRUMB ASLI -->
+        <div class="catalog-breadcrumb-bar">
+
+            <a href="{{ url_for('shop.index') }}">
+                HOME
+            </a>
+
+            <span class="breadcrumb-sep">/</span>
+
+            <span class="breadcrumb-curr">
+                ALL
+            </span>
+
+        </div>
+
+
+        <!-- HERO ALL COLLECTION -->
+        <div class="catalog-hero-box">
+
+            <div class="row align-items-end g-4">
+
+                <div class="col-lg-8">
+
+                    <div class="catalog-badge-etalase">
+                        <span class="badge-diamond">
+                            &#9670;
+                        </span>
+
+                        <span>
+                            ETALASE BERSAMA &bull; MAN & WOMEN
+                        </span>
+                    </div>
+
+                    <h1 class="catalog-hero-title">
+                        ALL COLLECTION
+                    </h1>
+
+                    <p class="catalog-hero-desc">
+                        Semua siluet esensial busana pria dan wanita
+                        disatukan dalam satu katalog. Dirancang
+                        dengan sentuhan minimalis, kenyamanan,
+                        dan pilihan material berkualitas.
+                    </p>
+
+                </div>
+
+
+                <!-- STATISTIK ASLI, DATA DINAMIS -->
+                <div class="col-lg-4">
+
+                    <div class="catalog-stats-wrapper">
+
+                        <div class="stat-box">
+
+                            <div
+                                class="stat-val"
+                                id="total-product-stat"
+                            >
+                                {{ products|length }}
+                            </div>
+
+                            <div class="stat-lbl">
+                                TOTAL ITEM TERSEDIA
+                            </div>
+
+                        </div>
+
+                        <div class="stat-box">
+
+                            <div class="stat-val maroon">
+                                {{ products|selectattr('gender', 'equalto', 'unisex')|list|length }}
+                            </div>
+
+                            <div class="stat-lbl">
+                                PRODUK UNISEX
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+    
+        {% if search_query is defined and search_query %}
+
+        <div class="bg-white border rounded-3 p-3 mb-4">
+            <div class="text-muted small mb-1">
+                HASIL PENCARIAN PRODUK
+            </div>
+            <h5 class="fw-bold mb-1">
+                Hasil pencarian untuk "{{ search_query }}"
+            </h5>
+            <p class="text-muted small mb-0">
+                Ditemukan {{ products|length }} produk
+                yang cocok dengan pencarianmu.
+            </p>
+        </div>
+
+        {% endif %}
+
+        <!-- KATEGORI, FILTER, PRODUK, WISHLIST -->
+        {% include 'shop/_collection_content.html' %}
+
+    </div>
+
+</div>
+
+<script src="{{ url_for('static', filename='js/collection-unified.js') }}"></script>
+<script src="{{ url_for('static', filename='js/wishlist.js') }}"></script>
+
+{% endblock %}

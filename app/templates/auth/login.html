@@ -1,0 +1,96 @@
+{% extends 'base.html' %}
+
+{% block title %}SIGN IN - KURO WEAR{% endblock %}
+
+{% block content %}
+<div class="signin-wrapper">
+    <div class="signin-form-box">
+        
+        <!-- Judul Besar SIGN IN -->
+        <h1 class="signin-title">SIGN IN</h1>
+
+                <!-- Flash Messages -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }} mb-4 rounded-0 py-3 d-flex align-items-center justify-content-between" style="font-size: 13px; font-weight: 500;">
+                        <span>
+                            {% if category == 'warning' %}
+                                <i class="bi bi-exclamation-triangle-fill me-2 text-warning"></i>
+                            {% elif category == 'danger' %}
+                                <i class="bi bi-x-circle-fill me-2 text-danger"></i>
+                            {% endif %}
+                            {{ message }}
+                        </span>
+                        {% if category == 'warning' %}
+                            <a href="{{ url_for('auth.register') }}" class="btn btn-sm btn-dark ms-2 py-1 px-2" style="font-size: 11px; font-weight: 700; border-radius: 0;">DAFTAR</a>
+                        {% endif %}
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <!-- Form Login -->
+        <form method="POST" action="{{ url_for('auth.login') }}">
+            {{ form.hidden_tag() }}
+
+            <!-- Input Email -->
+            <div class="mb-4">
+                <label class="signin-label">EMAIL</label>
+                {{ form.email(class="signin-input", placeholder="Enter your email address", autocomplete="email") }}
+                {% for error in form.email.errors %}
+                    <small class="text-danger d-block mt-1 fw-bold">{{ error }}</small>
+                {% endfor %}
+            </div>
+
+            <!-- Input Password -->
+            <div class="mb-4">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <label class="signin-label mb-0">PASSWORD</label>
+                    <a href="#" class="link-forgot-password">Forgot password?</a>
+                </div>
+                
+                <div class="signin-input-group">
+                    {{ form.password(id="password-input", class="signin-input", placeholder="Please enter your password", autocomplete="current-password") }}
+                    <!-- Tombol Intip Password Mata -->
+                    <button type="button" id="toggle-password-btn" class="btn-toggle-password" title="Lihat password">
+                        <i class="bi bi-eye" id="eye-icon"></i>
+                    </button>
+                </div>
+                {% for error in form.password.errors %}
+                    <small class="text-danger d-block mt-1 fw-bold">{{ error }}</small>
+                {% endfor %}
+            </div>
+
+            <!-- Tombol SIGN IN -->
+            <button type="submit" class="btn-signin-submit">
+                <span>SIGN IN</span>
+                <i class="bi bi-arrow-right fs-5"></i>
+            </button>
+        </form>
+
+        <!-- Link Register -->
+        <div class="signin-footer-text">
+            Don't have an account? 
+            <a href="{{ url_for('auth.register') }}" class="link-register-maroon ms-1">Register</a>
+        </div>
+
+    </div>
+</div>
+
+<!-- JavaScript Toggle Password Visibility -->
+<script>
+    const passwordInput = document.getElementById('password-input');
+    const toggleBtn = document.getElementById('toggle-password-btn');
+    const eyeIcon = document.getElementById('eye-icon');
+
+    if (toggleBtn && passwordInput) {
+        toggleBtn.addEventListener('click', function () {
+            const isPassword = passwordInput.getAttribute('type') === 'password';
+            passwordInput.setAttribute('type', isPassword ? 'text' : 'password');
+            eyeIcon.classList.toggle('bi-eye');
+            eyeIcon.classList.toggle('bi-eye-slash');
+        });
+    }
+</script>
+{% endblock %}

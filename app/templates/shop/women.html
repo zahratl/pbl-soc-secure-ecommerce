@@ -1,0 +1,139 @@
+
+{% extends 'base.html' %}
+
+{% block title %}
+WOMEN COLLECTION 2026 - KURO WEAR
+{% endblock %}
+
+{% block content %}
+
+{% set collection_type = 'women' %}
+
+<link
+    rel="stylesheet"
+    href="{{ url_for('static', filename='css/collection-unified.css') }}"
+>
+
+<div class="women-page-bg kw-collection-page">
+
+    <div class="container-fluid px-lg-5">
+
+        <!-- BREADCRUMB ASLI -->
+        <div class="women-breadcrumb-bar d-flex justify-content-between align-items-center flex-wrap gap-2">
+
+            <div>
+
+                <a
+                    href="{{ url_for('shop.index') }}"
+                    class="women-crumb-link"
+                >
+                    HOME
+                </a>
+
+                <span class="women-crumb-sep">
+                    /
+                </span>
+
+                <span class="women-crumb-active">
+                    WOMEN
+                </span>
+
+            </div>
+
+            <div class="women-top-notice d-none d-md-block">
+
+                <span>EDISI 2026</span>
+
+                <span class="mx-2">
+                    &bull;
+                </span>
+
+                <span>
+                    PENGIRIMAN SELURUH INDONESIA
+                </span>
+
+            </div>
+
+        </div>
+
+
+        <!-- HERO WOMEN -->
+        <div class="women-hero-card">
+
+            <div class="row align-items-end g-4">
+
+                <div class="col-lg-8">
+
+                    <div class="women-badge-tag">
+
+                        <span class="women-badge-dot"></span>
+
+                        <span>
+                            KOLEKSI WANITA 2026
+                            &bull;
+                            SILUET ANGGUN MINIMALIS
+                        </span>
+
+                    </div>
+
+                    <h1 class="women-hero-title">
+                        WOMEN COLLECTION
+                    </h1>
+
+                    <p class="women-hero-desc">
+                        Gaya feminin modern dengan sentuhan
+                        minimalis Jepang. Garis potongan bersih,
+                        pilihan rok, celana high-waist, rajut,
+                        dan outerwear untuk kenyamanan
+                        esensial sehari-hari.
+                    </p>
+
+                </div>
+
+
+                <!-- STATISTIK DINAMIS -->
+                <div class="col-lg-4">
+
+                    <div class="d-flex flex-column align-items-lg-end gap-2">
+
+                        <div class="women-stat-pill">
+
+                            <i class="bi bi-calendar2-check text-danger"></i>
+
+                            <span class="women-stat-text-dark">
+                                {{ products|length }}
+                                ITEM WANITA TERSEDIA
+                            </span>
+
+                        </div>
+
+                        <div class="women-stat-pill">
+
+                            <i class="bi bi-bag text-secondary"></i>
+
+                            <span class="women-stat-text-muted">
+                                KURO WEAR COLLECTION
+                            </span>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- KATEGORI, FILTER, PRODUK, WISHLIST -->
+        {% include 'shop/_collection_content.html' %}
+
+    </div>
+
+</div>
+
+<script src="{{ url_for('static', filename='js/collection-unified.js') }}"></script>
+<script src="{{ url_for('static', filename='js/wishlist.js') }}"></script>
+
+{% endblock %}
