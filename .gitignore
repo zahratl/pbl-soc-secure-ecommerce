@@ -35,3 +35,27 @@ config.json
 
 # Docker override
 docker-compose.override.yml
+
+# KURO WEAR - LOCAL FILES
+*.db
+*.sqlite
+*.sqlite3
+*.db-journal
+*.db-wal
+*.db-shm
+instance/
+logs/
+*.log
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.env.*
+!.env.example
+
+# File pengguna yang tidak boleh dipublikasikan
+app/static/uploads/avatars/
+app/static/uploads/profiles/
+app/static/profile_photos/
+
+# Upload dinamis aplikasi
+app/static/uploads/

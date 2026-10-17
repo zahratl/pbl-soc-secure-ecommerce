@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Portal - Sign In</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    
+    <style>
+        /* Desain berdasarkan spesifikasi Figma SIGN IN ADMIN.txt */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Inter', sans-serif;
+        }
+
+        body {
+            background-color: #F4F1EA;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        /* HEADER */
+        .admin-header {
+            background: #FFFFFF;
+            border-bottom: 1px solid #EBE8E0;
+            padding: 16px 56px;
+            display: flex;
+            align-items: center;
+        }
+
+        .header-content {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            width: 100%;
+            max-width: 1280px;
+            margin: 0 auto;
+        }
+
+        .header-logo {
+            font-weight: 800;
+            font-size: 24px;
+            letter-spacing: -0.6px;
+            color: #141414;
+            text-transform: uppercase;
+        }
+
+        .header-badge {
+            background: #F5F5F5;
+            border: 1px solid #D4D4D4;
+            border-radius: 4px;
+            padding: 2px 8px;
+            font-weight: 600;
+            font-size: 10px;
+            letter-spacing: 0.5px;
+            color: #525252;
+            text-transform: uppercase;
+        }
+
+        /* MAIN SECTION */
+        .admin-main {
+            flex-grow: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 40px 20px;
+        }
+
+        .login-container {
+            width: 100%;
+            max-width: 440px; /* Ukuran proporsional */
+            display: flex;
+            flex-direction: column;
+            gap: 36px;
+        }
+
+        .login-heading-area {
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .login-title {
+            font-weight: 700;
+            font-size: 34px; /* Ukuran proporsional */
+            letter-spacing: -0.8px;
+            color: #181717;
+            line-height: 1.2;
+        }
+
+        .login-subtitle {
+            font-weight: 500;
+            font-size: 13px;
+            letter-spacing: 0.35px;
+            color: #575E70;
+            text-transform: uppercase;
+        }
+
+        .login-form-area {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        /* CLASS YANG SEMPAT HILANG (DIKEMBALIKAN) */
+        .label-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .form-label {
+            font-weight: 600;
+            font-size: 12px;
+            letter-spacing: 0.6px;
+            color: #1A1B22;
+            text-transform: uppercase;
+        }
+
+        .forgot-link {
+            font-weight: 500;
+            font-size: 12px;
+            color: #525252;
+            text-decoration: underline;
+        }
+
+        .input-wrapper {
+            position: relative;
+            width: 100%;
+        }
+
+        .form-input {
+            width: 100%;
+            height: 48px;
+            background: #FFFFFF;
+            border: 1px solid #E2DED2;
+            padding: 10px 16px;
+            font-size: 14px;
+            color: #1A1B22;
+            outline: none;
+            transition: border-color 0.2s ease;
+        }
+        
+        .form-input::placeholder {
+            color: #A3A3A3;
+        }
+
+        .form-input:focus {
+            border-color: #181717;
+        }
+
+        /* CLASS YANG SEMPAT HILANG (DIKEMBALIKAN) */
+        .btn-toggle-password {
+            position: absolute;
+            right: 16px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: #737373;
+            font-size: 18px;
+        }
+
+        .btn-submit {
+            width: 100%;
+            height: 48px;
+            background: #181717;
+            color: #FFFFFF;
+            font-weight: 600;
+            font-size: 13px;
+            letter-spacing: 1.2px;
+            text-transform: uppercase;
+            border: none;
+            border-radius: 0;
+            cursor: pointer;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 8px;
+            margin-top: 10px;
+            transition: background-color 0.2s ease;
+        }
+
+        .btn-submit:hover {
+            background: #333333;
+        }
+
+        .security-note {
+            text-align: center;
+            font-weight: 400;
+            font-size: 12px;
+            line-height: 18px;
+            color: #737373;
+            margin-top: 8px;
+        }
+
+        /* FOOTER */
+        .admin-footer {
+            background: #FFFFFF;
+            border-top: 1px solid #EBE8E0;
+            padding: 20px 56px;
+        }
+
+        .footer-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            max-width: 1280px;
+            margin: 0 auto;
+        }
+
+        .footer-text, .footer-links a {
+            font-weight: 400;
+            font-size: 11px;
+            color: #737373;
+            text-decoration: none;
+        }
+
+        .footer-links {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .footer-sep {
+            color: #737373;
+            font-size: 11px;
+        }
+
+        /* ALERT STYLES */
+        .alert-box {
+            padding: 12px 16px;
+            margin-bottom: 24px;
+            border-radius: 4px;
+            font-size: 13px;
+            font-weight: 500;
+            text-align: center;
+        }
+        .alert-danger { background-color: #FEE2E2; color: #991B1B; border: 1px solid #F87171; }
+        .alert-success { background-color: #D1FAE5; color: #065F46; border: 1px solid #34D399; }
+        .alert-warning { background-color: #FEF3C7; color: #92400E; border: 1px solid #FBBF24; }
+    </style>
+</head>
+<body>
+
+    <!-- Header -->
+    <header class="admin-header">
+        <div class="header-content">
+            <div class="header-logo">LOGO</div>
+            <div class="header-badge">ADMIN PORTAL</div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="admin-main">
+        <div class="login-container">
+            
+            <div class="login-heading-area">
+                <h1 class="login-title">SIGN IN</h1>
+                <p class="login-subtitle">PORTAL MANAJEMEN & AKSES ADMINISTRATOR</p>
+            </div>
+
+            <!-- Flash Messages -->
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    <div>
+                    {% for category, message in messages %}
+                        <div class="alert-box alert-{{ category }}">{{ message }}</div>
+                    {% endfor %}
+                    </div>
+                {% endif %}
+            {% endwith %}
+
+            <form method="POST" action="{{ url_for('auth.admin_login') }}" class="login-form-area">
+                {{ form.hidden_tag() }}
+                
+                <!-- Email Field -->
+                <div class="form-group">
+                    <label class="form-label">{{ form.email.label.text }}</label>
+                    <div class="input-wrapper">
+                        {{ form.email(class="form-input", placeholder="Enter your email address") }}
+                    </div>
+                </div>
+
+                <!-- Password Field -->
+                <div class="form-group" style="margin-bottom: 8px;">
+                    <div class="label-row">
+                        <label class="form-label">{{ form.password.label.text }}</label>
+                        <a href="#" class="forgot-link">Forgot password?</a>
+                    </div>
+                    <div class="input-wrapper">
+                        {{ form.password(class="form-input", id="adminPassword", placeholder="Please enter your password") }}
+                        <button type="button" class="btn-toggle-password" id="togglePasswordBtn">
+                            <i class="bi bi-eye"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Submit Button -->
+                <button type="submit" class="btn-submit">
+                    {{ form.submit.label.text }} <span style="font-family: Arial;">&rarr;</span>
+                </button>
+
+                <!-- Security Note -->
+                <div class="security-note">
+                    Akses terbatas hanya untuk staf & pengelola terdaftar.<br>
+                    Hubungi Superadmin jika terkendala verifikasi akses.
+                </div>
+            </form>
+
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="admin-footer">
+        <div class="footer-content">
+            <div class="footer-text">
+                &copy; 2026 All rights reserved.
+            </div>
+            <div class="footer-links">
+                <a href="#">Kebijakan Privasi</a>
+                <span class="footer-sep">|</span>
+                <a href="#">Syarat & Ketentuan</a>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Script for Password Visibility Toggle -->
+    <script>
+        const togglePasswordBtn = document.getElementById('togglePasswordBtn');
+        const adminPassword = document.getElementById('adminPassword');
+        const icon = togglePasswordBtn.querySelector('i');
+
+        togglePasswordBtn.addEventListener('click', function () {
+            // Toggle type between password and text
+            const type = adminPassword.getAttribute('type') === 'password' ? 'text' : 'password';
+            adminPassword.setAttribute('type', type);
+            
+            // Toggle icon 
+            icon.classList.toggle('bi-eye');
+            icon.classList.toggle('bi-eye-slash');
+        });
+    </script>
+</body>
+</html>

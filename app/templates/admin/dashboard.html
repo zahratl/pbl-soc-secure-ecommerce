@@ -1,0 +1,611 @@
+{% extends "admin/admin_base.html" %}
+
+{% block title %}Dashboard - Admin Panel Kuro Wear{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* Styling khusus Dashboard Admin */
+    .dashboard-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-end;
+        padding-bottom: 22px;
+        border-bottom: 1px solid rgba(227, 225, 236, 0.8);
+        margin-bottom: 37px;
+    }
+
+    .dashboard-title h1 {
+        font-weight: 600;
+        font-size: 26px;
+        letter-spacing: -0.65px;
+        color: #1A1B22;
+        margin: 0;
+    }
+
+    .quick-action-group {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+
+    .btn-lihat-toko {
+        background: #FFFFFF;
+        box-shadow: 0px 1px 2px rgba(0, 0, 0, 0.05);
+        padding: 9px 15px;
+        font-weight: 600;
+        font-size: 11px;
+        letter-spacing: 0.56px;
+        text-transform: uppercase;
+        color: #1A1B22;
+        text-decoration: none;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        border-radius: 2px;
+    }
+
+    .btn-tambah-produk {
+        background: #2F3038;
+        box-shadow: 0px 1px 2px rgba(0, 0, 0, 0.05);
+        padding: 9px 18px;
+        font-weight: 600;
+        font-size: 11px;
+        letter-spacing: 0.56px;
+        text-transform: uppercase;
+        color: #F1EFFA;
+        text-decoration: none;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        border-radius: 2px;
+    }
+
+    /* 4 METRIC CARDS */
+    .metrics-row {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 15px;
+        margin-bottom: 37px;
+    }
+
+    .metric-card {
+        background: #FFFFFF;
+        box-shadow: 0px 1px 2px rgba(0, 0, 0, 0.05);
+        padding: 22px;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        min-height: 140px;
+        border-radius: 2px;
+    }
+
+    .metric-card.accent-red {
+        border-left: 2px solid #E60012;
+    }
+
+    .metric-top-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .metric-title {
+        font-weight: 600;
+        font-size: 11px;
+        letter-spacing: 0.56px;
+        text-transform: uppercase;
+        color: #585A5C;
+        margin: 0;
+    }
+
+    .metric-badge-purple {
+        background: #EEEDF7;
+        color: #1A1B22;
+        font-weight: 700;
+        font-size: 10px;
+        padding: 2px 6px;
+    }
+
+    .metric-badge-red {
+        background: #FFDAD5;
+        color: #930007;
+        font-weight: 700;
+        font-size: 10px;
+        padding: 2px 8px;
+    }
+
+    .metric-value-row {
+        margin-top: 15px;
+    }
+
+    .metric-main-num {
+        font-weight: 700;
+        font-size: 26px;
+        letter-spacing: -0.65px;
+        color: #1A1B22;
+        line-height: 1.2;
+    }
+
+    .metric-main-num.text-red {
+        color: #E60012;
+    }
+
+    .metric-sub-text {
+        font-weight: 400;
+        font-size: 11px;
+        letter-spacing: 0.11px;
+        color: #585A5C;
+        margin-top: 4px;
+    }
+
+    /* MAIN OPERATIONAL SPLIT (TABLE + LOW STOCK) */
+    .operational-split {
+        display: grid;
+        grid-template-columns: 2fr 1fr;
+        gap: 24px;
+    }
+
+    /* RECENT ORDERS TABLE */
+    .table-card-container {
+        background: #FFFFFF;
+        box-shadow: 0px 1px 2px rgba(0, 0, 0, 0.05);
+        border-radius: 2px;
+        padding: 0;
+    }
+
+    .table-section-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 15px;
+    }
+
+    .table-section-title {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+
+    .table-section-title h2 {
+        font-weight: 600;
+        font-size: 17px;
+        letter-spacing: -0.42px;
+        color: #1A1B22;
+        margin: 0;
+    }
+
+    .badge-terakhir {
+        background: #2F3038;
+        color: #F1EFFA;
+        font-weight: 700;
+        font-size: 10px;
+        letter-spacing: 0.8px;
+        padding: 2px 8px;
+    }
+
+    .link-semua-transaksi {
+        font-weight: 600;
+        font-size: 11px;
+        letter-spacing: 0.56px;
+        text-transform: uppercase;
+        color: #585A5C;
+        text-decoration: none;
+        display: flex;
+        align-items: center;
+        gap: 4px;
+    }
+
+    .admin-custom-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin: 0;
+    }
+
+    .admin-custom-table th {
+        background: #F4F1EA;
+        font-weight: 600;
+        font-size: 11px;
+        letter-spacing: 0.56px;
+        text-transform: uppercase;
+        color: #585A5C;
+        padding: 14px 18px;
+        border-bottom: 1px solid #E8E7F1;
+        text-align: left;
+    }
+
+    .admin-custom-table td {
+        padding: 16px 18px;
+        vertical-align: middle;
+        border-top: 1px solid #F4F1EA;
+        font-size: 13px;
+        color: #1A1B22;
+    }
+
+    .order-id {
+        font-weight: 600;
+        font-size: 15px;
+        letter-spacing: -0.37px;
+        margin: 0;
+    }
+
+    .order-payment {
+        font-size: 11px;
+        color: #585A5C;
+        margin: 2px 0 0 0;
+    }
+
+    .item-name {
+        font-weight: 500;
+        font-size: 13px;
+        margin: 0;
+    }
+
+    .item-variant {
+        font-size: 11px;
+        color: #585A5C;
+        margin: 2px 0 0 0;
+    }
+
+    /* Status Badges */
+    .status-pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 3px 10px;
+        font-weight: 700;
+        font-size: 10px;
+        letter-spacing: 0.5px;
+        text-transform: uppercase;
+        border-radius: 50px;
+    }
+    .status-pill.menunggu { background: #FFDAD5; color: #930007; }
+    .status-pill.diproses { background: #F4F1EA; color: #5C6274; }
+    .status-pill.dikirim { background: #F4F1EA; color: #585A5C; }
+    .status-pill.selesai { background: #79FF74; color: #585A5C; border: 1px solid #E1ECE3; }
+
+    .status-dot {
+        width: 5px;
+        height: 5px;
+        border-radius: 50%;
+        background: currentColor;
+    }
+
+    /* Action Buttons in Table */
+    .btn-action-setujui {
+        background: #2F3038;
+        color: #F1EFFA;
+        font-weight: 600;
+        font-size: 11px;
+        padding: 5px 12px;
+        border-radius: 50px;
+        border: none;
+        text-transform: uppercase;
+    }
+
+    .btn-action-rincian {
+        background: #F4F1EA;
+        color: #1A1B22;
+        font-weight: 600;
+        font-size: 11px;
+        padding: 5px 12px;
+        border-radius: 50px;
+        border: none;
+        text-transform: uppercase;
+        text-decoration: none;
+        display: inline-block;
+    }
+
+    /* LOW STOCK WIDGET */
+    .low-stock-card {
+        background: #FFFFFF;
+        box-shadow: 0px 1px 2px rgba(0, 0, 0, 0.05);
+        padding: 20px;
+        border-radius: 2px;
+    }
+
+    .low-stock-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 15px;
+    }
+
+    .low-stock-title {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .red-dot {
+        width: 8px;
+        height: 8px;
+        background: #E60012;
+        border-radius: 50%;
+    }
+
+    .low-stock-title h2 {
+        font-weight: 600;
+        font-size: 17px;
+        letter-spacing: -0.42px;
+        color: #1A1B22;
+        margin: 0;
+    }
+
+    .sku-kritis-badge {
+        font-weight: 600;
+        font-size: 11px;
+        letter-spacing: 0.67px;
+        text-transform: uppercase;
+        color: #585A5C;
+    }
+
+    .low-stock-desc {
+        font-size: 11px;
+        line-height: 18px;
+        color: #585A5C;
+        margin-bottom: 16px;
+    }
+
+    .stock-item-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 13px 0;
+        border-top: 1px solid #EEEDF7;
+    }
+
+    .stock-item-row:first-of-type {
+        border-top: none;
+    }
+
+    .stock-item-title {
+        font-weight: 600;
+        font-size: 15px;
+        color: #1A1B22;
+        margin: 0;
+    }
+
+    .stock-item-variant {
+        font-size: 11px;
+        color: #585A5C;
+        margin: 2px 0 0 0;
+    }
+
+    .stock-count-val {
+        font-weight: 700;
+        font-size: 15px;
+        color: #B7000C;
+        text-align: right;
+        margin: 0;
+    }
+
+    .stock-threshold {
+        font-weight: 500;
+        font-size: 10px;
+        color: #585A5C;
+        margin: 2px 0 0 0;
+        text-align: right;
+    }
+
+    .btn-tambah-stok {
+        width: 100%;
+        background: #2F3038;
+        color: #F1EFFA;
+        font-weight: 600;
+        font-size: 11px;
+        letter-spacing: 0.56px;
+        text-transform: uppercase;
+        padding: 12px;
+        border: none;
+        border-radius: 2px;
+        margin-top: 15px;
+        cursor: pointer;
+    }
+
+    /* Empty-state: tidak mengubah struktur dashboard yang sudah ada */
+    .dashboard-empty-state {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        min-height: 210px;
+        padding: 32px 20px;
+        text-align: center;
+        color: #585A5C;
+    }
+    .dashboard-empty-state i {
+        color: #9A9BA1;
+        font-size: 30px;
+        margin-bottom: 10px;
+    }
+    .dashboard-empty-state strong {
+        color: #1A1B22;
+        font-size: 14px;
+        font-weight: 600;
+        margin-bottom: 6px;
+    }
+    .dashboard-empty-state p {
+        margin: 0;
+        font-size: 12px;
+        line-height: 1.6;
+    }
+    .dashboard-empty-state.stock-empty {
+        min-height: 155px;
+        padding: 18px 6px;
+    }
+    @media (max-width: 1100px) {
+        .metrics-row { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+        .operational-split { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 620px) {
+        .dashboard-header { align-items: flex-start; flex-wrap: wrap; gap: 14px; }
+        .metrics-row { grid-template-columns: 1fr; }
+        .table-card-container { overflow-x: auto; }
+        .admin-custom-table { min-width: 680px; }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Dashboard tanpa data contoh; angka = 0 sampai backend mengirim data nyata. -->
+
+<!-- Section 1: Header & Operational Bar -->
+<div class="dashboard-header">
+    <div class="dashboard-title">
+        <h1>Selamat Datang, Admin</h1>
+    </div>
+    <div class="quick-action-group">
+        <a href="{{ url_for('shop.index') }}" target="_blank" rel="noopener noreferrer" class="btn-lihat-toko">
+            LIHAT TOKO <i class="bi bi-arrow-up-right" style="font-size: 10px;"></i>
+        </a>
+        <a href="{{ url_for('admin.product_create') }}" class="btn-tambah-produk">
+            <i class="bi bi-plus" style="font-size: 14px;"></i> TAMBAH PRODUK
+        </a>
+    </div>
+</div>
+
+<!-- Section 2: Four Metric Cards -->
+<div class="metrics-row">
+    <div class="metric-card">
+        <div class="metric-top-row">
+            <span class="metric-title">TOTAL PENDAPATAN (BLN)</span>
+            <span class="metric-badge-purple">BELUM ADA TRANSAKSI</span>
+        </div>
+        <div class="metric-value-row">
+            <div class="metric-main-num">Rp {{ '{:,.0f}'.format(monthly_revenue|default(0, true)|float).replace(',', '.') }}</div>
+            <div class="metric-sub-text">Belum ada transaksi bulan ini</div>
+        </div>
+    </div>
+
+    <div class="metric-card accent-red">
+        <div class="metric-top-row">
+            <span class="metric-title">MENUNGGU APPROVAL</span>
+            <span class="metric-badge-red">0 ANTREAN</span>
+        </div>
+        <div class="metric-value-row">
+            <div style="display: flex; align-items: baseline; gap: 8px;">
+                <span class="metric-main-num text-red">{{ pending_orders_count|default(0, true) }}</span>
+                <span style="font-weight: 600; font-size: 15px;">Pesanan</span>
+            </div>
+            <div class="metric-sub-text">Estimasi volume: Rp {{ '{:,.0f}'.format(pending_orders_total|default(0, true)|float).replace(',', '.') }}</div>
+        </div>
+    </div>
+
+    <!-- Metric 3: Katalog Aktif -->
+    <div class="metric-card">
+        <div class="metric-top-row">
+            <span class="metric-title">KATALOG AKTIF</span>
+            <span style="font-size: 10px; color: #585A5C;">
+                SKU Live
+            </span>
+        </div>
+        <div class="metric-value-row">
+            <div style="display: flex; align-items: baseline; gap: 8px;">
+                <!-- Jumlah produk yang sudah dipublish -->
+                <span class="metric-main-num">
+                    {{ catalog_count|default(0, true) }}
+                </span>
+                <span style="font-weight: 600; font-size: 15px;">
+                    Artikel
+                </span>
+            </div>
+            <!-- Statistik stok produk dari database -->
+            <div class="metric-sub-text">
+                Aman: {{ catalog_safe|default(0, true) }}
+                &bull;
+                Stok Tipis: {{ catalog_low|default(0, true) }}
+            </div>
+        </div>
+    </div>
+
+    <div class="metric-card">
+        <div class="metric-top-row">
+            <span class="metric-title">PELANGGAN TERDAFTAR</span>
+            <i class="bi bi-people" style="font-size: 16px; color: #585A5C;"></i>
+        </div>
+        <div class="metric-value-row">
+            <div style="display: flex; align-items: baseline; gap: 8px;">         
+                <span class="metric-main-num">
+                    {{ customer_count }}
+                </span>
+                <span style="font-weight: 600; font-size: 15px;">
+                    Akun
+                </span>
+            </div>        
+            <div class="metric-sub-text">
+                {% if customer_count == 0 %}
+                    Belum ada data pelanggan
+                {% else %}
+                    {{ customer_count }} customer terdaftar di KURO WEAR
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Section 3: Main Operational Split -->
+<div class="operational-split">
+    <!-- LEFT: Recent Orders Table -->
+    <div>
+        <div class="table-section-header">
+            <div class="table-section-title">
+                <h2>Pesanan Terbaru &amp; Approval</h2>
+                <span class="badge-terakhir">0 PESANAN</span>
+            </div>
+            <span class="link-semua-transaksi" style="cursor: default;">Belum Ada Transaksi</span>
+        </div>
+        <div class="table-card-container">
+            <table class="admin-custom-table">
+                <thead>
+                    <tr>
+                        <th>ID Pesanan</th>
+                        <th>Pelanggan</th>
+                        <th>Item &amp; Varian</th>
+                        <th style="text-align: right;">Total</th>
+                        <th style="text-align: center;">Status</th>
+                        <th style="text-align: right;">Aksi</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td colspan="6">
+                            <div class="dashboard-empty-state">
+                                <i class="bi bi-receipt-cutoff" aria-hidden="true"></i>
+                                <strong>Belum ada pesanan</strong>
+                                <p>Pesanan pelanggan akan muncul di sini setelah transaksi pertama.</p>
+                            </div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- RIGHT: Low Stock Alert Widget -->
+    <div>
+        <div class="table-section-header">
+            <div class="low-stock-header" style="margin: 0; width: 100%;">
+                <div class="low-stock-title">
+                    <span class="red-dot"></span>
+                    <h2>Peringatan Stok Menipis</h2>
+                </div>
+                <span class="sku-kritis-badge">0 SKU KRITIS</span>
+            </div>
+        </div>
+        <div class="low-stock-card">
+            <div class="low-stock-desc">
+                Daftar varian yang stoknya berada di bawah atau sama dengan batas minimum akan tampil di sini.
+            </div>
+            <div class="dashboard-empty-state stock-empty">
+                <i class="bi bi-box-seam" aria-hidden="true"></i>
+                <strong>Belum ada peringatan stok</strong>
+                <p>Data stok akan tersedia setelah produk ditambahkan.</p>
+            </div>
+            <a href="{{ url_for('admin.products') }}" class="btn-tambah-stok"
+                style="display: flex; align-items: center; justify-content: center; text-decoration: none;">
+                KELOLA PRODUK &amp; STOK
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}
