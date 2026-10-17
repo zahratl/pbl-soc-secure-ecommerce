@@ -6,7 +6,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 class Config:
-    SECRET_KEY = os.environ.get('SECRET_KEY', 'default-insecure-dev-key')
+    SECRET_KEY = os.environ.get('SECRET_KEY')
     SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL', 'sqlite:///ecommerce_local.db')
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     
@@ -35,6 +35,10 @@ class ProductionConfig(Config):
     DEBUG = False
     SESSION_COOKIE_SECURE = True
 
+    if not Config.SECRET_KEY:
+        raise RuntimeError(
+            "SECRET_KEY wajib diatur pada environment production."
+        )
 class TestingConfig(Config):
     TESTING = True
     SQLALCHEMY_DATABASE_URI = 'sqlite:///:memory:'
