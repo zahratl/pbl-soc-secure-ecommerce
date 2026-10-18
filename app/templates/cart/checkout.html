@@ -1,1439 +1,282 @@
+<!--alamat pengiriman, JNE, ringkasan belanja, dan Midtrans. Perbedaannya, form alamat sekarang juga memuat kode pos dan akan mengirim datanya ke backend untuk disimpan secara permanen.-->
 {% extends 'base.html' %}
-
-{% block title %}Checkout & Verifikasi Pembayaran - KURO WEAR{% endblock %}
-
+{% block title %}Checkout - KURO WEAR{% endblock %}
 {% block content %}
 <style>
-/* ========================================================
-   KURO WEAR - CHECKOUT & PAYMENT VERIFICATION (JAPANESE MINIMALIST)
-   Color Palette: #F5F2EB / #EDEBDD, #FFFFFF, #1A1B22, #E60012, #575E70, #E5E0D5
-   ======================================================== */
-
-.kw-checkout-page {
-    background-color: #F5F2EB;
-    min-height: calc(100vh - 81px - 278px);
-    padding: 32px 0 80px;
-    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-    color: #1A1B22;
-}
-
-/* Stepper / Breadcrumbs Bar */
-.kw-checkout-stepper {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 16px;
-    margin-bottom: 32px;
-    flex-wrap: wrap;
-}
-.kw-step-item {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    font-size: 13px;
-    font-weight: 600;
-    color: #575E70;
-    letter-spacing: 0.3px;
-    text-transform: uppercase;
-}
-.kw-step-item.active {
-    color: #1A1B22;
-    font-weight: 700;
-}
-.kw-step-circle {
-    width: 26px;
-    height: 26px;
-    border-radius: 50%;
-    background: #EFECE5;
-    color: #575E70;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 12px;
-    font-weight: 700;
-}
-.kw-step-item.active .kw-step-circle {
-    background: #1A1B22;
-    color: #FFFFFF;
-}
-.kw-step-item.completed .kw-step-circle {
-    background: #2E7D32;
-    color: #FFFFFF;
-}
-.kw-step-divider {
-    width: 36px;
-    height: 1px;
-    background: #D5D1C3;
-}
-
-/* Main Cards */
-.kw-checkout-card {
-    background: #FFFFFF;
-    border: 1px solid #E5E0D5;
-    border-radius: 8px;
-    padding: 26px 28px;
-    margin-bottom: 24px;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03);
-}
-.kw-checkout-title {
-    font-size: 15px;
-    font-weight: 700;
-    letter-spacing: 0.8px;
-    text-transform: uppercase;
-    color: #1A1B22;
-    margin-bottom: 0;
-}
-.kw-badge-utama {
-    background: #1A1B22;
-    color: #FFFFFF;
-    font-size: 10px;
-    font-weight: 700;
-    letter-spacing: 0.8px;
-    padding: 3px 8px;
-    border-radius: 2px;
-    text-transform: uppercase;
-}
-
-/* Recipient Box */
-.kw-address-box {
-    background: #FAF9F5;
-    border: 1px solid #E5E0D5;
-    border-radius: 6px;
-    padding: 18px 20px;
-    margin-top: 16px;
-    transition: border-color 0.2s ease;
-}
-.kw-address-name {
-    font-size: 14.5px;
-    font-weight: 700;
-    color: #1A1B22;
-}
-.kw-address-city {
-    font-size: 12px;
-    font-weight: 600;
-    color: #575E70;
-    text-transform: uppercase;
-    letter-spacing: 0.4px;
-}
-.kw-address-text {
-    font-size: 13px;
-    line-height: 20px;
-    color: #575E70;
-    margin-top: 6px;
-    margin-bottom: 0;
-}
-
-/* Empty Address Box */
-.kw-address-empty-box {
-    background: #FAF9F5;
-    border: 1.5px dashed #D5D1C3;
-    border-radius: 8px;
-    padding: 28px 20px;
-    margin-top: 16px;
-    text-align: center;
-}
-
-/* Sub-headings */
-.kw-subheading {
-    font-size: 12px;
-    font-weight: 700;
-    letter-spacing: 0.7px;
-    text-transform: uppercase;
-    color: #575E70;
-    margin-top: 22px;
-    margin-bottom: 12px;
-    display: block;
-}
-
-/* Courier Box */
-.kw-courier-box {
-    background: #FAF9F5;
-    border: 1.5px solid #1A1B22;
-    border-radius: 6px;
-    padding: 16px 20px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-.kw-badge-ongkir {
-    background: #E60012;
-    color: #FFFFFF;
-    font-size: 10px;
-    font-weight: 700;
-    letter-spacing: 0.6px;
-    padding: 3px 7px;
-    border-radius: 2px;
-    display: inline-block;
-    margin-top: 4px;
-}
-
-/* Courier Note Input */
-.kw-note-input {
-    width: 100%;
-    background: #FFFFFF;
-    border: 1px solid #D5D1C3;
-    border-radius: 6px;
-    padding: 12px 16px;
-    font-size: 13px;
-    color: #1A1B22;
-    outline: none;
-    transition: border-color 0.2s ease;
-}
-.kw-note-input:focus {
-    border-color: #1A1B22;
-}
-
-/* Payment Options (Midtrans vs Manual) */
-.kw-payment-card {
-    border: 1.5px solid #E5E0D5;
-    border-radius: 8px;
-    padding: 20px 22px;
-    background: #FFFFFF;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    margin-bottom: 14px;
-    display: block;
-    position: relative;
-}
-.kw-payment-card:hover {
-    border-color: #BDB7AB;
-}
-.kw-payment-card.active {
-    border-color: #1A1B22;
-    background: #FAF9F5;
-    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.04);
-}
-.kw-payment-title {
-    font-size: 14.5px;
-    font-weight: 700;
-    color: #1A1B22;
-    letter-spacing: 0.3px;
-}
-.kw-badge-sandbox {
-    background: #EDEBDD;
-    color: #810100;
-    border: 1px solid #D5D1C3;
-    font-size: 10.5px;
-    font-weight: 700;
-    letter-spacing: 0.6px;
-    padding: 2px 8px;
-    border-radius: 3px;
-}
-.kw-channel-pill {
-    background: #FFFFFF;
-    border: 1px solid #D5D1C3;
-    padding: 4px 10px;
-    font-size: 11px;
-    font-weight: 700;
-    color: #1A1B22;
-    border-radius: 3px;
-    letter-spacing: 0.4px;
-    display: inline-flex;
-    align-items: center;
-}
-.kw-channel-pill.kw-priority-pill {
-    background: #1A1B22;
-    color: #FFFFFF;
-    border-color: #1A1B22;
-}
-.kw-security-tag {
-    font-size: 11.5px;
-    color: #575E70;
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    margin-top: 10px;
-}
-
-/* Right Sidebar: Ringkasan Order */
-.kw-order-summary {
-    position: sticky;
-    top: 100px;
-    background: #FFFFFF;
-    border: 1px solid #E5E0D5;
-    border-radius: 8px;
-    padding: 26px 24px;
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.03);
-}
-.kw-item-row {
-    display: flex;
-    gap: 14px;
-    padding: 12px 0;
-    border-bottom: 1px solid #F0ECE1;
-}
-.kw-item-row:last-child {
-    border-bottom: none;
-}
-.kw-item-thumb {
-    width: 68px;
-    height: 85px;
-    background: #EFECE5;
-    border-radius: 4px;
-    overflow: hidden;
-    flex-shrink: 0;
-}
-.kw-item-thumb img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-}
-.kw-item-title {
-    font-size: 13.5px;
-    font-weight: 700;
-    color: #1A1B22;
-    margin-bottom: 2px;
-}
-.kw-item-sub {
-    font-size: 12px;
-    color: #575E70;
-}
-.kw-item-price {
-    font-size: 13.5px;
-    font-weight: 700;
-    color: #1A1B22;
-    margin-top: 4px;
-}
-
-/* Price Breakdown */
-.kw-calc-row {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    font-size: 13px;
-    color: #575E70;
-    margin-bottom: 10px;
-}
-.kw-calc-val {
-    font-weight: 600;
-    color: #1A1B22;
-}
-.kw-total-row {
-    display: flex;
-    justify-content: space-between;
-    align-items: baseline;
-    padding-top: 14px;
-    margin-top: 14px;
-    border-top: 1.5px solid #E8E7F1;
-}
-.kw-total-label {
-    font-size: 12.5px;
-    font-weight: 700;
-    letter-spacing: 0.6px;
-    text-transform: uppercase;
-    color: #575E70;
-}
-.kw-total-price {
-    font-size: 26px;
-    font-weight: 800;
-    color: #E60012;
-    letter-spacing: -0.5px;
-}
-
-/* Button Bayar */
-.kw-btn-submit-order {
-    width: 100%;
-    background: #E60012;
-    color: #FFFFFF;
-    font-size: 13px;
-    font-weight: 700;
-    letter-spacing: 0.8px;
-    text-transform: uppercase;
-    padding: 15px;
-    border: none;
-    border-radius: 4px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 10px;
-    cursor: pointer;
-    transition: background 0.2s ease, transform 0.15s ease;
-    margin-top: 18px;
-}
-.kw-btn-submit-order:hover {
-    background: #810100;
-    transform: translateY(-1px);
-}
-.kw-btn-submit-order:disabled {
-    background: #8C8C94;
-    cursor: not-allowed;
-    transform: none;
-}
-
-/* Voucher Form */
-.kw-voucher-box {
-    display: flex;
-    gap: 8px;
-    margin: 16px 0 20px;
-}
-.kw-voucher-input {
-    flex-grow: 1;
-    background: #FAF9F5;
-    border: 1px solid #D5D1C3;
-    border-radius: 4px;
-    padding: 8px 12px;
-    font-size: 12px;
-    text-transform: uppercase;
-    outline: none;
-}
-.kw-voucher-btn {
-    background: #1A1B22;
-    color: #FFFFFF;
-    border: none;
-    border-radius: 4px;
-    font-size: 11px;
-    font-weight: 700;
-    padding: 0 14px;
-    letter-spacing: 0.6px;
-}
-
-/* ========================================================
-   SECTION VERIFIKASI PEMBAYARAN (MIDTRANS SANDBOX)
-   ======================================================== */
-.kw-verification-banner {
-    background: #FFF8E1;
-    border-left: 4px solid #FFA000;
-    padding: 16px 20px;
-    border-radius: 4px;
-    margin-bottom: 24px;
-}
-.kw-countdown-badge {
-    background: #1A1B22;
-    color: #FFFFFF;
-    font-family: monospace;
-    font-size: 14px;
-    font-weight: 700;
-    padding: 4px 10px;
-    border-radius: 4px;
-    letter-spacing: 1px;
-}
-.kw-va-container {
-    background: #FAF9F5;
-    border: 1.5px dashed #D5D1C3;
-    border-radius: 8px;
-    padding: 24px 20px;
-    text-align: center;
-    margin: 20px 0;
-}
-.kw-va-number {
-    font-family: 'Inter', monospace;
-    font-size: 26px;
-    font-weight: 800;
-    letter-spacing: 2px;
-    color: #1A1B22;
-    margin: 10px 0;
-}
-.kw-btn-copy {
-    background: #FFFFFF;
-    border: 1px solid #D5D1C3;
-    color: #1A1B22;
-    font-size: 12px;
-    font-weight: 700;
-    padding: 6px 14px;
-    border-radius: 4px;
-    cursor: pointer;
-    transition: all 0.15s ease;
-}
-.kw-btn-copy:hover {
-    background: #1A1B22;
-    color: #FFFFFF;
-}
-.kw-sandbox-helper {
-    background: #EDEBDD;
-    border: 1px solid #D8D4C0;
-    border-radius: 6px;
-    padding: 16px 20px;
-    font-size: 12.5px;
-    color: #1A1B22;
-    margin-top: 18px;
-}
+.kw-checkout{min-height:70vh;padding:34px 18px 70px;background:#F5F2EB;color:#1A1B22}
+.kw-checkout-wrap{max-width:1190px;margin:auto}
+.kw-checkout-steps{display:flex;justify-content:center;gap:15px;align-items:center;flex-wrap:wrap;margin-bottom:28px;font-size:12px;font-weight:700}
+.kw-checkout-steps span{color:#575E70}.kw-checkout-steps strong{color:#810100}
+.kw-checkout-grid{display:grid;grid-template-columns:minmax(0,1.6fr) minmax(300px,1fr);gap:22px;align-items:start}
+.kw-checkout-card{background:#fff;border:1px solid #E5E0D5;border-radius:8px;padding:25px;margin-bottom:18px}
+.kw-checkout-card h2{font-size:15px;font-weight:700;letter-spacing:.5px;margin:0}
+.kw-checkout-muted{font-size:12px;line-height:1.8;color:#575E70}
+.kw-checkout-link{border:0;background:none;color:#810100;font-weight:700;font-size:12px;padding:0;cursor:pointer}
+.kw-checkout-address{margin-top:18px;padding:19px;border:1px dashed #D5D1C3;background:#FAF9F5;border-radius:5px}
+.kw-checkout-address strong{display:block;font-size:14px;margin-bottom:6px}
+.kw-checkout-address p{margin:0;font-size:12px;line-height:1.7;color:#575E70;overflow-wrap:anywhere}
+.kw-checkout-courier{padding:15px;border:1px solid #D5D1C3;background:#FAF9F5;display:flex;align-items:center;justify-content:space-between;gap:15px;margin-top:15px}
+.kw-checkout-courier strong{font-size:13px}.kw-checkout-courier span{font-size:12px;color:#25804C;font-weight:700}
+.kw-checkout-methods{display:flex;flex-wrap:wrap;gap:8px;margin-top:15px}
+.kw-checkout-method{padding:9px 11px;background:#F5F2EB;border:1px solid #E5E0D5;font-size:12px;font-weight:600}
+.kw-checkout-item{display:flex;gap:12px;align-items:flex-start;border-bottom:1px solid #E8E7F1;padding:14px 0}
+.kw-checkout-item img,.kw-checkout-thumb{width:64px;height:82px;object-fit:cover;background:#F4F2FD;border-radius:3px;flex-shrink:0}
+.kw-checkout-item strong{display:block;font-size:13px;margin-bottom:5px}.kw-checkout-item small{font-size:11px;color:#575E70}
+.kw-checkout-price{margin-left:auto;white-space:nowrap;font-size:12px;font-weight:700}
+.kw-checkout-row{display:flex;justify-content:space-between;gap:15px;margin-top:15px;font-size:12px;color:#575E70}
+.kw-checkout-total{border-top:1px solid #E8E7F1;padding-top:17px;margin-top:19px;display:flex;align-items:center;justify-content:space-between;gap:12px}
+.kw-checkout-total strong{font-size:24px;color:#810100}
+.kw-checkout-pay{border:0;background:#1A1B22;color:#fff;border-radius:4px;min-height:49px;padding:12px;width:100%;margin-top:20px;font-size:12px;font-weight:700}
+.kw-checkout-pay:hover{background:#333}.kw-checkout-pay:disabled{opacity:.5;cursor:not-allowed}
+.kw-checkout-field{margin-bottom:15px}.kw-checkout-field label{display:block;font-size:12px;font-weight:700;margin-bottom:6px}
+.kw-checkout-field input,.kw-checkout-field textarea{width:100%;border:1px solid #D5D1C3;border-radius:4px;padding:10px 12px;font-size:13px}
+.kw-checkout-field textarea{resize:vertical;min-height:96px}
+@media(max-width:900px){.kw-checkout-grid{grid-template-columns:1fr}}
+@media(max-width:550px){.kw-checkout{padding:22px 12px 45px}.kw-checkout-card{padding:17px}.kw-checkout-item{flex-wrap:wrap}.kw-checkout-price{margin-left:76px}}
 </style>
 
-<div class="kw-checkout-page">
-    <div class="container" style="max-width: 1200px;">
-        
-        <!-- 1. BREADCRUMBS & STEPPER -->
-        <div class="kw-checkout-stepper">
-            <a href="{{ url_for('cart.view_cart') }}" class="kw-step-item text-decoration-none">
-                <span class="kw-step-circle"><i class="bi bi-check-lg"></i></span>
-                <span>1. Keranjang</span>
-            </a>
-            <div class="kw-step-divider"></div>
-            <div class="kw-step-item active" id="step-nav-checkout">
-                <span class="kw-step-circle">2</span>
-                <span>2. Pengiriman & Pembayaran</span>
-            </div>
-            <div class="kw-step-divider"></div>
-            <div class="kw-step-item" id="step-nav-verification">
-                <span class="kw-step-circle">3</span>
-                <span>3. Verifikasi & Selesai</span>
-            </div>
+<section class="kw-checkout" id="checkoutRoot"
+    data-save-url="{{ url_for('cart.save_address') }}"
+    data-payment-url="{{ url_for('cart.payment_snap') }}"
+    data-items="{{ selected_item_ids }}"
+    data-csrf="{{ csrf_token() }}"
+    data-has-address="{{ 'true' if address else 'false' }}">
+
+    <div class="kw-checkout-wrap">
+        <div class="kw-checkout-steps">
+            <span>1. Keranjang</span><i class="bi bi-arrow-right"></i>
+            <strong>2. Checkout</strong><i class="bi bi-arrow-right"></i>
+            <span>3. Pembayaran</span>
         </div>
 
-        <!-- ========================================================
-             VIEW 1: FORM CHECKOUT
-             ======================================================== -->
-        <div id="view-checkout-form">
-            <div class="row g-4">
-                
-                <!-- KOLOM KIRI: ALAMAT, EKSPEDISI, PEMBAYARAN -->
-                <div class="col-lg-7 col-xl-8">
-                    
-                    <!-- KARTU 1: ALAMAT PENGIRIMAN -->
-                    <div class="kw-checkout-card">
-                        
-                        <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
-                            <div class="d-flex align-items-center gap-2">
-                                <h2 class="kw-checkout-title">ALAMAT PENGIRIMAN</h2>
-                                <span class="kw-badge-utama" id="badge-address-status">
-                                    {% if address %}ALAMAT UTAMA{% else %}BELUM TERDAFTAR{% endif %}
-                                </span>
-                            </div>
-                            <button type="button" class="btn btn-sm btn-link text-decoration-none p-0 fw-bold" style="color: #810100; font-size: 12.5px;" onclick="openChangeAddressModal()">
-                                <i class="bi bi-pencil-square me-1"></i> 
-                                <span id="btn-text-address">{% if address %}UBAH ALAMAT{% else %}TAMBAH ALAMAT{% endif %}</span>
-                            </button>
-                        </div>
-
-                        <!-- EMPTY STATE: JIKA USER BELUM PERNAH MENAMBAHKAN ALAMAT -->
-                        <div class="kw-address-empty-box {% if address %}d-none{% endif %}" id="empty-address-container">
-                            <div class="mb-2" style="font-size: 30px; color: #8C8C94;">
-                                <i class="bi bi-geo-alt"></i>
-                            </div>
-                            <h6 class="fw-bold mb-1" style="font-size: 13.5px; color: #1A1B22; letter-spacing: 0.3px;">
-                                BELUM ADA ALAMAT PENGIRIMAN
-                            </h6>
-                            <p class="text-muted small mb-3" style="max-width: 440px; margin: 0 auto; font-size: 12.5px; line-height: 18px;">
-                                Bagian alamat pengiriman Anda masih kosong. Silakan tambahkan alamat tujuan pengiriman agar kurir dapat mengantar pesanan Anda dengan tepat.
-                            </p>
-                            <button type="button" class="btn btn-dark btn-sm px-4 py-2 fw-bold text-uppercase" style="font-size: 11.5px; letter-spacing: 0.6px; border-radius: 4px;" onclick="openChangeAddressModal()">
-                                <i class="bi bi-plus-lg me-1"></i> TAMBAH ALAMAT PENGIRIMAN
-                            </button>
-                        </div>
-
-                        <!-- ACTIVE ADDRESS BOX: DITAMPILKAN JIKA ALAMAT SUDAH ADA / SETELAH DISIMPAN -->
-                        <div class="kw-address-box {% if not address %}d-none{% endif %}" id="active-address-container">
-                            <div class="d-flex justify-content-between align-items-baseline flex-wrap">
-                                <span class="kw-address-name" id="display-recipient-name">
-                                    {{ address.recipient_name if address else (current_user.name if current_user.name else 'Nama Penerima') }} &bull; <span class="fw-normal text-muted" id="display-recipient-phone">{{ address.phone if address else '' }}</span>
-                                </span>
-                                <span class="kw-address-city" id="display-recipient-city">
-                                    {{ address.city if address else '' }}
-                                </span>
-                            </div>
-                            <p class="kw-address-text" id="display-recipient-address">
-                                {{ address.full_address if address else '' }}
-                            </p>
-                        </div>
-
-                        <!-- Pilihan Opsi Kurir Ekspedisi -->
-                        <span class="kw-subheading">PILIH OPSI KURIR EKSPEDISI</span>
-                        <div class="kw-courier-box">
-                            <div class="d-flex align-items-start gap-3">
-                                <input type="radio" name="courier_option" checked class="form-check-input mt-1" style="accent-color: #E60012;">
-                                <div>
-                                    <div class="fw-bold" style="font-size: 14px;">JNE Express</div>
-                                    <div class="text-muted" style="font-size: 12px;">Reguler (1-2 hari kerja) &bull; Estimasi tiba: 2 - 3 hari ke depan</div>
-                                    <span class="kw-badge-ongkir">PROMO BEBAS ONGKIR</span>
-                                </div>
-                            </div>
-                            <div class="text-end">
-                                <span class="text-muted text-decoration-line-through me-1" style="font-size: 12px;">Rp 22.000</span>
-                                <span class="fw-bold text-success" style="font-size: 14px;">Rp 0 (GRATIS)</span>
-                            </div>
-                        </div>
-
-                        <!-- Catatan Tambahan Untuk Kurir -->
-                        <span class="kw-subheading">CATATAN TAMBAHAN UNTUK KURIR (OPSIONAL)</span>
-                        <input type="text" class="kw-note-input" id="courier-note" placeholder="Contoh: Titipkan di pos satpam atau resepsionis jika penerima sedang tidak di tempat">
-                    </div>
-
-                    <!-- KARTU 2: PILIHAN PEMBAYARAN MIDTRANS SANDBOX -->
-                    <div class="kw-checkout-card">
-                        <div class="d-flex justify-content-between align-items-center mb-3">
-                            <h2 class="kw-checkout-title">PILIHAN METODE PEMBAYARAN</h2>
-                            <span class="text-muted small"><i class="bi bi-shield-check text-success"></i> Terenkripsi & Terverifikasi</span>
-                        </div>
-
-                        <!-- Pilihan 1: Midtrans Payment Gateway (Prioritas Utama User) -->
-                        <label class="kw-payment-card active" id="card-pay-midtrans" onclick="selectPaymentMethod('midtrans')">
-                            <div class="d-flex align-items-start gap-3">
-                                <input type="radio" name="pay_method" value="midtrans" checked class="form-check-input mt-1" style="accent-color: #E60012;">
-                                <div class="flex-grow-1">
-                                    <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
-                                        <span class="kw-payment-title">Midtrans Payment Gateway (Automated Sandbox)</span>
-                                        <span class="kw-badge-sandbox">MIDTRANS SANDBOX</span>
-                                    </div>
-                                    <p class="text-muted small mb-2 mt-1" style="font-size: 12.5px; line-height: 18px;">
-                                        Gateway pembayaran resmi Midtrans Sandbox. Transaksi instan dengan verifikasi otomatis secara real-time.
-                                    </p>
-                                    
-                                    <!-- Channels Prioritas: GoPay, QRIS, BRI VA, BNI VA, BCA VA -->
-                                    <div class="d-flex align-items-center gap-2 flex-wrap mt-2">
-                                        <span class="kw-channel-pill kw-priority-pill"><i class="bi bi-wallet2 me-1"></i> GOPAY</span>
-                                        <span class="kw-channel-pill kw-priority-pill"><i class="bi bi-qr-code-scan me-1"></i> QRIS</span>
-                                        <span class="kw-channel-pill kw-priority-pill"><i class="bi bi-bank me-1"></i> BCA VA</span>
-                                        <span class="kw-channel-pill kw-priority-pill"><i class="bi bi-bank me-1"></i> BNI VA</span>
-                                        <span class="kw-channel-pill kw-priority-pill"><i class="bi bi-bank me-1"></i> BRI VA</span>
-                                    </div>
-                                    
-                                    <div class="kw-security-tag">
-                                        <i class="bi bi-lock-fill text-success"></i>
-                                        <span>Prioritas: GoPay, QRIS, BRI VA, BNI VA, BCA VA &bull; Terhubung Midtrans Sandbox</span>
-                                    </div>
-                                </div>
-                            </div>
-                        </label>
-
-                        <!-- Pilihan 2: Transfer Rekening Manual / COD -->
-                        <label class="kw-payment-card" id="card-pay-manual" onclick="selectPaymentMethod('manual')">
-                            <div class="d-flex align-items-start gap-3">
-                                <input type="radio" name="pay_method" value="manual" class="form-check-input mt-1" style="accent-color: #E60012;">
-                                <div class="flex-grow-1">
-                                    <span class="kw-payment-title">Cash on Delivery (COD) / Transfer Manual Rekening</span>
-                                    <p class="text-muted small mb-0 mt-1" style="font-size: 12.5px; line-height: 18px;">
-                                        Kirim pembayaran manual atau bayar saat barang diterima di tempat. Verifikasi dilakukan manual oleh Admin Kuro Wear.
-                                    </p>
-                                </div>
-                            </div>
-                        </label>
-
-                    </div>
-
-                </div>
-
-                <!-- KOLOM KANAN: RINGKASAN ORDER PRODUK DINAMIS -->
-                <div class="col-lg-5 col-xl-4">
-                    <div class="kw-order-summary">
-                        <div class="d-flex justify-content-between align-items-center pb-2 border-bottom">
-                            <h3 class="kw-checkout-title">RINGKASAN ORDER</h3>
-                            <span class="badge bg-light text-dark fw-bold" style="font-size: 11px;">{{ items|length }} PRODUK</span>
-                        </div>
-
-                        <!-- Daftar Item Pembelian Dari Keranjang (Asli & Sesuai Pilihan) -->
-                        <div class="my-2" style="max-height: 350px; overflow-y: auto;">
-                            {% for item in items %}
-                            <div class="kw-item-row">
-                                <div class="kw-item-thumb">
-                                    {% if item.image %}
-                                    <img src="{{ item.image }}" alt="{{ item.name }}" loading="lazy">
-                                    {% else %}
-                                    <div class="w-100 h-100 d-flex align-items-center justify-content-center bg-light text-muted">
-                                        <i class="bi bi-bag"></i>
-                                    </div>
-                                    {% endif %}
-                                </div>
-                                <div class="flex-grow-1">
-                                    <div class="kw-item-title">{{ item.name }}</div>
-                                    <div class="kw-item-sub">
-                                        Warna: {{ item.color }} &bull; Ukuran: {{ item.size }} &bull; Qty: {{ item.quantity }}
-                                    </div>
-                                    <div class="kw-item-price">
-                                        {{ item.line_total_text }}
-                                        {% if item.quantity > 1 %}
-                                        <span class="text-muted fw-normal small">({{ item.price_text }}/pcs)</span>
-                                        {% endif %}
-                                    </div>
-                                </div>
-                            </div>
-                            {% endfor %}
-                        </div>
-
-                        <!-- Voucher / Kupon Input -->
-                        <div class="kw-voucher-box">
-                            <input type="text" class="kw-voucher-input" placeholder="KODE PROMO / VOUCHER" id="voucher-code">
-                            <button type="button" class="kw-voucher-btn" onclick="applyVoucher()">TERAPKAN</button>
-                        </div>
-
-                        <!-- Rincian Biaya Transaksi -->
-                        <div class="kw-calc-row">
-                            <span>Subtotal Produk ({{ items|length }} item)</span>
-                            <span class="kw-calc-val" id="summary-subtotal-val">{{ rupiah(subtotal) }}</span>
-                        </div>
-                        <div class="kw-calc-row">
-                            <span>Ongkos Kirim JNE Express</span>
-                            <div>
-                                <span class="text-muted text-decoration-line-through me-1 small">Rp 22.000</span>
-                                <span class="text-success fw-bold">GRATIS</span>
-                            </div>
-                        </div>
-                        <div class="kw-calc-row">
-                            <span>Biaya Layanan Gateway</span>
-                            <span class="text-success fw-bold">Rp 0 (FREE)</span>
-                        </div>
-
-                        <!-- Total Tagihan Akhir -->
-                        <div class="kw-total-row">
-                            <span class="kw-total-label">TOTAL PEMBAYARAN</span>
-                            <span class="kw-total-price" id="display-total-amount">{{ rupiah(grand_total) }}</span>
-                        </div>
-
-                        <!-- Tombol Konfirmasi Pembayaran & Buat Pesanan -->
-                        <button type="button" class="kw-btn-submit-order" id="btn-submit-order" onclick="processOrderCheckout()">
-                            <span>KONFIRMASI PEMBAYARAN & BUAT PESANAN</span>
-                            <i class="bi bi-arrow-right"></i>
+        <div class="kw-checkout-grid">
+            <div>
+                <div class="kw-checkout-card">
+                    <div class="d-flex justify-content-between align-items-center gap-3">
+                        <h2>ALAMAT PENGIRIMAN</h2>
+                        <button type="button" class="kw-checkout-link" id="editAddressButton">
+                            {{ 'UBAH ALAMAT' if address else 'TAMBAH ALAMAT' }}
                         </button>
+                    </div>
 
-                        <div class="text-center mt-3 text-muted" style="font-size: 11.5px;">
-                            <i class="bi bi-shield-lock me-1"></i> 100% Produk Original Kuro Wear &bull; Garansi Retur 14 Hari
+                    <div class="kw-checkout-address">
+                        <div id="addressEmpty" {% if address %}hidden{% endif %}>
+                            <strong>Belum ada alamat pengiriman</strong>
+                            <p>Tambahkan alamat tujuan sebelum melanjutkan ke pembayaran.</p>
+                        </div>
+
+                        <div id="addressSaved" {% if not address %}hidden{% endif %}>
+                            <strong>
+                                <span id="addressRecipient">{{ address.recipient_name if address else '' }}</span>
+                                · <span id="addressPhone">{{ address.phone if address else '' }}</span>
+                            </strong>
+                            <p id="addressCity">{{ address.city if address else '' }}</p>
+                            <p id="addressPostal">{{ 'Kode pos: ' ~ address.postal_code if address and address.postal_code else '' }}</p>
+                            <p id="addressText">{{ address.full_address if address else '' }}</p>
                         </div>
                     </div>
+
+                    <p class="kw-checkout-muted mt-2 mb-0">
+                        Alamat yang disimpan di sini juga tersimpan sebagai alamat utama di halaman Profil.
+                        Alamat pada pesanan lama tidak berubah.
+                    </p>
+
+                    <h2 class="mt-4">PENGIRIMAN</h2>
+                    <div class="kw-checkout-courier">
+                        <div>
+                            <strong>JNE Express Reguler</strong>
+                            <div class="kw-checkout-muted">Satu layanan pengiriman · Ongkir Rp0 untuk pengujian Sandbox</div>
+                        </div>
+                        <span>Rp 0</span>
+                    </div>
+                    <p class="kw-checkout-muted mt-2 mb-0">
+                        Resi resmi JNE akan tersedia setelah integrasi API pengiriman diaktifkan.
+                    </p>
                 </div>
 
+                <div class="kw-checkout-card">
+                    <h2>METODE PEMBAYARAN</h2>
+                    <p class="kw-checkout-muted mt-2 mb-0">
+                        Midtrans Snap Sandbox. Pilih metode pembayaran akhir melalui Midtrans.
+                    </p>
+                    <div class="kw-checkout-methods">
+                        <span class="kw-checkout-method">QRIS</span>
+                        <span class="kw-checkout-method">GoPay</span>
+                        <span class="kw-checkout-method">BCA VA</span>
+                        <span class="kw-checkout-method">BNI VA</span>
+                        <span class="kw-checkout-method">BRI VA</span>
+                    </div>
+                    <p class="kw-checkout-muted mt-3 mb-0">
+                        <i class="bi bi-shield-lock me-1"></i> Pembayaran diproses melalui Midtrans.
+                    </p>
+                </div>
             </div>
+
+            <aside class="kw-checkout-card">
+                <h2>RINGKASAN BELANJA</h2>
+
+                {% for item in items %}
+                <div class="kw-checkout-item">
+                    {% if item.image %}
+                    <img src="{{ item.image }}" alt="{{ item.name }}" loading="lazy">
+                    {% else %}
+                    <div class="kw-checkout-thumb d-flex justify-content-center align-items-center">
+                        <i class="bi bi-image text-muted"></i>
+                    </div>
+                    {% endif %}
+
+                    <div class="flex-grow-1">
+                        <strong>{{ item.name }}</strong>
+                        <small>{{ item.color }} · {{ item.size }} · {{ item.quantity }} pcs</small>
+                    </div>
+                    <span class="kw-checkout-price">{{ item.line_total_text }}</span>
+                </div>
+                {% endfor %}
+
+                <div class="kw-checkout-row"><span>Subtotal Produk</span><strong>{{ rupiah(subtotal) }}</strong></div>
+                <div class="kw-checkout-row"><span>Ongkos JNE (uji)</span><strong>Rp 0</strong></div>
+                <div class="kw-checkout-row"><span>Voucher</span><span>Belum tersedia</span></div>
+
+                <div class="kw-checkout-total">
+                    <span class="fw-bold">TOTAL PEMBAYARAN</span>
+                    <strong>{{ rupiah(grand_total) }}</strong>
+                </div>
+
+                <button type="button" class="kw-checkout-pay" id="proceedPayment">
+                    <i class="bi bi-lock-fill me-1"></i>
+                    LANJUT KE PEMBAYARAN
+                    <i class="bi bi-arrow-right ms-1"></i>
+                </button>
+                <p class="kw-checkout-muted mt-3 mb-0 text-center">
+                    Harga dan stok diperiksa ulang oleh backend sebelum membuat transaksi.
+                </p>
+            </aside>
         </div>
 
-        <!-- ========================================================
-             VIEW 2: STATUS & VERIFIKASI PEMBAYARAN (MIDTRANS SANDBOX)
-             ======================================================== -->
-        <div id="view-payment-verification" class="d-none">
-            
-            <div class="kw-verification-banner d-flex justify-content-between align-items-center flex-wrap gap-3">
-                <div class="d-flex align-items-center gap-2">
-                    <i class="bi bi-clock-history fs-4 text-warning"></i>
-                    <div>
-                        <strong class="d-block" style="font-size: 14px; color: #8F5B00;">MENUNGGU PEMBAYARAN (MIDTRANS SANDBOX)</strong>
-                        <span class="text-muted small">Selesaikan pembayaran sebelum batas waktu berakhir agar pesanan diproses otomatis.</span>
-                    </div>
-                </div>
-                <div class="d-flex align-items-center gap-2">
-                    <span class="small fw-bold text-muted">SISA WAKTU:</span>
-                    <span class="kw-countdown-badge" id="countdown-timer">23:59:59</span>
-                </div>
-            </div>
-
-            <div class="row g-4">
-                
-                <!-- KIRI: INFORMASI PEMBAYARAN & INSTRUKSI -->
-                <div class="col-lg-8">
-                    <div class="kw-checkout-card">
-                        
-                        <div class="d-flex justify-content-between align-items-center pb-3 border-bottom flex-wrap gap-2">
-                            <div>
-                                <span class="text-muted small d-block">NOMOR INVOICE PESANAN:</span>
-                                <strong class="fs-6" id="order-invoice-id">#KW-ORDER-PENDING</strong>
-                            </div>
-                            <span class="badge bg-dark px-3 py-2 text-uppercase" id="verif-payment-channel" style="letter-spacing: 0.8px;">
-                                MIDTRANS SANDBOX
-                            </span>
-                        </div>
-
-                        <!-- VA Container (Virtual Account BCA / BNI / BRI) -->
-                        <div class="kw-va-container" id="container-va-details">
-                            <span class="text-muted small fw-bold text-uppercase d-block" id="label-va-type" style="letter-spacing: 0.8px;">
-                                NOMOR VIRTUAL ACCOUNT:
-                            </span>
-                            <div class="kw-va-number" id="va-number-text">80777 0812 3456 7890</div>
-                            <button type="button" class="kw-btn-copy" onclick="copyVaNumber()">
-                                <i class="bi bi-clipboard me-1"></i> SALIN NO. VIRTUAL ACCOUNT
-                            </button>
-                        </div>
-
-                        <!-- QRIS / GoPay Container (Jika Memilih QRIS atau GoPay) -->
-                        <div class="kw-va-container d-none" id="container-qris-details">
-                            <span class="text-muted small fw-bold text-uppercase d-block mb-2" style="letter-spacing: 0.8px;">
-                                SCAN KODE QRIS UNTUK PEMBAYARAN
-                            </span>
-                            <div class="p-3 bg-white d-inline-block rounded border mb-2">
-                                <i class="bi bi-qr-code text-dark" style="font-size: 84px;"></i>
-                            </div>
-                            <p class="text-muted small mb-0">Buka aplikasi GoPay, BCA Mobile, Livin', atau e-wallet lainnya lalu scan kode QR di atas.</p>
-                        </div>
-
-                        <!-- Nominal Tagihan Tepat -->
-                        <div class="d-flex justify-content-between align-items-center p-3 rounded" style="background: #F8F7F4; border: 1px solid #E5E0D5;">
-                            <div>
-                                <span class="text-muted small d-block">TOTAL NOMINAL YANG HARUS DIBAYAR:</span>
-                                <strong class="fs-5 text-danger fw-bold" id="verif-total-amount">{{ rupiah(grand_total) }}</strong>
-                            </div>
-                            <button type="button" class="kw-btn-copy" onclick="copyAmountNumber()">
-                                <i class="bi bi-clipboard me-1"></i> SALIN NOMINAL
-                            </button>
-                        </div>
-
-                        <!-- Sandbox Simulator Helper Card (PBL Testing & Penilaian) -->
-                        <div class="kw-sandbox-helper" id="helper-midtrans-simulator">
-                            <div class="d-flex align-items-start gap-2">
-                                <i class="bi bi-info-circle-fill text-danger fs-5 mt-1"></i>
-                                <div>
-                                    <strong class="d-block mb-1">Simulasi Pembayaran Midtrans Sandbox (PBL Testing):</strong>
-                                    <span>Lingkungan ini menggunakan <strong>Midtrans Sandbox</strong>. Anda dapat menguji pelunasan transaksi instan melalui simulator resmi Midtrans untuk channel yang dipilih:</span>
-                                    <div class="d-flex gap-2 flex-wrap mt-2" id="simulator-links-group">
-                                        <a href="https://simulator.sandbox.midtrans.com/bca/va/index" target="_blank" class="btn btn-sm btn-dark px-3 py-1 fw-bold" id="link-sim-bca" style="font-size: 11.5px; border-radius: 4px;">
-                                            <i class="bi bi-box-arrow-up-right me-1"></i> Simulator BCA VA
-                                        </a>
-                                        <a href="https://simulator.sandbox.midtrans.com/bni/va/index" target="_blank" class="btn btn-sm btn-outline-dark px-3 py-1 fw-bold" id="link-sim-bni" style="font-size: 11.5px; border-radius: 4px;">
-                                            <i class="bi bi-box-arrow-up-right me-1"></i> Simulator BNI VA
-                                        </a>
-                                        <a href="https://simulator.sandbox.midtrans.com/bri/va/index" target="_blank" class="btn btn-sm btn-outline-dark px-3 py-1 fw-bold" id="link-sim-bri" style="font-size: 11.5px; border-radius: 4px;">
-                                            <i class="bi bi-box-arrow-up-right me-1"></i> Simulator BRI VA
-                                        </a>
-                                        <a href="https://simulator.sandbox.midtrans.com/qris/index" target="_blank" class="btn btn-sm btn-outline-dark px-3 py-1 fw-bold" id="link-sim-qris" style="font-size: 11.5px; border-radius: 4px;">
-                                            <i class="bi bi-box-arrow-up-right me-1"></i> Simulator QRIS
-                                        </a>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Tombol Cek Status & Riwayat -->
-                        <div class="d-flex gap-3 flex-wrap mt-4 pt-3 border-top">
-                            <button type="button" class="btn btn-dark px-4 py-2 fw-bold flex-grow-1" style="font-size: 13px; border-radius: 4px;" onclick="checkPaymentStatus()">
-                                <i class="bi bi-arrow-repeat me-1"></i> CEK STATUS PEMBAYARAN
-                            </button>
-                            <a href="{{ url_for('customer.order_history') }}" class="btn btn-outline-dark px-4 py-2 fw-bold" style="font-size: 13px; border-radius: 4px;">
-                                <i class="bi bi-bag-check me-1"></i> LIHAT PESANAN SAYA
-                            </a>
-                        </div>
-
-                        <!-- Accordion Panduan Bayar -->
-                        <div class="mt-4 pt-3 border-top">
-                            <span class="kw-subheading mb-3">PETUNJUK CARA PEMBAYARAN</span>
-                            
-                            <div class="accordion" id="accordionPaymentGuide">
-                                <!-- BCA -->
-                                <div class="accordion-item" style="border: 1px solid #E5E0D5;">
-                                    <h2 class="accordion-header">
-                                        <button class="accordion-button collapsed fw-bold text-dark py-2" type="button" data-bs-toggle="collapse" data-bs-target="#collapseMbc">
-                                            BCA Virtual Account (m-BCA / KlikBCA / ATM)
-                                        </button>
-                                    </h2>
-                                    <div id="collapseMbc" class="accordion-collapse collapse" data-bs-parent="#accordionPaymentGuide">
-                                        <div class="accordion-body small text-muted">
-                                            1. Buka aplikasi BCA Mobile &bull; Pilih <strong>m-Transfer</strong> &gt; <strong>BCA Virtual Account</strong>.<br>
-                                            2. Masukkan nomor Virtual Account di atas &bull; Klik Send.<br>
-                                            3. Pastikan nominal pembayaran sesuai &bull; Masukkan PIN m-BCA.<br>
-                                            4. Transaksi selesai & verifikasi otomatis terkonfirmasi.
-                                        </div>
-                                    </div>
-                                </div>
-                                <!-- BRI -->
-                                <div class="accordion-item mt-2" style="border: 1px solid #E5E0D5;">
-                                    <h2 class="accordion-header">
-                                        <button class="accordion-button collapsed fw-bold text-dark py-2" type="button" data-bs-toggle="collapse" data-bs-target="#collapseBri">
-                                            BRI Virtual Account (BRImo / ATM BRI)
-                                        </button>
-                                    </h2>
-                                    <div id="collapseBri" class="accordion-collapse collapse" data-bs-parent="#accordionPaymentGuide">
-                                        <div class="accordion-body small text-muted">
-                                            1. Buka aplikasi BRImo &bull; Pilih menu <strong>Tagihan</strong> &gt; <strong>BRIVA</strong>.<br>
-                                            2. Masukkan nomor BRIVA di atas &bull; Periksa nama dan nominal tagihan.<br>
-                                            3. Konfirmasi pembayaran dan masukkan PIN BRImo.
-                                        </div>
-                                    </div>
-                                </div>
-                                <!-- BNI -->
-                                <div class="accordion-item mt-2" style="border: 1px solid #E5E0D5;">
-                                    <h2 class="accordion-header">
-                                        <button class="accordion-button collapsed fw-bold text-dark py-2" type="button" data-bs-toggle="collapse" data-bs-target="#collapseBni">
-                                            BNI Virtual Account (BNI Mobile Banking / ATM)
-                                        </button>
-                                    </h2>
-                                    <div id="collapseBni" class="accordion-collapse collapse" data-bs-parent="#accordionPaymentGuide">
-                                        <div class="accordion-body small text-muted">
-                                            1. Buka aplikasi BNI Mobile Banking &bull; Pilih <strong>Pembayaran</strong> &gt; <strong>Virtual Account Billing</strong>.<br>
-                                            2. Masukkan nomor VA BNI di atas &bull; Konfirmasi dan masukkan Password Transaksi.
-                                        </div>
-                                    </div>
-                                </div>
-                                <!-- GoPay & QRIS -->
-                                <div class="accordion-item mt-2" style="border: 1px solid #E5E0D5;">
-                                    <h2 class="accordion-header">
-                                        <button class="accordion-button collapsed fw-bold text-dark py-2" type="button" data-bs-toggle="collapse" data-bs-target="#collapseQris">
-                                            GoPay & QRIS (Semua E-Wallet)
-                                        </button>
-                                    </h2>
-                                    <div id="collapseQris" class="accordion-collapse collapse" data-bs-parent="#accordionPaymentGuide">
-                                        <div class="accordion-body small text-muted">
-                                            1. Buka aplikasi GoPay atau e-wallet pilihan Anda &bull; Pilih menu <strong>Scan QR</strong>.<br>
-                                            2. Scan kode QRIS yang tersedia pada layar pop-up Midtrans.<br>
-                                            3. Pastikan nama merchant <strong>KURO WEAR</strong> &bull; Konfirmasi pembayaran.
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                    </div>
-                </div>
-
-                <!-- KANAN: RINGKASAN PESANAN DI HALAMAN VERIFIKASI -->
-                <div class="col-lg-4">
-                    <div class="kw-order-summary">
-                        <h3 class="kw-checkout-title pb-2 border-bottom">RINGKASAN ITEM PESANAN</h3>
-                        
-                        <div class="small text-muted mb-3 mt-2">
-                            <div><strong>Penerima:</strong> <span id="verif-summary-recipient">{{ address.recipient_name if address else current_user.name }}</span></div>
-                            <div><strong>Pengiriman:</strong> JNE Express Reguler (Bebas Ongkir)</div>
-                            <div><strong>Metode:</strong> <span id="verif-summary-method">Midtrans Sandbox</span></div>
-                        </div>
-
-                        <!-- Daftar Item Ringkas -->
-                        <div class="my-2 border-bottom pb-2" style="max-height: 220px; overflow-y: auto;">
-                            {% for item in items %}
-                            <div class="d-flex justify-content-between align-items-center py-1 small">
-                                <span class="text-truncate me-2" style="max-width: 190px;">{{ item.name }} (x{{ item.quantity }})</span>
-                                <strong class="text-dark">{{ item.line_total_text }}</strong>
-                            </div>
-                            {% endfor %}
-                        </div>
-
-                        <div class="kw-calc-row mt-2">
-                            <span>Subtotal Produk</span>
-                            <span class="kw-calc-val">{{ rupiah(subtotal) }}</span>
-                        </div>
-                        <div class="kw-calc-row">
-                            <span>Ongkos Kirim</span>
-                            <span class="text-success fw-bold">GRATIS</span>
-                        </div>
-                        <div class="kw-total-row">
-                            <span class="kw-total-label">TOTAL AKHIR</span>
-                            <span class="kw-total-price fs-4" id="verif-summary-total">{{ rupiah(grand_total) }}</span>
-                        </div>
-
-                        <div class="mt-4 pt-3 border-top text-center">
-                            <a href="{{ url_for('shop.catalog_all') }}" class="btn btn-sm btn-outline-secondary w-100 py-2 fw-bold" style="font-size: 12px;">
-                                &larr; KEMBALI KE KATALOG BELANJA
-                            </a>
-                        </div>
-                    </div>
-                </div>
-
-            </div>
-        </div>
-
+        <a class="text-decoration-none text-dark fw-semibold small" href="{{ url_for('cart.view_cart') }}">
+            <i class="bi bi-arrow-left me-1"></i> Kembali ke keranjang
+        </a>
     </div>
-</div>
+</section>
 
-<!-- ========================================================
-     MODAL TAMBAH / UBAH ALAMAT PENGIRIMAN
-     ======================================================== -->
-<div class="modal fade" id="modalChangeAddress" tabindex="-1" aria-hidden="true">
+<div class="modal fade" id="addressModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content" style="border-radius: 8px; border: 1px solid #E5E0D5;">
-            <div class="modal-header border-bottom py-3" style="background: #FAF9F5;">
-                <h6 class="modal-title fw-bold text-uppercase mb-0" style="font-size: 13.5px; letter-spacing: 0.6px;" id="modalAddressTitle">
-                    {% if address %}UBAH ALAMAT PENGIRIMAN{% else %}TAMBAH ALAMAT PENGIRIMAN{% endif %}
-                </h6>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body p-4">
-                <form id="form-edit-address" onsubmit="saveCustomAddress(event)">
-                    <div class="mb-3">
-                        <label class="form-label small fw-bold text-uppercase" style="font-size: 11px;">Nama Penerima:</label>
-                        <input type="text" class="form-control" id="input-recipient-name" value="{{ address.recipient_name if address else (current_user.name if current_user.name else '') }}" placeholder="Contoh: Budi Santoso" required>
+        <div class="modal-content">
+            <form id="addressForm">
+                <div class="modal-header">
+                    <h2 class="modal-title fs-6 fw-bold">ALAMAT PENGIRIMAN</h2>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Tutup"></button>
+                </div>
+
+                <div class="modal-body">
+                    <div class="kw-checkout-field">
+                        <label for="recipientName">Nama Penerima</label>
+                        <input id="recipientName" maxlength="100" required value="{{ address.recipient_name if address else current_user.name }}">
                     </div>
-                    <div class="mb-3">
-                        <label class="form-label small fw-bold text-uppercase" style="font-size: 11px;">Nomor Telepon / WhatsApp:</label>
-                        <input type="text" class="form-control" id="input-recipient-phone" value="{{ address.phone if address else '' }}" placeholder="Contoh: 081234567890" required>
+
+                    <div class="kw-checkout-field">
+                        <label for="recipientPhone">Nomor WhatsApp</label>
+                        <input id="recipientPhone" maxlength="25" required value="{{ address.phone if address else '' }}">
                     </div>
-                    <div class="mb-3">
-                        <label class="form-label small fw-bold text-uppercase" style="font-size: 11px;">Kota / Kecamatan:</label>
-                        <input type="text" class="form-control" id="input-recipient-city" value="{{ address.city if address else '' }}" placeholder="Contoh: Jakarta Selatan, Kebayoran Baru" required>
+
+                    <div class="kw-checkout-field">
+                        <label for="recipientCity">Kota / Kecamatan</label>
+                        <input id="recipientCity" maxlength="100" required value="{{ address.city if address else '' }}">
                     </div>
-                    <div class="mb-3">
-                        <label class="form-label small fw-bold text-uppercase" style="font-size: 11px;">Alamat Lengkap:</label>
-                        <textarea class="form-control" id="input-recipient-address" rows="3" placeholder="Nama jalan, nomor rumah, RT/RW, kelurahan, dan kode pos" required>{{ address.full_address if address else '' }}</textarea>
+
+                    <div class="kw-checkout-field">
+                        <label for="recipientPostal">Kode Pos (opsional saat Sandbox)</label>
+                        <input id="recipientPostal" inputmode="numeric" maxlength="5" pattern="[0-9]{5}" value="{{ address.postal_code if address and address.postal_code else '' }}">
                     </div>
-                    <button type="submit" class="btn btn-dark w-100 py-2 fw-bold text-uppercase" style="font-size: 12px; letter-spacing: 0.6px;" id="btn-save-address-submit">
-                        SIMPAN ALAMAT PENGIRIMAN
-                    </button>
-                </form>
-            </div>
+
+                    <div class="kw-checkout-field mb-0">
+                        <label for="recipientAddress">Alamat Lengkap</label>
+                        <textarea id="recipientAddress" maxlength="500" required>{{ address.full_address if address else '' }}</textarea>
+                    </div>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="submit" id="saveAddressButton" class="btn btn-dark w-100 fw-bold">SIMPAN ALAMAT</button>
+                </div>
+            </form>
         </div>
     </div>
 </div>
 
-<!-- ========================================================
-     MIDTRANS SNAP JS (SANDBOX)
-     ======================================================== -->
-{% if midtrans_client_key %}
-<script 
-    type="text/javascript"
-    src="https://app.sandbox.midtrans.com/snap/snap.js"
-    data-client-key="{{ midtrans_client_key }}">
-</script>
-{% endif %}
-
-<!-- ========================================================
-     SCRIPT INTERAKTIF CHECKOUT & INTEGRASI MIDTRANS SANDBOX
-     ======================================================== -->
 <script>
-    let selectedPayment = 'midtrans';
-    let hasAddress = {{ 'true' if address else 'false' }};
-    const orderGrossAmount = {{ grand_total }};
-    const selectedItemIds = "{{ selected_item_ids }}";
-    let currentVaNumber = "80777081234567890";
-    let currentOrderId = "KW-" + Date.now();
+document.addEventListener('DOMContentLoaded', () => {
+    const root = document.getElementById('checkoutRoot');
+    const modal = new bootstrap.Modal(document.getElementById('addressModal'));
+    const saveButton = document.getElementById('saveAddressButton');
+    let hasAddress = root.dataset.hasAddress === 'true';
 
-    // 1. Pilih Metode Pembayaran
-    function selectPaymentMethod(method) {
-        selectedPayment = method;
-        const cardMidtrans = document.getElementById('card-pay-midtrans');
-        const cardManual = document.getElementById('card-pay-manual');
+    document.getElementById('editAddressButton').addEventListener('click', () => modal.show());
 
-        if (method === 'midtrans') {
-            cardMidtrans.classList.add('active');
-            cardManual.classList.remove('active');
-            cardMidtrans.querySelector('input').checked = true;
-        } else {
-            cardManual.classList.add('active');
-            cardMidtrans.classList.remove('active');
-            cardManual.querySelector('input').checked = true;
-        }
-    }
+    document.getElementById('addressForm').addEventListener('submit', async event => {
+        event.preventDefault();
 
-    // 2. Terapkan Voucher Promo
-    function applyVoucher() {
-        const code = document.getElementById('voucher-code').value.trim().toUpperCase();
-        if (!code) {
-            Swal.fire({
-                icon: 'warning',
-                title: 'Kode Voucher Kosong',
-                text: 'Silakan ketikkan kode promo voucher terlebih dahulu.',
-                confirmButtonColor: '#1A1B22'
-            });
-            return;
-        }
+        const address = {
+            recipient_name: document.getElementById('recipientName').value.trim(),
+            phone: document.getElementById('recipientPhone').value.trim(),
+            city: document.getElementById('recipientCity').value.trim(),
+            postal_code: document.getElementById('recipientPostal').value.trim(),
+            full_address: document.getElementById('recipientAddress').value.trim()
+        };
 
-        if (code === 'KURO2026' || code === 'GRATISONGKIR' || code === 'HEMAT') {
-            const discount = 20000;
-            const newTotal = Math.max(0, orderGrossAmount - discount);
-            Swal.fire({
-                icon: 'success',
-                title: 'Voucher Berhasil Digunakan!',
-                text: 'Potongan promo Rp 20.000 telah diaplikasikan.',
-                confirmButtonColor: '#1A1B22'
-            });
-            document.getElementById('display-total-amount').innerText = rupiah(newTotal);
-            document.getElementById('verif-total-amount').innerText = rupiah(newTotal);
-            document.getElementById('verif-summary-total').innerText = rupiah(newTotal);
-        } else {
-            Swal.fire({
-                icon: 'error',
-                title: 'Voucher Tidak Valid',
-                text: 'Kode voucher "' + code + '" tidak ditemukan atau sudah tidak berlaku.',
-                confirmButtonColor: '#1A1B22'
-            });
-        }
-    }
+        saveButton.disabled = true;
 
-    // 3. Buka Modal Ubah / Tambah Alamat
-    function openChangeAddressModal() {
-        const modal = new bootstrap.Modal(document.getElementById('modalChangeAddress'));
-        modal.show();
-    }
-
-    // Simpan Alamat (via AJAX ke backend)
-    function saveCustomAddress(e) {
-        e.preventDefault();
-        const submitBtn = document.getElementById('btn-save-address-submit');
-        submitBtn.disabled = true;
-        submitBtn.innerText = 'MENYIMPAN...';
-
-        const name = document.getElementById('input-recipient-name').value.trim();
-        const phone = document.getElementById('input-recipient-phone').value.trim();
-        const city = document.getElementById('input-recipient-city').value.trim();
-        const address = document.getElementById('input-recipient-address').value.trim();
-
-        fetch("{{ url_for('cart.save_address') }}", {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRFToken': '{{ csrf_token() }}'
-            },
-            body: JSON.stringify({
-                recipient_name: name,
-                phone: phone,
-                city: city,
-                full_address: address
-            })
-        })
-        .then(res => res.json())
-        .then(data => {
-            submitBtn.disabled = false;
-            submitBtn.innerText = 'SIMPAN ALAMAT PENGIRIMAN';
-
-            if (data.status === 'success') {
-                hasAddress = true;
-                
-                // Update DOM view
-                document.getElementById('display-recipient-name').innerHTML = `${name} &bull; <span class="fw-normal text-muted">${phone}</span>`;
-                document.getElementById('display-recipient-city').innerText = city.toUpperCase();
-                document.getElementById('display-recipient-address').innerText = address;
-                
-                // Update badge & buttons
-                document.getElementById('badge-address-status').innerText = 'ALAMAT UTAMA';
-                document.getElementById('btn-text-address').innerText = 'UBAH ALAMAT';
-                document.getElementById('modalAddressTitle').innerText = 'UBAH ALAMAT PENGIRIMAN';
-
-                // Tampilkan active card, sembunyikan empty card
-                document.getElementById('empty-address-container').classList.add('d-none');
-                document.getElementById('active-address-container').classList.remove('d-none');
-
-                // Sinkronkan ke summary
-                const verifRecipient = document.getElementById('verif-summary-recipient');
-                if (verifRecipient) verifRecipient.innerText = name;
-
-                // Tutup Modal
-                const modalEl = document.getElementById('modalChangeAddress');
-                const modalInstance = bootstrap.Modal.getInstance(modalEl);
-                if (modalInstance) modalInstance.hide();
-
-                Swal.fire({
-                    toast: true,
-                    position: 'top-end',
-                    icon: 'success',
-                    title: 'Alamat berhasil disimpan',
-                    showConfirmButton: false,
-                    timer: 2000
-                });
-            } else {
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Gagal Menyimpan Alamat',
-                    text: data.message || 'Periksa kembali formulir alamat Anda.',
-                    confirmButtonColor: '#1A1B22'
-                });
-            }
-        })
-        .catch(err => {
-            submitBtn.disabled = false;
-            submitBtn.innerText = 'SIMPAN ALAMAT PENGIRIMAN';
-            console.error('Save address error:', err);
-            // Fallback save in client DOM
-            hasAddress = true;
-            document.getElementById('display-recipient-name').innerHTML = `${name} &bull; <span class="fw-normal text-muted">${phone}</span>`;
-            document.getElementById('display-recipient-city').innerText = city.toUpperCase();
-            document.getElementById('display-recipient-address').innerText = address;
-            document.getElementById('empty-address-container').classList.add('d-none');
-            document.getElementById('active-address-container').classList.remove('d-none');
-            
-            const modalEl = document.getElementById('modalChangeAddress');
-            const modalInstance = bootstrap.Modal.getInstance(modalEl);
-            if (modalInstance) modalInstance.hide();
-        });
-    }
-
-    // 4. Salin Teks ke Clipboard
-    function copyVaNumber() {
-        const text = currentVaNumber.replace(/\s+/g, '');
-        copyToClipboard(text, 'Nomor Virtual Account');
-    }
-
-    function copyAmountNumber() {
-        copyToClipboard(orderGrossAmount.toString(), 'Nominal Pembayaran');
-    }
-
-    function copyToClipboard(text, label) {
-        if (navigator.clipboard && navigator.clipboard.writeText) {
-            navigator.clipboard.writeText(text).then(() => {
-                showToast(label + ' berhasil disalin!');
-            }).catch(() => {
-                fallbackCopyText(text, label);
-            });
-        } else {
-            fallbackCopyText(text, label);
-        }
-    }
-
-    function fallbackCopyText(text, label) {
-        const temp = document.createElement("input");
-        document.body.appendChild(temp);
-        temp.value = text;
-        temp.select();
-        document.execCommand("copy");
-        document.body.removeChild(temp);
-        showToast(label + ' berhasil disalin!');
-    }
-
-    function showToast(msg) {
-        Swal.fire({
-            toast: true,
-            position: 'top-end',
-            icon: 'success',
-            title: msg,
-            showConfirmButton: false,
-            timer: 2000
-        });
-    }
-
-    function rupiah(number) {
-        return "Rp " + new Intl.NumberFormat("id-ID", { maximumFractionDigits: 0 }).format(number);
-    }
-
-    // 5. Proses Konfirmasi Pembayaran & Buat Pesanan
-    function processOrderCheckout() {
-        // Validasi alamat jika masih kosong
-        if (!hasAddress) {
-            Swal.fire({
-                icon: 'warning',
-                title: 'Alamat Belum Diisi',
-                text: 'Silakan tambahkan alamat pengiriman terlebih dahulu sebelum memproses pesanan.',
-                confirmButtonText: 'TAMBAH ALAMAT SEKARANG',
-                confirmButtonColor: '#1A1B22',
-                showCancelButton: true,
-                cancelButtonText: 'Batal',
-                cancelButtonColor: '#8C8C94'
-            }).then((res) => {
-                if (res.isConfirmed) {
-                    openChangeAddressModal();
-                }
-            });
-            return;
-        }
-
-        const btn = document.getElementById('btn-submit-order');
-        btn.disabled = true;
-        btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span> MEMPROSES KE MIDTRANS...';
-
-        if (selectedPayment === 'midtrans') {
-            // Minta Snap Token resmi ke backend
-            fetch("{{ url_for('cart.create_snap_token') }}", {
+        try {
+            const response = await fetch(root.dataset.saveUrl, {
                 method: 'POST',
+                credentials: 'same-origin',
                 headers: {
                     'Content-Type': 'application/json',
-                    'X-CSRFToken': '{{ csrf_token() }}'
+                    'X-CSRFToken': root.dataset.csrf
                 },
-                body: JSON.stringify({
-                    items: selectedItemIds
-                })
-            })
-            .then(res => res.json())
-            .then(data => {
-                btn.disabled = false;
-                btn.innerHTML = '<span>KONFIRMASI PEMBAYARAN & BUAT PESANAN</span> <i class="bi bi-arrow-right"></i>';
-
-                if (data.status === 'success' && data.snap_token && window.snap) {
-                    // Munculkan popup Midtrans Snap resmi (hanya channel prioritas: GoPay, QRIS, BRI VA, BNI VA, BCA VA)
-                    window.snap.pay(data.snap_token, {
-                        onSuccess: function(result) {
-                            console.log('Midtrans Snap Success:', result);
-                            switchToVerificationView(result, 'success');
-                        },
-                        onPending: function(result) {
-                            console.log('Midtrans Snap Pending:', result);
-                            switchToVerificationView(result, 'pending');
-                        },
-                        onError: function(result) {
-                            console.error('Midtrans Snap Error:', result);
-                            Swal.fire({
-                                icon: 'error',
-                                title: 'Pembayaran Gagal',
-                                text: 'Terjadi kendala dalam transaksi Midtrans Sandbox. Silakan coba kembali.',
-                                confirmButtonColor: '#1A1B22'
-                            });
-                        },
-                        onClose: function() {
-                            Swal.fire({
-                                icon: 'info',
-                                title: 'Pembayaran Ditunda',
-                                text: 'Anda menutup pop-up Midtrans. Klik tombol konfirmasi kembali kapan pun Anda siap menyelesaikan pembayaran.',
-                                confirmButtonColor: '#1A1B22'
-                            });
-                        }
-                    });
-                } else {
-                    // Fallback simulation jika Snap JS offline atau error koneksi API Midtrans
-                    console.warn('Fallback Midtrans Mode:', data.message || data.error_detail);
-                    const fallbackResult = {
-                        order_id: data.order_id || 'KW-' + Date.now(),
-                        gross_amount: data.gross_amount || orderGrossAmount,
-                        payment_type: 'bank_transfer',
-                        va_numbers: [{ bank: 'bca', va_number: '80777' + Math.floor(1000000000 + Math.random() * 9000000000) }],
-                        transaction_status: 'pending'
-                    };
-                    switchToVerificationView(fallbackResult, 'pending');
-                }
-            })
-            .catch(err => {
-                btn.disabled = false;
-                btn.innerHTML = '<span>KONFIRMASI PEMBAYARAN & BUAT PESANAN</span> <i class="bi bi-arrow-right"></i>';
-                console.error('Midtrans connection error:', err);
-                const fallbackResult = {
-                    order_id: 'KW-' + Date.now(),
-                    gross_amount: orderGrossAmount,
-                    payment_type: 'bank_transfer',
-                    va_numbers: [{ bank: 'bca', va_number: '80777081234567890' }],
-                    transaction_status: 'pending'
-                };
-                switchToVerificationView(fallbackResult, 'pending');
+                body: JSON.stringify(address)
             });
-        } else {
-            // Metode COD / Transfer Manual
-            setTimeout(() => {
-                btn.disabled = false;
-                btn.innerHTML = '<span>KONFIRMASI PEMBAYARAN & BUAT PESANAN</span> <i class="bi bi-arrow-right"></i>';
-                const codResult = {
-                    order_id: 'KW-COD-' + Date.now().toString().slice(-6),
-                    gross_amount: orderGrossAmount,
-                    payment_type: 'cod',
-                    transaction_status: 'pending'
-                };
-                switchToVerificationView(codResult, 'cod');
-            }, 500);
-        }
-    }
 
-    // 6. Transisi ke Tampilan Verifikasi Pembayaran (View 2)
-    function switchToVerificationView(result, mode) {
-        document.getElementById('view-checkout-form').classList.add('d-none');
-        document.getElementById('view-payment-verification').classList.remove('d-none');
-        
-        // Update Stepper
-        const stepCheckout = document.getElementById('step-nav-checkout');
-        const stepVerif = document.getElementById('step-nav-verification');
-        
-        stepCheckout.classList.remove('active');
-        stepCheckout.classList.add('completed');
-        stepCheckout.querySelector('.kw-step-circle').innerHTML = '<i class="bi bi-check-lg"></i>';
-        
-        stepVerif.classList.add('active');
+            const result = await response.json();
 
-        // Scroll to top
-        window.scrollTo({ top: 0, behavior: 'smooth' });
+            if (!response.ok || result.status !== 'success') {
+                throw new Error(result.message || 'Gagal menyimpan alamat.');
+            }
 
-        // Update Data Transaksi di View 2
-        const orderId = result.order_id || ('KW-' + Date.now());
-        currentOrderId = orderId;
-        document.getElementById('order-invoice-id').innerText = '#' + orderId;
+            const saved = result.address;
+            document.getElementById('addressRecipient').textContent = saved.recipient_name;
+            document.getElementById('addressPhone').textContent = saved.phone;
+            document.getElementById('addressCity').textContent = saved.city;
+            document.getElementById('addressPostal').textContent = saved.postal_code ? `Kode pos: ${saved.postal_code}` : '';
+            document.getElementById('addressText').textContent = saved.full_address;
+            document.getElementById('addressEmpty').hidden = true;
+            document.getElementById('addressSaved').hidden = false;
+            document.getElementById('editAddressButton').textContent = 'UBAH ALAMAT';
 
-        const gross = Number(result.gross_amount) || orderGrossAmount;
-        document.getElementById('verif-total-amount').innerText = rupiah(gross);
-        document.getElementById('verif-summary-total').innerText = rupiah(gross);
+            hasAddress = true;
+            modal.hide();
 
-        const badgeChannel = document.getElementById('verif-payment-channel');
-        const vaContainer = document.getElementById('container-va-details');
-        const qrisContainer = document.getElementById('container-qris-details');
-        const vaNumberEl = document.getElementById('va-number-text');
-        const vaLabelEl = document.getElementById('label-va-type');
-        const simGroup = document.getElementById('simulator-links-group');
-        const simBca = document.getElementById('link-sim-bca');
-        const simBni = document.getElementById('link-sim-bni');
-        const simBri = document.getElementById('link-sim-bri');
-        const simQris = document.getElementById('link-sim-qris');
+            if (window.Swal) {
+                Swal.fire({ icon: 'success', title: 'Alamat tersimpan', timer: 1600, showConfirmButton: false });
+            }
 
-        // Cek tipe pembayaran yang dipilih user di Snap:
-        const payType = result.payment_type || '';
-        const vaArray = result.va_numbers || [];
-        let bankName = '';
-        let vaNum = '';
-
-        if (vaArray.length > 0) {
-            bankName = (vaArray[0].bank || '').toUpperCase();
-            vaNum = vaArray[0].va_number || '';
-        } else if (result.permata_va_number) {
-            bankName = 'PERMATA';
-            vaNum = result.permata_va_number;
-        } else if (result.bill_key && result.biller_code) {
-            bankName = 'MANDIRI BILL';
-            vaNum = result.bill_key;
-        }
-
-        if (payType === 'qris' || payType === 'other_qris') {
-            badgeChannel.innerText = 'QRIS MIDTRANS';
-            vaContainer.classList.add('d-none');
-            qrisContainer.classList.remove('d-none');
-            document.getElementById('verif-summary-method').innerText = 'QRIS Midtrans';
-        } else if (payType === 'gopay') {
-            badgeChannel.innerText = 'GOPAY E-WALLET';
-            vaContainer.classList.add('d-none');
-            qrisContainer.classList.remove('d-none');
-            document.getElementById('verif-summary-method').innerText = 'GoPay';
-        } else if (mode === 'cod') {
-            badgeChannel.innerText = 'CASH ON DELIVERY (COD)';
-            vaContainer.classList.add('d-none');
-            qrisContainer.classList.add('d-none');
-            document.getElementById('verif-summary-method').innerText = 'COD (Bayar di Tempat)';
-            document.getElementById('helper-midtrans-simulator').classList.add('d-none');
-        } else {
-            // Default Virtual Account (BCA / BNI / BRI)
-            const resolvedBank = bankName || 'BCA';
-            badgeChannel.innerText = resolvedBank + ' VIRTUAL ACCOUNT';
-            vaLabelEl.innerText = `NOMOR VIRTUAL ACCOUNT (${resolvedBank}):`;
-            
-            if (vaNum) {
-                currentVaNumber = vaNum;
-                vaNumberEl.innerText = vaNum.replace(/(.{4})/g, '$1 ').trim();
+        } catch (error) {
+            if (window.Swal) {
+                Swal.fire({ icon: 'error', title: 'Gagal menyimpan alamat', text: error.message });
             } else {
-                currentVaNumber = '80777081234567890';
-                vaNumberEl.innerText = '80777 0812 3456 7890';
+                alert(error.message);
             }
-
-            vaContainer.classList.remove('d-none');
-            qrisContainer.classList.add('d-none');
-            document.getElementById('verif-summary-method').innerText = resolvedBank + ' Virtual Account';
-
-            // Sorot tombol simulator yang relevan
-            if (resolvedBank === 'BNI') {
-                simBni.classList.remove('btn-outline-dark');
-                simBni.classList.add('btn-dark');
-                simBca.classList.remove('btn-dark');
-                simBca.classList.add('btn-outline-dark');
-            } else if (resolvedBank === 'BRI') {
-                simBri.classList.remove('btn-outline-dark');
-                simBri.classList.add('btn-dark');
-                simBca.classList.remove('btn-dark');
-                simBca.classList.add('btn-outline-dark');
-            }
+        } finally {
+            saveButton.disabled = false;
         }
+    });
 
-        // Mulai Countdown Timer
-        startCountdown(24 * 3600);
-    }
+    document.getElementById('proceedPayment').addEventListener('click', () => {
+        if (!hasAddress) return modal.show();
 
-    // 7. Hitung Mundur Waktu Bayar
-    function startCountdown(seconds) {
-        const timerEl = document.getElementById('countdown-timer');
-        let remaining = seconds;
-
-        const interval = setInterval(() => {
-            if (remaining <= 0) {
-                clearInterval(interval);
-                timerEl.innerText = "00:00:00 (KADALUARSA)";
-                return;
-            }
-            remaining--;
-            const hrs = Math.floor(remaining / 3600).toString().padStart(2, '0');
-            const mins = Math.floor((remaining % 3600) / 60).toString().padStart(2, '0');
-            const secs = (remaining % 60).toString().padStart(2, '0');
-            timerEl.innerText = `${hrs}:${mins}:${secs}`;
-        }, 1000);
-    }
-
-    // 8. Cek Status Pembayaran
-    function checkPaymentStatus() {
-        Swal.fire({
-            title: 'Memeriksa ke Midtrans Gateway...',
-            html: '<p class="text-muted small">Menghubungi server Midtrans Sandbox API untuk memverifikasi pembayaran Anda.</p>',
-            allowOutsideClick: false,
-            didOpen: () => {
-                Swal.showLoading();
-            }
-        });
-
-        setTimeout(() => {
-            Swal.fire({
-                icon: 'success',
-                title: 'PEMBAYARAN DIVERIFIKASI!',
-                html: `
-                    <p style="color: #575E70; font-size: 13px;">
-                        Pembayaran pesanan <strong>#${currentOrderId}</strong> sebesar <strong>${rupiah(orderGrossAmount)}</strong> berhasil diverifikasi lunas secara otomatis oleh Midtrans Sandbox.<br>
-                        Pesanan Anda sedang dipersiapkan untuk dikirim oleh Kuro Wear.
-                    </p>
-                `,
-                confirmButtonText: 'LIHAT PESANAN SAYA',
-                confirmButtonColor: '#1A1B22',
-                showCancelButton: true,
-                cancelButtonText: 'KEMBALI KE TOKO',
-                cancelButtonColor: '#8C8C94'
-            }).then((res) => {
-                if (res.isConfirmed) {
-                    window.location.href = "{{ url_for('customer.order_history') }}";
-                } else {
-                    window.location.href = "{{ url_for('shop.catalog_all') }}";
-                }
-            });
-        }, 1200);
-    }
+        const url = new URL(root.dataset.paymentUrl, window.location.origin);
+        url.searchParams.set('items', root.dataset.items);
+        window.location.assign(url.toString());
+    });
+});
 </script>
 {% endblock %}

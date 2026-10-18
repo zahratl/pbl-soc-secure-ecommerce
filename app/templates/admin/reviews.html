@@ -1,0 +1,185 @@
+<!--tab kategori di bagian atas, jumlah ulasan pada setiap kategori, lalu kartu komentar dengan rating, foto, dan form balasan-->
+{% extends 'admin/admin_base.html' %}
+{% block title %}Manajemen Ulasan - Admin KURO WEAR{% endblock %}
+
+{% block extra_css %}
+<style>
+.ar-page{color:#202126}
+.ar-header{display:flex;align-items:flex-start;justify-content:space-between;gap:15px;margin-bottom:25px}
+.ar-header h1{font-size:25px;font-weight:700;letter-spacing:-.4px;margin:0 0 7px}
+.ar-header p{color:#777A82;font-size:12px;margin:0}
+.ar-total{padding:9px 13px;border:1px solid #E6E5E2;border-radius:6px;background:white;font-size:11px;color:#55565E;white-space:nowrap}
+.ar-filter-panel{padding:18px;background:#fff;border:1px solid #E6E5E2;border-radius:7px;margin-bottom:20px}
+.ar-filter-label{display:block;font-size:11px;font-weight:700;margin-bottom:13px}
+.ar-categories{display:flex;align-items:center;gap:9px;flex-wrap:wrap}
+.ar-tab{display:inline-flex;align-items:center;gap:8px;min-height:38px;padding:8px 12px;border:1px solid #E4E3DF;border-radius:5px;color:#575A60;font-size:11px;font-weight:600;text-decoration:none;background:white}
+.ar-tab:hover{border-color:#202126;color:#202126}
+.ar-tab.active{background:#202126;border-color:#202126;color:white}
+.ar-count{padding:3px 6px;background:#F0EFED;border-radius:3px;color:#575A60;font-size:10px}
+.ar-tab.active .ar-count{background:#FFFFFF25;color:white}
+.ar-caption{display:flex;justify-content:space-between;flex-wrap:wrap;gap:10px;font-size:11px;color:#85878D;margin:0 0 15px}
+.ar-list{display:grid;gap:15px}
+.ar-card{padding:21px;background:#fff;border:1px solid #E6E5E2;border-radius:7px;scroll-margin-top:28px}
+.ar-card-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
+.ar-product{font-size:14px;font-weight:700;color:#202126;text-decoration:none}
+.ar-product:hover{color:#A30B14}
+.ar-review-meta{font-size:11px;color:#85878D;margin-top:7px}
+.ar-verified{color:#176743;font-weight:600}
+.ar-stars{color:#A30B14;font-size:16px;letter-spacing:3px;white-space:nowrap}
+.ar-review-text{font-size:12px;line-height:1.8;white-space:pre-line;overflow-wrap:anywhere;color:#45464C;margin:18px 0}
+.ar-photos{display:flex;gap:9px;flex-wrap:wrap;margin:13px 0 17px}
+.ar-photos img{width:85px;height:105px;object-fit:cover;border:1px solid #E6E5E2;border-radius:4px}
+.ar-reply{padding:15px 16px;background:#F7F6F3;border-left:3px solid #A30B14;margin:16px 0}
+.ar-reply-heading{font-size:11px;font-weight:700}
+.ar-reply p{margin:9px 0 0;font-size:12px;line-height:1.8;white-space:pre-line;overflow-wrap:anywhere}
+.ar-form{border-top:1px solid #EEEEEB;padding-top:17px;margin-top:17px}
+.ar-form label{display:block;font-size:11px;font-weight:700;margin-bottom:9px}
+.ar-form textarea{display:block;width:100%;min-height:90px;resize:vertical;padding:12px;border:1px solid #DAD9D5;border-radius:5px;color:#202126;font-size:12px;line-height:1.7}
+.ar-form textarea:focus{outline:2px solid #D6C2BF;outline-offset:1px}
+.ar-form-actions{display:flex;justify-content:flex-end;margin-top:12px}
+.ar-empty{padding:65px 20px;background:#fff;border:1px solid #E6E5E2;border-radius:7px;text-align:center}
+.ar-empty i{font-size:30px;color:#A2A3A5}
+.ar-empty h2{font-size:14px;font-weight:700;margin:13px 0 8px}
+.ar-empty p{color:#85878D;font-size:12px;margin:0}
+@media(max-width:600px){.ar-header{flex-direction:column}.ar-header h1{font-size:22px}.ar-card{padding:15px}.ar-card-head{flex-direction:column}.ar-form-actions .admin-btn{width:100%}}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="ar-page">
+    <div class="ar-header">
+        <div>
+            <h1>Manajemen Ulasan</h1>
+            <p>Kelola feedback pelanggan dan tanggapi ulasan pembelian terverifikasi.</p>
+        </div>
+        <div class="ar-total">
+            {{ counts['all'] }} Total Ulasan
+        </div>
+    </div>
+
+    <section class="ar-filter-panel">
+        <span class="ar-filter-label">FILTER BERDASARKAN KATEGORI PRODUK</span>
+
+        <nav class="ar-categories" aria-label="Filter kategori ulasan">
+            <a href="{{ url_for('admin.manage_product_reviews', category='all') }}"
+               class="ar-tab {{ 'active' if selected_category == 'all' else '' }}"
+               {% if selected_category == 'all' %}aria-current="page"{% endif %}>
+                Semua Ulasan
+                <span class="ar-count">{{ counts['all'] }}</span>
+            </a>
+
+            {% for key, name in categories %}
+            <a href="{{ url_for('admin.manage_product_reviews', category=key) }}"
+               class="ar-tab {{ 'active' if selected_category == key else '' }}"
+               {% if selected_category == key %}aria-current="page"{% endif %}>
+                {{ name }}
+                <span class="ar-count">{{ counts[key] }}</span>
+            </a>
+            {% endfor %}
+        </nav>
+    </section>
+
+    <div class="ar-caption">
+        <span>Menampilkan {{ reviews|length }} ulasan pada kategori ini</span>
+        <span>{{ unanswered_count }} belum dibalas</span>
+    </div>
+
+    <div class="ar-list">
+        {% for review in reviews %}
+        {% set reply = replies.get(review.id) %}
+
+        <article class="ar-card" id="admin-review-{{ review.id }}">
+            <div class="ar-card-head">
+                <div>
+                    {% if review.product %}
+                    <a class="ar-product"
+                       href="{{ url_for('shop.product_detail', product_id=review.product_id) }}#kpdReviews"
+                       target="_blank"
+                       rel="noopener noreferrer">
+                        {{ review.product.name }}
+                        <i class="bi bi-box-arrow-up-right" style="font-size:11px"></i>
+                    </a>
+                    {% else %}
+                    <strong class="ar-product">Produk tidak tersedia</strong>
+                    {% endif %}
+
+                    <div class="ar-review-meta">
+                        {{ review.author_name }}
+                        · Ulasan #{{ review.id }}
+                        · <span class="ar-verified">Pembelian Terverifikasi</span>
+                    </div>
+
+                    {% if review.product %}
+                    <div class="ar-review-meta">
+                        Kategori: {{ review.product.subcategory }}
+                    </div>
+                    {% endif %}
+                </div>
+
+                <span class="ar-stars" aria-label="{{ review.rating }} dari 5 bintang">
+                    {% for n in range(1, 6) %}
+                        {{ '★' if n <= review.rating else '☆' }}
+                    {% endfor %}
+                </span>
+            </div>
+
+            <p class="ar-review-text">{{ review.comment }}</p>
+
+            {% if review.image_paths %}
+            <div class="ar-photos">
+                {% for path in review.image_paths %}
+                <a href="{{ url_for('static', filename=path) }}"
+                   target="_blank" rel="noopener noreferrer">
+                    <img src="{{ url_for('static', filename=path) }}"
+                         alt="Foto ulasan {{ loop.index }}"
+                         loading="lazy">
+                </a>
+                {% endfor %}
+            </div>
+            {% endif %}
+
+            {% if reply %}
+            <div class="ar-reply">
+                <div class="ar-reply-heading">
+                    <i class="bi bi-shop me-1"></i> Balasan Tim KURO WEAR
+                </div>
+                <p>{{ reply.message }}</p>
+            </div>
+            {% endif %}
+
+            <form class="ar-form"
+                  method="POST"
+                  action="{{ url_for('admin.reply_product_review', review_id=review.id) }}">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <input type="hidden" name="category" value="{{ selected_category }}">
+
+                <label for="reply-{{ review.id }}">
+                    {{ 'Edit Balasan' if reply else 'Balas Ulasan Pelanggan' }}
+                </label>
+
+                <textarea id="reply-{{ review.id }}"
+                          name="message"
+                          minlength="5"
+                          maxlength="1000"
+                          placeholder="Tulis tanggapan untuk pelanggan..."
+                          required>{{ reply.message if reply else '' }}</textarea>
+
+                <div class="ar-form-actions">
+                    <button class="admin-btn" type="submit">
+                        <i class="bi bi-reply"></i>
+                        {{ 'Simpan Perubahan' if reply else 'Kirim Balasan' }}
+                    </button>
+                </div>
+            </form>
+        </article>
+
+        {% else %}
+        <div class="ar-empty">
+            <i class="bi bi-chat-square-text"></i>
+            <h2>Belum Ada Ulasan</h2>
+            <p>Belum ada ulasan yang dipublikasikan pada kategori ini.</p>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

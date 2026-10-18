@@ -1,1293 +1,293 @@
 {% extends 'base.html' %}
-
-{% block title %}
-Keranjang Belanja - KURO WEAR
-{% endblock %}
-
+{% block title %}Keranjang Belanja - KURO WEAR{% endblock %}
 {% block content %}
-
 <style>
-
-/* ================================================
-   KURO WEAR - CART PAGE COMPACT DESIGN
-   ================================================ */
-
-.kw-cart-page {
-    background: #EDEBDD;
-    min-height: 65vh;
-    padding: 32px 20px 65px;
-    color: #1A1B22;
-}
-
-.kw-cart-page * {
-    box-sizing: border-box;
-}
-
-.kw-cart-container {
-    width: 100%;
-    max-width: 1240px;
-    margin: 0 auto;
-}
-
-/* ================================================
-   HEADER
-   ================================================ */
-
-.kw-cart-header {
-    display: flex;
-    align-items: baseline;
-    gap: 12px;
-    flex-wrap: wrap;
-    margin-bottom: 24px;
-}
-
-.kw-cart-title {
-    font-size: 27px;
-    font-weight: 700;
-    letter-spacing: -0.6px;
-    margin: 0;
-    color: #1A1B22;
-}
-
-.kw-cart-count {
-    font-size: 13px;
-    color: #575E70;
-}
-
-/* ================================================
-   TWO COLUMN LAYOUT
-   ================================================ */
-
-.kw-cart-layout {
-    display: grid;
-    grid-template-columns: minmax(0, 1.8fr) minmax(300px, 0.9fr);
-    gap: 22px;
-    align-items: start;
-}
-
-.kw-cart-left,
-.kw-cart-right {
-    min-width: 0;
-}
-
-/* ================================================
-   CARD
-   ================================================ */
-
-.kw-cart-card {
-    background: #FFFFFF;
-    border: 1px solid #E8E7F1;
-    border-radius: 8px;
-    padding: 20px;
-    margin-bottom: 15px;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.035);
-}
-
-/* ================================================
-   EMPTY CART
-   ================================================ */
-
-.kw-cart-empty {
-    min-height: 285px;
-    background: #FFFFFF;
-    border: 1px solid #E8E7F1;
-    border-radius: 8px;
-
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-
-    padding: 32px 22px;
-    text-align: center;
-}
-
-.kw-cart-empty-icon {
-    width: 66px;
-    height: 66px;
-    background: #F4F2FD;
-    color: #575E70;
-    border-radius: 50%;
-
-    display: flex;
-    align-items: center;
-    justify-content: center;
-
-    margin-bottom: 17px;
-}
-
-.kw-cart-empty-icon i {
-    font-size: 30px;
-}
-
-.kw-cart-empty-title {
-    font-size: 19px;
-    font-weight: 700;
-    letter-spacing: -0.35px;
-    color: #1A1B22;
-    margin: 0 0 10px;
-}
-
-.kw-cart-empty-desc {
-    max-width: 430px;
-    font-size: 12.5px;
-    line-height: 1.8;
-    color: #575E70;
-    margin: 0 0 20px;
-}
-
-.kw-cart-explore {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 9px;
-
-    background: #1A1B22;
-    color: #FFFFFF;
-    text-decoration: none;
-
-    min-height: 42px;
-    padding: 11px 23px;
-
-    font-size: 11px;
-    font-weight: 700;
-    letter-spacing: 0.65px;
-
-    transition: background 0.2s;
-}
-
-.kw-cart-explore:hover {
-    background: #333333;
-    color: #FFFFFF;
-}
-
-/* ================================================
-   SELECT ALL
-   ================================================ */
-
-.kw-cart-select-all {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 12px;
-}
-
-.kw-cart-select-label {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    font-size: 13px;
-    font-weight: 600;
-    cursor: pointer;
-}
-
-.kw-cart-checkbox {
-    appearance: none;
-    -webkit-appearance: none;
-
-    width: 17px;
-    height: 17px;
-    flex-shrink: 0;
-
-    border: 1.5px solid #1A1B22;
-    border-radius: 3px;
-    background: white;
-    cursor: pointer;
-
-    display: grid;
-    place-items: center;
-}
-
-.kw-cart-checkbox:checked {
-    background: #1A1B22;
-}
-
-.kw-cart-checkbox:checked::after {
-    content: "\2714";
-    font-size: 11px;
-    color: #FFFFFF;
-}
-
-.kw-cart-checkbox:disabled {
-    opacity: 0.35;
-    cursor: not-allowed;
-}
-
-.kw-cart-delete-selected {
-    border: none;
-    background: transparent;
-    color: #575E70;
-    font-size: 11px;
-    font-weight: 600;
-    cursor: pointer;
-}
-
-.kw-cart-delete-selected:hover {
-    color: #B7000C;
-}
-
-/* ================================================
-   PRODUCT ITEM
-   ================================================ */
-
-.kw-cart-product-row {
-    display: flex;
-    align-items: flex-start;
-    gap: 15px;
-}
-
-.kw-cart-product-img {
-    width: 93px;
-    height: 116px;
-    flex-shrink: 0;
-    position: relative;
-    background: #F4F2FD;
-}
-
-.kw-cart-product-img img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-}
-
-.kw-cart-product-img-empty {
-    display: grid;
-    place-items: center;
-    width: 100%;
-    height: 100%;
-    color: #9CA3AF;
-    font-size: 27px;
-}
-
-.kw-cart-product-category {
-    position: absolute;
-    top: 0;
-    left: 0;
-    padding: 4px 7px;
-    font-size: 9px;
-    font-weight: 700;
-    color: white;
-    background: #2F3038;
-    text-transform: uppercase;
-}
-
-.kw-cart-product-info {
-    flex: 1;
-    min-width: 0;
-}
-
-.kw-cart-product-top {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-    gap: 12px;
-}
-
-.kw-cart-product-name {
-    font-size: 14px;
-    font-weight: 700;
-    color: #1A1B22;
-    line-height: 1.45;
-    margin-bottom: 5px;
-}
-
-.kw-cart-product-variant {
-    font-size: 11px;
-    color: #575E70;
-    margin-bottom: 5px;
-}
-
-.kw-cart-product-label {
-    display: inline-block;
-    background: #EEEDF7;
-    padding: 4px 8px;
-    color: #5F3F3B;
-    font-size: 10px;
-    font-weight: 600;
-}
-
-.kw-cart-price {
-    font-size: 15px;
-    font-weight: 700;
-    white-space: nowrap;
-    text-align: right;
-}
-
-.kw-cart-unit-price {
-    font-size: 10px;
-    color: #575E70;
-    text-align: right;
-}
-
-.kw-cart-product-bottom {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    gap: 12px;
-    margin-top: 17px;
-}
-
-/* ================================================
-   QUANTITY
-   ================================================ */
-
-.kw-cart-quantity {
-    display: inline-flex;
-    align-items: center;
-    background: #F4F2FD;
-    border-radius: 4px;
-}
-
-.kw-cart-qty-btn {
-    width: 31px;
-    height: 31px;
-    background: transparent;
-    border: none;
-    color: #1A1B22;
-    font-size: 16px;
-    font-weight: 700;
-}
-
-.kw-cart-qty-btn:disabled {
-    opacity: 0.35;
-    cursor: not-allowed;
-}
-
-.kw-cart-qty-value {
-    width: 28px;
-    border: none;
-    background: transparent;
-    text-align: center;
-    font-size: 12px;
-    font-weight: 700;
-    pointer-events: none;
-}
-
-/* ================================================
-   PRODUCT ACTIONS
-   ================================================ */
-
-.kw-cart-actions {
-    display: flex;
-    align-items: center;
-    gap: 13px;
-    flex-wrap: wrap;
-}
-
-.kw-cart-action-btn {
-    border: none;
-    background: transparent;
-    color: #575E70;
-    font-size: 11px;
-    display: inline-flex;
-    align-items: center;
-    gap: 5px;
-    cursor: pointer;
-}
-
-.kw-cart-action-btn:hover {
-    color: #B7000C;
-}
-
-.kw-cart-unavailable {
-    display: inline-block;
-    font-size: 11px;
-    color: #991B1B;
-    background: #FEE2E2;
-    padding: 5px 8px;
-    margin-top: 7px;
-}
-
-/* ================================================
-   SUMMARY
-   ================================================ */
-
-/*
-   Tidak menggunakan sticky-top Bootstrap.
-   Card tidak akan naik menutupi navbar.
-*/
-
-.kw-cart-summary {
-    position: static;
-    top: auto;
-    margin: 0;
-    padding: 22px;
-}
-
-.kw-cart-summary-title {
-    font-size: 18px;
-    font-weight: 700;
-    color: #1A1B22;
-    margin: 0 0 23px;
-}
-
-.kw-cart-summary-row {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-    gap: 12px;
-
-    font-size: 12px;
-    color: #575E70;
-    margin-bottom: 15px;
-}
-
-.kw-cart-summary-row strong {
-    color: #1A1B22;
-    font-weight: 700;
-    text-align: right;
-}
-
-.kw-cart-summary-divider {
-    height: 1px;
-    width: 100%;
-    background: #E8E7F1;
-    margin: 16px 0;
-}
-
-.kw-cart-summary-total {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    gap: 12px;
-}
-
-.kw-cart-summary-total-label {
-    font-size: 13px;
-    font-weight: 700;
-    color: #1A1B22;
-}
-
-.kw-cart-summary-price {
-    font-size: 23px;
-    font-weight: 700;
-    color: #1A1B22;
-    white-space: nowrap;
-}
-
-.kw-cart-checkout {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    gap: 8px;
-
-    width: 100%;
-    min-height: 43px;
-    margin-top: 22px;
-
-    border: none;
-    border-radius: 4px;
-
-    background: #1A1B22;
-    color: #FFFFFF;
-
-    font-size: 11px;
-    font-weight: 700;
-    letter-spacing: 0.5px;
-}
-
-.kw-cart-checkout:disabled {
-    background: #AAAAAA;
-    cursor: not-allowed;
-}
-
-.kw-cart-summary-note {
-    font-size: 10.5px;
-    line-height: 1.7;
-    text-align: center;
-    color: #737373;
-    margin: 15px 0 0;
-}
-
-/* ================================================
-   BACK TO SHOP
-   ================================================ */
-
-.kw-cart-back {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-
-    color: #1A1B22;
-    text-decoration: none;
-    font-size: 12px;
-    font-weight: 700;
-    margin-top: 8px;
-}
-
-.kw-cart-back:hover {
-    color: #810100;
-}
-
-/* ================================================
-   RESPONSIVE
-   ================================================ */
-
+.kw-cart-page { background: #EDEBDD; min-height: 65vh; padding: 32px 20px 65px; color: #1A1B22; }
+.kw-cart-page * { box-sizing: border-box; }
+.kw-cart-container { width: 100%; max-width: 1240px; margin: 0 auto; }
+.kw-cart-header { display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap; margin-bottom: 24px; }
+.kw-cart-title { font-size: 27px; font-weight: 700; letter-spacing: -0.6px; margin: 0; color: #1A1B22; }
+.kw-cart-count { font-size: 13px; color: #575E70; }
+.kw-cart-layout { display: grid; grid-template-columns: minmax(0, 1.8fr) minmax(300px, 0.9fr); gap: 22px; align-items: start; }
+.kw-cart-left, .kw-cart-right { min-width: 0; }
+.kw-cart-card { background: #FFFFFF; border: 1px solid #E8E7F1; border-radius: 8px; padding: 20px; margin-bottom: 15px; box-shadow: 0 1px 3px rgba(0,0,0,0.035); }
+.kw-cart-empty { min-height: 285px; background: #FFFFFF; border: 1px solid #E8E7F1; border-radius: 8px; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 32px 22px; text-align: center; }
+.kw-cart-empty-icon { width: 66px; height: 66px; background: #F4F2FD; color: #575E70; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-bottom: 17px; }
+.kw-cart-empty-icon i { font-size: 30px; }
+.kw-cart-empty-title { font-size: 19px; font-weight: 700; letter-spacing: -0.35px; color: #1A1B22; margin: 0 0 10px; }
+.kw-cart-empty-desc { max-width: 430px; font-size: 12.5px; line-height: 1.8; color: #575E70; margin: 0 0 20px; }
+.kw-cart-explore { display: inline-flex; align-items: center; justify-content: center; gap: 9px; background: #1A1B22; color: #FFFFFF; text-decoration: none; min-height: 42px; padding: 11px 23px; font-size: 11px; font-weight: 700; letter-spacing: 0.65px; transition: background 0.2s; }
+.kw-cart-explore:hover { background: #333333; color: #FFFFFF; }
+.kw-cart-select-all { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.kw-cart-select-label { display: flex; align-items: center; gap: 10px; font-size: 13px; font-weight: 600; cursor: pointer; }
+.kw-cart-checkbox { appearance: none; -webkit-appearance: none; width: 17px; height: 17px; flex-shrink: 0; border: 1.5px solid #1A1B22; border-radius: 3px; background: #FFFFFF; cursor: pointer; display: grid; place-items: center; }
+.kw-cart-checkbox:checked { background: #1A1B22; }
+.kw-cart-checkbox:checked::after { content: "\2714"; font-size: 11px; color: #FFFFFF; }
+.kw-cart-checkbox:disabled { opacity: 0.35; cursor: not-allowed; }
+.kw-cart-delete-selected { border: none; background: transparent; color: #575E70; font-size: 11px; font-weight: 600; cursor: pointer; }
+.kw-cart-delete-selected:hover { color: #B7000C; }
+.kw-cart-product-row { display: flex; align-items: flex-start; gap: 15px; }
+.kw-cart-product-img { width: 93px; height: 116px; flex-shrink: 0; position: relative; background: #F4F2FD; }
+.kw-cart-product-img img { width: 100%; height: 100%; object-fit: cover; }
+.kw-cart-product-img-empty { display: grid; place-items: center; width: 100%; height: 100%; color: #9CA3AF; font-size: 27px; }
+.kw-cart-product-category { position: absolute; top: 0; left: 0; padding: 4px 7px; font-size: 9px; font-weight: 700; color: #FFFFFF; background: #2F3038; text-transform: uppercase; }
+.kw-cart-product-info { flex: 1; min-width: 0; }
+.kw-cart-product-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; }
+.kw-cart-product-name { font-size: 14px; font-weight: 700; color: #1A1B22; line-height: 1.45; margin-bottom: 5px; }
+.kw-cart-product-variant { font-size: 11px; color: #575E70; margin-bottom: 5px; }
+.kw-cart-product-label { display: inline-block; background: #EEEDF7; padding: 4px 8px; color: #5F3F3B; font-size: 10px; font-weight: 600; }
+.kw-cart-price { font-size: 15px; font-weight: 700; white-space: nowrap; text-align: right; }
+.kw-cart-unit-price { font-size: 10px; color: #575E70; text-align: right; }
+.kw-cart-product-bottom { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-top: 17px; }
+.kw-cart-quantity { display: inline-flex; align-items: center; background: #F4F2FD; border-radius: 4px; }
+.kw-cart-qty-btn { width: 31px; height: 31px; background: transparent; border: none; color: #1A1B22; font-size: 16px; font-weight: 700; cursor: pointer; }
+.kw-cart-qty-btn:disabled { opacity: 0.35; cursor: not-allowed; }
+.kw-cart-qty-value { width: 28px; border: none; background: transparent; text-align: center; font-size: 12px; font-weight: 700; pointer-events: none; }
+.kw-cart-actions { display: flex; align-items: center; gap: 13px; flex-wrap: wrap; }
+.kw-cart-action-btn { border: none; background: transparent; color: #575E70; font-size: 11px; display: inline-flex; align-items: center; gap: 5px; cursor: pointer; }
+.kw-cart-action-btn:hover, .kw-cart-action-btn.is-wishlisted { color: #B7000C; }
+.kw-cart-unavailable { display: inline-block; font-size: 11px; color: #991B1B; background: #FEE2E2; padding: 5px 8px; margin-top: 7px; }
+.kw-cart-summary { position: static; top: auto; margin: 0; padding: 22px; }
+.kw-cart-summary-title { font-size: 18px; font-weight: 700; color: #1A1B22; margin: 0 0 23px; }
+.kw-cart-summary-row { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; font-size: 12px; color: #575E70; margin-bottom: 15px; }
+.kw-cart-summary-row strong { color: #1A1B22; font-weight: 700; text-align: right; }
+.kw-cart-summary-divider { height: 1px; width: 100%; background: #E8E7F1; margin: 16px 0; }
+.kw-cart-summary-total { display: flex; justify-content: space-between; align-items: center; gap: 12px; }
+.kw-cart-summary-total-label { font-size: 13px; font-weight: 700; color: #1A1B22; }
+.kw-cart-summary-price { font-size: 23px; font-weight: 700; color: #1A1B22; white-space: nowrap; }
+.kw-cart-checkout { display: flex; justify-content: center; align-items: center; gap: 8px; width: 100%; min-height: 43px; margin-top: 22px; border: none; border-radius: 4px; background: #1A1B22; color: #FFFFFF; font-size: 11px; font-weight: 700; letter-spacing: 0.5px; }
+.kw-cart-checkout:disabled { background: #AAAAAA; cursor: not-allowed; }
+.kw-cart-summary-note { font-size: 10.5px; line-height: 1.7; text-align: center; color: #737373; margin: 15px 0 0; }
+.kw-cart-back { display: inline-flex; align-items: center; gap: 8px; color: #1A1B22; text-decoration: none; font-size: 12px; font-weight: 700; margin-top: 8px; }
+.kw-cart-back:hover { color: #810100; }
 @media (max-width: 991px) {
-    .kw-cart-layout {
-        grid-template-columns: minmax(0, 1fr);
-        gap: 18px;
-    }
+    .kw-cart-layout { grid-template-columns: minmax(0, 1fr); gap: 18px; }
 }
-
 @media (max-width: 575px) {
-    .kw-cart-page {
-        padding: 23px 13px 45px;
-    }
-
-    .kw-cart-title {
-        font-size: 23px;
-    }
-
-    .kw-cart-empty {
-        min-height: 260px;
-        padding: 28px 15px;
-    }
-
-    .kw-cart-empty-title {
-        font-size: 17px;
-    }
-
-    .kw-cart-product-row {
-        gap: 9px;
-    }
-
-    .kw-cart-product-img {
-        width: 70px;
-        height: 92px;
-    }
-
-    .kw-cart-product-top,
-    .kw-cart-product-bottom {
-        flex-wrap: wrap;
-    }
-
-    .kw-cart-summary {
-        padding: 18px;
-    }
-
-    .kw-cart-select-all {
-        flex-wrap: wrap;
-    }
+    .kw-cart-page { padding: 23px 13px 45px; }
+    .kw-cart-title { font-size: 23px; }
+    .kw-cart-empty { min-height: 260px; padding: 28px 15px; }
+    .kw-cart-empty-title { font-size: 17px; }
+    .kw-cart-product-row { gap: 9px; }
+    .kw-cart-product-img { width: 70px; height: 92px; }
+    .kw-cart-product-top, .kw-cart-product-bottom { flex-wrap: wrap; }
+    .kw-cart-summary { padding: 18px; }
+    .kw-cart-select-all { flex-wrap: wrap; }
 }
-
 </style>
 
-
-<!-- ================================================
-     CART PAGE
-     ================================================ -->
-
 <div class="kw-cart-page">
-
     <div class="kw-cart-container">
-
-        <!-- HEADER -->
         <div class="kw-cart-header">
-
-            <h1 class="kw-cart-title">
-                Keranjang Belanja
-            </h1>
-
-            <span class="kw-cart-count" id="header-total-qty">
-                ({{ items|length }} Produk, {{ total_pieces }} Pcs)
-            </span>
-
+            <h1 class="kw-cart-title">Keranjang Belanja</h1>
+            <span class="kw-cart-count" id="header-total-qty">({{ items|length }} Produk, {{ total_pieces }} Pcs)</span>
         </div>
-
 
         <div class="kw-cart-layout">
-
-            <!-- ====================================
-                 LEFT COLUMN
-                 ==================================== -->
-
             <main class="kw-cart-left">
-
                 {% if items %}
-
-                <!-- PILIH SEMUA -->
                 <div class="kw-cart-card kw-cart-select-all">
-
                     <label class="kw-cart-select-label">
-
-                        <input
-                            type="checkbox"
-                            class="kw-cart-checkbox"
-                            id="checkAll"
-                            checked
-                        >
-
-                        <span>
-                            Pilih Semua
-                            (<span id="select-all-count">{{ items|length }}</span> Barang)
-                        </span>
-
+                        <input type="checkbox" class="kw-cart-checkbox" id="checkAll" checked>
+                        <span>Pilih Semua (<span id="select-all-count">{{ items|length }}</span> Barang)</span>
                     </label>
-
-                    <button
-                        type="button"
-                        class="kw-cart-delete-selected"
-                        id="removeSelectedButton"
-                    >
-                        <i class="bi bi-trash3"></i>
-                        HAPUS PILIHAN
+                    <button type="button" class="kw-cart-delete-selected" id="removeSelectedButton">
+                        <i class="bi bi-trash3"></i> HAPUS PILIHAN
                     </button>
-
                 </div>
 
-
-                <form
-                    id="removeSelectedForm"
-                    action="{{ url_for('cart.remove_selected') }}"
-                    method="POST"
-                >
-                    <input
-                        type="hidden"
-                        name="csrf_token"
-                        value="{{ csrf_token() }}"
-                    >
+                <form id="removeSelectedForm" action="{{ url_for('cart.remove_selected') }}" method="POST">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                 </form>
 
-
-                <!-- ITEMS -->
                 <div id="cart-items-container">
-
                     {% for item in items %}
-
-                    <div
-                        class="kw-cart-card kw-cart-item"
-                        data-item-id="{{ item.id }}"
-                        data-price="{{ item.price }}"
-                        data-quantity="{{ item.quantity }}"
-                    >
-
+                    <div class="kw-cart-card kw-cart-item" data-item-id="{{ item.id }}" data-price="{{ item.price }}" data-quantity="{{ item.quantity }}">
                         <div class="kw-cart-product-row">
-
-                            <input
-                                type="checkbox"
-                                class="kw-cart-checkbox item-checkbox mt-4"
-                                value="{{ item.id }}"
-                                {% if item.available %}
-                                    checked
-                                {% else %}
-                                    disabled
-                                {% endif %}
-                            >
-
-
-                            <!-- FOTO -->
+                            <input type="checkbox" class="kw-cart-checkbox item-checkbox mt-4" value="{{ item.id }}" {% if item.available %}checked{% else %}disabled{% endif %} aria-label="Pilih {{ item.name }}">
                             <div class="kw-cart-product-img">
-
-                                {% if item.category %}
-                                <span class="kw-cart-product-category">
-                                    {{ item.category }}
-                                </span>
-                                {% endif %}
-
+                                {% if item.category %}<span class="kw-cart-product-category">{{ item.category }}</span>{% endif %}
                                 {% if item.image %}
-                                <img
-                                    src="{{ item.image }}"
-                                    alt="{{ item.name }}"
-                                    loading="lazy"
-                                >
+                                <img src="{{ item.image }}" alt="{{ item.name }}" loading="lazy">
                                 {% else %}
-                                <div class="kw-cart-product-img-empty">
-                                    <i class="bi bi-image"></i>
-                                </div>
+                                <div class="kw-cart-product-img-empty"><i class="bi bi-image"></i></div>
                                 {% endif %}
-
                             </div>
 
-
-                            <!-- INFORMASI PRODUK -->
                             <div class="kw-cart-product-info">
-
                                 <div class="kw-cart-product-top">
-
                                     <div>
-
                                         {% if item.product_id and item.available %}
-
-                                        <a
-                                            href="{{ url_for('shop.product_detail', product_id=item.product_id) }}"
-                                            class="text-decoration-none"
-                                        >
-                                            <div class="kw-cart-product-name">
-                                                {{ item.name }}
-                                            </div>
+                                        <a href="{{ url_for('shop.product_detail', product_id=item.product_id) }}" class="text-decoration-none">
+                                            <div class="kw-cart-product-name">{{ item.name }}</div>
                                         </a>
-
                                         {% else %}
-
-                                        <div class="kw-cart-product-name">
-                                            {{ item.name }}
-                                        </div>
-
+                                        <div class="kw-cart-product-name">{{ item.name }}</div>
                                         {% endif %}
-
-                                        <div class="kw-cart-product-variant">
-                                            Warna: {{ item.color }}
-                                            |
-                                            Ukuran: {{ item.size }}
-                                        </div>
-
-                                        {% if item.collection %}
-                                        <span class="kw-cart-product-label">
-                                            {{ item.collection }}
-                                        </span>
-                                        {% endif %}
-
-                                        {% if not item.available %}
-                                        <div class="kw-cart-unavailable">
-                                            Produk atau stok tidak tersedia
-                                        </div>
-                                        {% endif %}
-
+                                        <div class="kw-cart-product-variant">Warna: {{ item.color }} | Ukuran: {{ item.size }}</div>
+                                        {% if item.collection %}<span class="kw-cart-product-label">{{ item.collection }}</span>{% endif %}
+                                        {% if not item.available %}<div class="kw-cart-unavailable">Produk atau stok tidak tersedia</div>{% endif %}
                                     </div>
-
-
-                                    <!-- HARGA -->
                                     <div>
-
-                                        <div class="kw-cart-price">
-                                            {{ item.line_total_text }}
-                                        </div>
-
-                                        <div class="kw-cart-unit-price">
-                                            {{ item.price_text }} / pcs
-                                        </div>
-
+                                        <div class="kw-cart-price">{{ item.line_total_text }}</div>
+                                        <div class="kw-cart-unit-price">{{ item.price_text }} / pcs</div>
                                     </div>
-
                                 </div>
-
 
                                 <div class="kw-cart-product-bottom">
-
-                                    <!-- QUANTITY -->
-                                    <form
-                                        method="POST"
-                                        action="{{ url_for('cart.update_quantity', item_id=item.id) }}"
-                                        class="kw-cart-quantity"
-                                    >
-
-                                        <input
-                                            type="hidden"
-                                            name="csrf_token"
-                                            value="{{ csrf_token() }}"
-                                        >
-
-                                        <button
-                                            type="submit"
-                                            name="delta"
-                                            value="-1"
-                                            class="kw-cart-qty-btn"
-                                            {% if item.quantity <= 1 or not item.available %}disabled{% endif %}
-                                        >
-                                            &minus;
-                                        </button>
-
-                                        <input
-                                            type="text"
-                                            class="kw-cart-qty-value"
-                                            value="{{ item.quantity }}"
-                                            readonly
-                                        >
-
-                                        <button
-                                            type="submit"
-                                            name="delta"
-                                            value="1"
-                                            class="kw-cart-qty-btn"
-                                            {% if item.quantity >= item.stock or not item.available %}disabled{% endif %}
-                                        >
-                                            &plus;
-                                        </button>
-
+                                    <form method="POST" action="{{ url_for('cart.update_quantity', item_id=item.id) }}" class="kw-cart-quantity">
+                                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                        <button type="submit" name="delta" value="-1" class="kw-cart-qty-btn" aria-label="Kurangi jumlah {{ item.name }}" {% if item.quantity <= 1 or not item.available %}disabled{% endif %}>&minus;</button>
+                                        <input type="text" class="kw-cart-qty-value" value="{{ item.quantity }}" aria-label="Jumlah {{ item.name }}" readonly>
+                                        <button type="submit" name="delta" value="1" class="kw-cart-qty-btn" aria-label="Tambah jumlah {{ item.name }}" {% if item.quantity >= item.stock or not item.available %}disabled{% endif %}>&plus;</button>
                                     </form>
-
-
-                                    <!-- ACTIONS -->
                                     <div class="kw-cart-actions">
-
                                         {% if item.product_id and item.available %}
-
-                                        <form
-                                            action="{{ url_for('cart.move_to_wishlist', item_id=item.id) }}"
-                                            method="POST"
-                                        >
-
-                                            <input
-                                                type="hidden"
-                                                name="csrf_token"
-                                                value="{{ csrf_token() }}"
-                                            >
-
-                                            <button
-                                                type="submit"
-                                                class="kw-cart-action-btn"
-                                            >
-                                                <i class="bi bi-heart"></i>
-                                                Wishlist
+                                        <form action="{{ url_for('cart.move_to_wishlist', item_id=item.id) }}" method="POST">
+                                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                            <button type="submit" class="kw-cart-action-btn {% if item.wishlisted|default(false) %}is-wishlisted{% endif %}" aria-pressed="{{ 'true' if item.wishlisted|default(false) else 'false' }}" title="{{ 'Hapus dari Wishlist' if item.wishlisted|default(false) else 'Tambah ke Wishlist' }}">
+                                                <i class="bi {{ 'bi-heart-fill' if item.wishlisted|default(false) else 'bi-heart' }}"></i>
+                                                {{ 'Tersimpan' if item.wishlisted|default(false) else 'Wishlist' }}
                                             </button>
-
                                         </form>
-
                                         {% endif %}
-
-
-                                        <form
-                                            action="{{ url_for('cart.remove_item', item_id=item.id) }}"
-                                            method="POST"
-                                        >
-
-                                            <input
-                                                type="hidden"
-                                                name="csrf_token"
-                                                value="{{ csrf_token() }}"
-                                            >
-
-                                            <button
-                                                type="submit"
-                                                class="kw-cart-action-btn"
-                                            >
-                                                <i class="bi bi-trash3"></i>
-                                                Hapus
-                                            </button>
-
+                                        <form action="{{ url_for('cart.remove_item', item_id=item.id) }}" method="POST">
+                                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                            <button type="submit" class="kw-cart-action-btn"><i class="bi bi-trash3"></i> Hapus</button>
                                         </form>
-
                                     </div>
-
                                 </div>
-
                             </div>
-
                         </div>
-
                     </div>
-
                     {% endfor %}
-
                 </div>
-
-
-                <a
-                    href="{{ url_for('shop.catalog_all') }}"
-                    class="kw-cart-back"
-                >
-                    <i class="bi bi-arrow-left"></i>
-                    Lanjut Belanja Pakaian Lain
+                <a href="{{ url_for('shop.catalog_all') }}" class="kw-cart-back">
+                    <i class="bi bi-arrow-left"></i> Lanjut Belanja Pakaian Lain
                 </a>
-
-
                 {% else %}
-
-                <!-- ====================================
-                     EMPTY STATE
-                     ==================================== -->
-
                 <div class="kw-cart-empty">
-
-                    <div class="kw-cart-empty-icon">
-                        <i class="bi bi-bag"></i>
-                    </div>
-
-                    <h2 class="kw-cart-empty-title">
-                        Keranjang Belanja Masih Kosong
-                    </h2>
-
-                    <p class="kw-cart-empty-desc">
-                        Belum ada produk di keranjangmu.
-                        Jelajahi koleksi KURO WEAR dan tambahkan
-                        produk favoritmu untuk mulai berbelanja.
-                    </p>
-
-                    <a
-                        href="{{ url_for('shop.catalog_all') }}"
-                        class="kw-cart-explore"
-                    >
-                        <i class="bi bi-arrow-left"></i>
-                        JELAJAHI PRODUK
+                    <div class="kw-cart-empty-icon"><i class="bi bi-bag"></i></div>
+                    <h2 class="kw-cart-empty-title">Keranjang Belanja Masih Kosong</h2>
+                    <p class="kw-cart-empty-desc">Belum ada produk di keranjangmu. Jelajahi koleksi KURO WEAR dan tambahkan produk favoritmu untuk mulai berbelanja.</p>
+                    <a href="{{ url_for('shop.catalog_all') }}" class="kw-cart-explore">
+                        <i class="bi bi-arrow-left"></i> JELAJAHI PRODUK
                     </a>
-
                     {% if not current_user.is_authenticated %}
-                    <p class="text-muted small mt-3 mb-0">
-                        Login untuk menyimpan keranjang ke akunmu.
-                    </p>
+                    <p class="text-muted small mt-3 mb-0">Login untuk menyimpan keranjang ke akunmu.</p>
                     {% endif %}
-
                 </div>
-
                 {% endif %}
-
             </main>
 
-
-            <!-- ====================================
-                 RIGHT COLUMN - SUMMARY
-                 ==================================== -->
-
             <aside class="kw-cart-right">
-
                 <div class="kw-cart-card kw-cart-summary">
-
-                    <h2 class="kw-cart-summary-title">
-                        Ringkasan Belanja
-                    </h2>
-
-
+                    <h2 class="kw-cart-summary-title">Ringkasan Belanja</h2>
                     <div class="kw-cart-summary-row">
-
-                        <span>
-                            Total Harga Produk
-                            (<span id="summary-total-items">0</span> items)
-                        </span>
-
-                        <strong id="summary-subtotal">
-                            Rp 0
-                        </strong>
-
+                        <span>Total Harga Produk (<span id="summary-total-items">0</span> items)</span>
+                        <strong id="summary-subtotal">Rp 0</strong>
                     </div>
-
-
                     <div class="kw-cart-summary-row">
-
-                        <span>
-                            Estimasi Ongkos Kirim
-                            <i class="bi bi-question-circle ms-1"></i>
-                        </span>
-
-                        <strong class="text-secondary">
-                            Belum dihitung
-                        </strong>
-
+                        <span>Estimasi Ongkos Kirim <i class="bi bi-question-circle ms-1"></i></span>
+                        <strong class="text-secondary">Belum dihitung</strong>
                     </div>
-
-
                     <div class="kw-cart-summary-divider"></div>
-
-
                     <div class="kw-cart-summary-total">
-
-                        <span class="kw-cart-summary-total-label">
-                            Subtotal Pilihan
-                        </span>
-
-                        <span
-                            class="kw-cart-summary-price"
-                            id="summary-grand-total"
-                        >
-                            Rp 0
-                        </span>
-
+                        <span class="kw-cart-summary-total-label">Subtotal Pilihan</span>
+                        <span class="kw-cart-summary-price" id="summary-grand-total">Rp 0</span>
                     </div>
-
-
                     {% if items %}
-                    <a
-                        href="{{ url_for('cart.checkout') }}"
-                        class="kw-cart-checkout text-decoration-none"
-                        style="display: flex; justify-content: center; align-items: center; text-decoration: none;"
-                    >
-                        LANJUT KE CHECKOUT &rarr;
-                    </a>
+                    <a href="{{ url_for('cart.checkout') }}" class="kw-cart-checkout text-decoration-none">LANJUT KE CHECKOUT &rarr;</a>
                     {% else %}
-                    <button
-                        type="button"
-                        class="kw-cart-checkout"
-                        disabled
-                    >
-                        <i class="bi bi-lock-fill"></i>
-                        KERANJANG MASIH KOSONG
-                    </button>
+                    <button type="button" class="kw-cart-checkout" disabled><i class="bi bi-lock-fill"></i> KERANJANG MASIH KOSONG</button>
                     {% endif %}
-
-
-                    <p class="kw-cart-summary-note">
-                        Subtotal mengikuti barang yang dipilih.
-                        Ongkos kirim dan pembayaran akan dihitung
-                        saat fitur checkout tersedia.
-                    </p>
-
+                    <p class="kw-cart-summary-note">Subtotal mengikuti barang yang dipilih. Ongkos kirim dan pembayaran akan dihitung saat checkout.</p>
                 </div>
-
             </aside>
-
         </div>
-
     </div>
-
 </div>
 
-
-<!-- ================================================
-     CART JAVASCRIPT
-     ================================================ -->
-
 <script>
-document.addEventListener("DOMContentLoaded", function () {
-
-    const cartItems = Array.from(
-        document.querySelectorAll(".kw-cart-item")
-    );
-
+document.addEventListener("DOMContentLoaded", () => {
+    const items = [...document.querySelectorAll(".kw-cart-item")];
     const checkAll = document.getElementById("checkAll");
-
-    const totalItems = document.getElementById(
-        "summary-total-items"
-    );
-
-    const subtotal = document.getElementById(
-        "summary-subtotal"
-    );
-
-    const grandTotal = document.getElementById(
-        "summary-grand-total"
-    );
-
-    const headerCount = document.getElementById(
-        "header-total-qty"
-    );
-
-    const selectAllCount = document.getElementById(
-        "select-all-count"
-    );
-
-    const removeButton = document.getElementById(
-        "removeSelectedButton"
-    );
-
-    const removeForm = document.getElementById(
-        "removeSelectedForm"
-    );
-
-
-    function rupiah(number) {
-
-        return "Rp " + new Intl.NumberFormat(
-            "id-ID",
-            {
-                maximumFractionDigits: 0
-            }
-        ).format(number);
-
-    }
-
+    const removeButton = document.getElementById("removeSelectedButton");
+    const removeForm = document.getElementById("removeSelectedForm");
+    const checkoutButton = document.querySelector(".kw-cart-checkout");
+    const availableItems = items.filter(item => !item.querySelector(".item-checkbox").disabled);
+    const getCheckbox = item => item.querySelector(".item-checkbox");
+    const rupiah = value => "Rp " + new Intl.NumberFormat("id-ID", { maximumFractionDigits: 0 }).format(value);
+    const updateText = (id, value) => { const element = document.getElementById(id); if (element) element.textContent = value; };
+    const checkoutUrl = "{{ url_for('cart.checkout') }}";
 
     function calculateCart() {
+        const selected = availableItems.filter(item => getCheckbox(item).checked);
+        const totalQuantity = items.reduce((sum, item) => sum + Number(item.dataset.quantity || 0), 0);
+        const selectedSubtotal = selected.reduce((sum, item) => sum + Number(item.dataset.price || 0) * Number(item.dataset.quantity || 0), 0);
 
-        let selectedSubtotal = 0;
-        let selectedQuantity = 0;
-        let allQuantity = 0;
-
-        const enabledCheckboxes = [];
-
-        cartItems.forEach(item => {
-
-            const checkbox = item.querySelector(
-                ".item-checkbox"
-            );
-
-            const price = Number(
-                item.dataset.price || 0
-            );
-
-            const quantity = Number(
-                item.dataset.quantity || 0
-            );
-
-            allQuantity += quantity;
-
-            if (!checkbox.disabled) {
-                enabledCheckboxes.push(checkbox);
-            }
-
-            if (checkbox.checked && !checkbox.disabled) {
-                selectedSubtotal += price * quantity;
-                selectedQuantity += quantity;
-            }
-
-        });
-
-
-        if (totalItems) {
-            totalItems.textContent = selectedQuantity;
-        }
-
-        if (subtotal) {
-            subtotal.textContent = rupiah(selectedSubtotal);
-        }
-
-        if (grandTotal) {
-            grandTotal.textContent = rupiah(selectedSubtotal);
-        }
-
-        if (headerCount) {
-            headerCount.textContent =
-                `(${cartItems.length} Produk, ${allQuantity} Pcs)`;
-        }
-
-        if (selectAllCount) {
-            selectAllCount.textContent = cartItems.length;
-        }
-
+        updateText("summary-total-items", selected.length);
+        updateText("summary-subtotal", rupiah(selectedSubtotal));
+        updateText("summary-grand-total", rupiah(selectedSubtotal));
+        updateText("header-total-qty", `(${items.length} Produk, ${totalQuantity} Pcs)`);
+        updateText("select-all-count", items.length);
 
         if (checkAll) {
-
-            const everyChecked =
-                enabledCheckboxes.length > 0 &&
-                enabledCheckboxes.every(cb => cb.checked);
-
-            const someChecked =
-                enabledCheckboxes.some(cb => cb.checked);
-
-            checkAll.checked = everyChecked;
-
-            checkAll.indeterminate =
-                someChecked && !everyChecked;
-
-            checkAll.disabled =
-                enabledCheckboxes.length === 0;
-
+            checkAll.checked = availableItems.length > 0 && selected.length === availableItems.length;
+            checkAll.indeterminate = selected.length > 0 && selected.length < availableItems.length;
+            checkAll.disabled = availableItems.length === 0;
         }
 
-        // Sinkronisasi link checkout dengan produk yang dicentang
-        const selectedItemIds = [];
-        cartItems.forEach(item => {
-            const checkbox = item.querySelector(".item-checkbox");
-            if (checkbox && checkbox.checked && !checkbox.disabled) {
-                selectedItemIds.push(item.dataset.itemId);
-            }
-        });
-
-        const checkoutBtn = document.querySelector(".kw-cart-checkout");
-        if (checkoutBtn && checkoutBtn.tagName === "A") {
-            if (selectedItemIds.length > 0) {
-                checkoutBtn.href = "{{ url_for('cart.checkout') }}?items=" + selectedItemIds.join(",");
-                checkoutBtn.style.opacity = "1";
-                checkoutBtn.style.cursor = "pointer";
-            } else {
-                checkoutBtn.href = "javascript:void(0);";
-                checkoutBtn.style.opacity = "0.45";
-                checkoutBtn.style.cursor = "not-allowed";
-            }
+        if (checkoutButton?.tagName === "A") {
+            const ids = selected.map(item => item.dataset.itemId).join(",");
+            checkoutButton.href = ids ? `${checkoutUrl}?items=${ids}` : checkoutUrl;
+            checkoutButton.style.opacity = ids ? "1" : "0.45";
+            checkoutButton.style.cursor = ids ? "pointer" : "not-allowed";
+            checkoutButton.setAttribute("aria-disabled", String(!ids));
         }
-
     }
 
-
-    if (checkAll) {
-
-        checkAll.addEventListener("change", function () {
-
-            cartItems.forEach(item => {
-
-                const checkbox = item.querySelector(
-                    ".item-checkbox"
-                );
-
-                if (!checkbox.disabled) {
-                    checkbox.checked = checkAll.checked;
-                }
-
-            });
-
-            calculateCart();
-
-        });
-
-    }
-
-
-    cartItems.forEach(item => {
-
-        const checkbox = item.querySelector(
-            ".item-checkbox"
-        );
-
-        checkbox.addEventListener(
-            "change",
-            calculateCart
-        );
-
+    checkAll?.addEventListener("change", () => {
+        availableItems.forEach(item => { getCheckbox(item).checked = checkAll.checked; });
+        calculateCart();
     });
-
+    availableItems.forEach(item => getCheckbox(item).addEventListener("change", calculateCart));
 
     if (removeButton && removeForm) {
+        removeButton.addEventListener("click", () => {
+            const selected = availableItems.filter(item => getCheckbox(item).checked);
+            if (!selected.length) return alert("Pilih barang yang ingin dihapus.");
+            if (!confirm("Yakin ingin menghapus barang yang dipilih?")) return;
 
-        removeButton.addEventListener("click", function () {
-
-            const selected = cartItems.filter(item => {
-
-                const checkbox = item.querySelector(
-                    ".item-checkbox"
-                );
-
-                return (
-                    checkbox.checked &&
-                    !checkbox.disabled
-                );
-
-            });
-
-
-            if (selected.length === 0) {
-                alert("Pilih barang yang ingin dihapus.");
-                return;
-            }
-
-
-            if (!confirm(
-                "Yakin ingin menghapus barang yang dipilih?"
-            )) {
-                return;
-            }
-
-
+            removeForm.querySelectorAll('input[name="item_ids"]').forEach(input => input.remove());
             selected.forEach(item => {
-
-                const hidden = document.createElement("input");
-
-                hidden.type = "hidden";
-                hidden.name = "item_ids";
-                hidden.value = item.dataset.itemId;
-
-                removeForm.appendChild(hidden);
-
+                const input = document.createElement("input");
+                input.type = "hidden";
+                input.name = "item_ids";
+                input.value = item.dataset.itemId;
+                removeForm.appendChild(input);
             });
-
             removeForm.submit();
-
         });
+    }
 
-    const checkoutBtn = document.querySelector(".kw-cart-checkout");
-    if (checkoutBtn && checkoutBtn.tagName === "A") {
-        checkoutBtn.addEventListener("click", function (e) {
-            const hasChecked = cartItems.some(item => {
-                const cb = item.querySelector(".item-checkbox");
-                return cb && cb.checked && !cb.disabled;
-            });
-            if (!hasChecked) {
-                e.preventDefault();
-                if (typeof Swal !== "undefined") {
-                    Swal.fire({
-                        icon: 'warning',
-                        title: 'Pilih Produk',
-                        text: 'Silakan centang setidaknya satu produk yang ingin Anda checkout.',
-                        confirmButtonColor: '#1A1B22'
-                    });
-                } else {
-                    alert("Silakan centang setidaknya satu produk yang ingin Anda checkout.");
-                }
+    if (checkoutButton?.tagName === "A") {
+        checkoutButton.addEventListener("click", event => {
+            if (availableItems.some(item => getCheckbox(item).checked)) return;
+            event.preventDefault();
+            if (typeof Swal !== "undefined") {
+                Swal.fire({
+                    icon: "warning", title: "Pilih Produk",
+                    text: "Silakan centang setidaknya satu produk yang ingin Anda checkout.",
+                    confirmButtonColor: "#1A1B22"
+                });
+            } else {
+                alert("Silakan centang setidaknya satu produk yang ingin Anda checkout.");
             }
         });
     }
 
     calculateCart();
-
 });
 </script>
-
 {% endblock %}
