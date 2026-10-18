@@ -1,638 +1,135 @@
 {% extends 'base.html' %}
-
-{% block title %}
-Wishlist Saya - KURO WEAR
-{% endblock %}
-
+{% block title %}Wishlist Saya - KURO WEAR{% endblock %}
 {% block content %}
-
 <style>
-
-/* ================================================
-   KURO WEAR - COMPACT WISHLIST PAGE
-   ================================================ */
-
-.kw-wishlist-page {
-    background: #EDEBDD;
-    min-height: 65vh;
-    padding: 32px 20px 65px;
-    color: #1A1B22;
-}
-
-.kw-wishlist-page * {
-    box-sizing: border-box;
-}
-
-.kw-wishlist-container {
-    max-width: 1240px;
-    width: 100%;
-    margin: 0 auto;
-}
-
-/* ================================================
-   HEADER
-   ================================================ */
-
-.kw-wishlist-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-end;
-    gap: 15px;
-    margin-bottom: 25px;
-}
-
-.kw-wishlist-breadcrumb {
-    font-size: 10px;
-    font-weight: 600;
-    letter-spacing: 1px;
-    color: #575E70;
-    margin-bottom: 9px;
-}
-
-.kw-wishlist-title {
-    font-size: 27px;
-    font-weight: 700;
-    letter-spacing: -0.6px;
-    color: #1A1B22;
-    margin: 0 0 6px;
-}
-
-.kw-wishlist-description {
-    font-size: 12px;
-    color: #575E70;
-    margin: 0;
-}
-
-.kw-wishlist-total {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-
-    padding: 9px 13px;
-    background: #FFFFFF;
-    border: 1px solid #E8E7F1;
-    border-radius: 5px;
-
-    font-size: 12px;
-    font-weight: 600;
-    color: #1A1B22;
-    white-space: nowrap;
-}
-
-/* ================================================
-   PRODUCT GRID
-   ================================================ */
-
-.kw-wishlist-grid {
-    display: grid;
-    grid-template-columns: repeat(5, minmax(0, 1fr));
-    gap: 16px;
-    align-items: stretch;
-}
-
-/* ================================================
-   PRODUCT CARD
-   ================================================ */
-
-.kw-wishlist-card {
-    background: #FFFFFF;
-    border: 1px solid #E8E7F1;
-    border-radius: 6px;
-    overflow: hidden;
-
-    display: flex;
-    flex-direction: column;
-    height: 100%;
-
-    transition: box-shadow 0.2s ease;
-}
-
-.kw-wishlist-card:hover {
-    box-shadow: 0 5px 15px rgba(0,0,0,0.06);
-}
-
-/* ================================================
-   PRODUCT IMAGE
-   ================================================ */
-
-.kw-wishlist-image-box {
-    position: relative;
-    width: 100%;
-    aspect-ratio: 1 / 1.05;
-    background: #F6F5F1;
-    overflow: hidden;
-}
-
-.kw-wishlist-image-link {
-    display: block;
-    width: 100%;
-    height: 100%;
-}
-
-.kw-wishlist-image {
-    display: block;
-    width: 100%;
-    height: 100%;
-    object-fit: contain;
-    padding: 10px;
-}
-
-.kw-wishlist-no-image {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    width: 100%;
-    height: 100%;
-    color: #9CA3AF;
-    font-size: 29px;
-}
-
-/* ================================================
-   HEART BUTTON
-   ================================================ */
-
-.kw-wishlist-heart {
-    position: absolute;
-    top: 11px;
-    right: 11px;
-
-    width: 35px;
-    height: 35px;
-
-    display: flex;
-    justify-content: center;
-    align-items: center;
-
-    border: none;
-    border-radius: 50%;
-    background: #FFFFFF;
-
-    box-shadow: 0 1px 5px rgba(0,0,0,0.08);
-    cursor: pointer;
-    z-index: 2;
-}
-
-.kw-wishlist-heart i {
-    font-size: 16px;
-}
-
-.kw-wishlist-heart:hover {
-    background: #F4F2FD;
-}
-
-.kw-wishlist-heart:disabled {
-    opacity: 0.6;
-    cursor: wait;
-}
-
-/* ================================================
-   PRODUCT INFORMATION
-   ================================================ */
-
-.kw-wishlist-card-body {
-    display: flex;
-    flex-direction: column;
-    flex: 1;
-    padding: 14px;
-}
-
-.kw-wishlist-category {
-    font-size: 9px;
-    font-weight: 700;
-    letter-spacing: 0.5px;
-    text-transform: uppercase;
-    color: #810100;
-    margin-bottom: 8px;
-}
-
-.kw-wishlist-product-name {
-    font-size: 13px;
-    font-weight: 700;
-    line-height: 1.5;
-    color: #1A1B22;
-    margin: 0 0 8px;
-
-    display: -webkit-box;
-    -webkit-box-orient: vertical;
-    -webkit-line-clamp: 2;
-    line-clamp: 2;
-    overflow: hidden;
-}
-
-.kw-wishlist-product-link {
-    text-decoration: none;
-    color: inherit;
-}
-
-.kw-wishlist-product-link:hover
-.kw-wishlist-product-name {
-    color: #810100;
-}
-
-.kw-wishlist-stock {
-    font-size: 10px;
-    color: #575E70;
-    margin-bottom: 9px;
-}
-
-.kw-wishlist-price {
-    font-size: 16px;
-    font-weight: 700;
-    color: #1A1B22;
-    margin-top: auto;
-    padding-top: 10px;
-}
-
-/* ================================================
-   PRODUCT ACTION
-   ================================================ */
-
-.kw-wishlist-view-btn {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 7px;
-
-    width: 100%;
-    min-height: 38px;
-
-    margin-top: 13px;
-    padding: 9px 12px;
-
-    background: #1A1B22;
-    color: #FFFFFF;
-    text-decoration: none;
-
-    font-size: 10px;
-    font-weight: 700;
-    letter-spacing: 0.5px;
-}
-
-.kw-wishlist-view-btn:hover {
-    background: #333333;
-    color: #FFFFFF;
-}
-
-/* ================================================
-   EMPTY WISHLIST
-   ================================================ */
-
-.kw-wishlist-empty {
-    min-height: 285px;
-    background: #FFFFFF;
-    border: 1px solid #E8E7F1;
-    border-radius: 8px;
-
-    padding: 32px 20px;
-
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-
-    text-align: center;
-}
-
-.kw-wishlist-empty-icon {
-    width: 66px;
-    height: 66px;
-
-    display: flex;
-    justify-content: center;
-    align-items: center;
-
-    background: #F4F2FD;
-    color: #575E70;
-    border-radius: 50%;
-
-    margin-bottom: 17px;
-}
-
-.kw-wishlist-empty-icon i {
-    font-size: 30px;
-}
-
-.kw-wishlist-empty-title {
-    font-size: 19px;
-    font-weight: 700;
-    color: #1A1B22;
-    margin: 0 0 10px;
-}
-
-.kw-wishlist-empty-desc {
-    max-width: 430px;
-    font-size: 12.5px;
-    line-height: 1.8;
-    color: #575E70;
-    margin: 0 0 20px;
-}
-
-.kw-wishlist-explore {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 9px;
-
-    background: #1A1B22;
-    color: #FFFFFF;
-    text-decoration: none;
-
-    min-height: 42px;
-    padding: 11px 23px;
-
-    font-size: 11px;
-    font-weight: 700;
-    letter-spacing: 0.6px;
-}
-
-.kw-wishlist-explore:hover {
-    background: #333333;
-    color: #FFFFFF;
-}
-
-/* ================================================
-   RESPONSIVE
-   ================================================ */
+.kw-wishlist-page { background: #EDEBDD; min-height: 65vh; padding: 32px 30px 65px; color: #1A1B22; }
+.kw-wishlist-page * { box-sizing: border-box; }
+.kw-wishlist-container { width: 100%; max-width: 1700px; margin: 0 auto; }
+.kw-wishlist-header { display: flex; align-items: center; justify-content: space-between; gap: 15px; margin-bottom: 28px; }
+.kw-wishlist-title { font-size: 27px; font-weight: 700; letter-spacing: -0.6px; color: #1A1B22; margin: 0 0 6px; }
+.kw-wishlist-description { font-size: 12px; color: #575E70; margin: 0; }
+.kw-wishlist-total { display: inline-flex; align-items: center; gap: 8px; padding: 9px 13px; background: #FFFFFF; border: 1px solid #E8E7F1; border-radius: 5px; font-size: 12px; font-weight: 600; white-space: nowrap; }
+.kw-wishlist-grid { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 20px; align-items: stretch; }
+.kw-wishlist-card { background: #FFFFFF; border: 1px solid #E8E7F1; border-radius: 6px; overflow: hidden; display: flex; flex-direction: column; height: 100%; transition: box-shadow 0.2s ease; }
+.kw-wishlist-card:hover { box-shadow: 0 5px 15px rgba(0, 0, 0, 0.06); }
+
+.kw-wishlist-image-box { position: relative; width: 100%; height: auto; aspect-ratio: 3 / 4; background: #EDEBDD; overflow: hidden; flex-shrink: 0; }
+.kw-wishlist-image-link { position: absolute; inset: 0; display: block; width: 100%; height: 100%; }
+.kw-wishlist-image { display: block; width: 100%; height: 100%; object-fit: cover; object-position: center; padding: 0; }
+.kw-wishlist-no-image { display: flex; align-items: center; justify-content: center; width: 100%; height: 100%; color: #9CA3AF; font-size: 29px; }
+
+.kw-wishlist-heart { position: absolute; top: 12px; right: 12px; width: 38px; height: 38px; display: flex; align-items: center; justify-content: center; border: none; border-radius: 50%; background: #FFFFFF; box-shadow: 0 1px 5px rgba(0,0,0,0.08); cursor: pointer; z-index: 2; transition: transform 0.2s ease; }
+.kw-wishlist-heart i { font-size: 17px; }
+.kw-wishlist-heart:hover { transform: scale(1.08); }
+.kw-wishlist-heart:disabled { opacity: 0.6; cursor: wait; }
+
+.kw-wishlist-card-body { display: flex; flex-direction: column; flex: 1; padding: 17px; }
+.kw-wishlist-category { font-size: 10px; font-weight: 700; letter-spacing: 0.5px; text-transform: uppercase; color: #810100; margin-bottom: 9px; }
+.kw-wishlist-product-name { font-size: 14px; font-weight: 700; line-height: 1.5; color: #1A1B22; margin: 0 0 9px; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; line-clamp: 2; overflow: hidden; }
+.kw-wishlist-product-link { text-decoration: none; color: inherit; }
+.kw-wishlist-product-link:hover .kw-wishlist-product-name { color: #810100; }
+.kw-wishlist-stock { font-size: 11px; color: #575E70; margin-bottom: 10px; }
+.kw-wishlist-price { font-size: 18px; font-weight: 700; color: #1A1B22; margin-top: auto; padding-top: 12px; }
+.kw-wishlist-view-btn { display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; min-height: 42px; margin-top: 14px; padding: 10px 12px; background: #1A1B22; color: #FFFFFF; text-decoration: none; font-size: 11px; font-weight: 700; letter-spacing: 0.5px; }
+.kw-wishlist-view-btn:hover { background: #333333; color: #FFFFFF; }
+
+.kw-wishlist-empty { min-height: 285px; background: #FFFFFF; border: 1px solid #E8E7F1; border-radius: 8px; padding: 32px 20px; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; }
+.kw-wishlist-empty-icon { width: 66px; height: 66px; display: flex; align-items: center; justify-content: center; background: #F4F2FD; color: #575E70; border-radius: 50%; margin-bottom: 17px; }
+.kw-wishlist-empty-icon i { font-size: 30px; }
+.kw-wishlist-empty-title { font-size: 19px; font-weight: 700; color: #1A1B22; margin: 0 0 10px; }
+.kw-wishlist-empty-desc { max-width: 430px; font-size: 12.5px; line-height: 1.8; color: #575E70; margin: 0 0 20px; }
+.kw-wishlist-explore { display: inline-flex; align-items: center; justify-content: center; gap: 9px; background: #1A1B22; color: #FFFFFF; text-decoration: none; min-height: 42px; padding: 11px 23px; font-size: 11px; font-weight: 700; letter-spacing: 0.6px; }
+.kw-wishlist-explore:hover { background: #333333; color: #FFFFFF; }
 
 @media (max-width: 1199px) {
-
-    .kw-wishlist-grid {
-        grid-template-columns: repeat(4, minmax(0, 1fr));
-        gap: 14px;
-    }
-
+    .kw-wishlist-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 14px; }
 }
-
 @media (max-width: 991px) {
-
-    .kw-wishlist-grid {
-        grid-template-columns: repeat(3, minmax(0, 1fr));
-    }
-
+    .kw-wishlist-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
 }
-
 @media (max-width: 767px) {
-
-    .kw-wishlist-page {
-        padding: 23px 13px 45px;
-    }
-
-    .kw-wishlist-header {
-        align-items: flex-start;
-    }
-
-    .kw-wishlist-title {
-        font-size: 23px;
-    }
-
-    .kw-wishlist-grid {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-        gap: 11px;
-    }
-
-    .kw-wishlist-card-body {
-        padding: 11px;
-    }
-
-    .kw-wishlist-product-name {
-        font-size: 12px;
-    }
-
-    .kw-wishlist-price {
-        font-size: 14px;
-    }
-
-    .kw-wishlist-empty-title {
-        font-size: 17px;
-    }
-
+    .kw-wishlist-page { padding: 23px 13px 45px; }
+    .kw-wishlist-header { align-items: flex-start; }
+    .kw-wishlist-title { font-size: 23px; }
+    .kw-wishlist-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 11px; }
+    .kw-wishlist-card-body { padding: 11px; }
+    .kw-wishlist-product-name { font-size: 12px; }
+    .kw-wishlist-price { font-size: 14px; }
+    .kw-wishlist-empty-title { font-size: 17px; }
 }
-
 @media (max-width: 400px) {
-
-    .kw-wishlist-total {
-        padding: 7px 9px;
-        font-size: 10px;
-    }
-
-    .kw-wishlist-grid {
-        gap: 9px;
-    }
-
-    .kw-wishlist-heart {
-        width: 31px;
-        height: 31px;
-        top: 8px;
-        right: 8px;
-    }
-
+    .kw-wishlist-total { padding: 7px 9px; font-size: 10px; }
+    .kw-wishlist-grid { gap: 9px; }
+    .kw-wishlist-heart { width: 31px; height: 31px; top: 8px; right: 8px; }
+    .kw-wishlist-view-btn { font-size: 9px; padding: 9px 5px; }
 }
-
 </style>
 
-
-<!-- ================================================
-     WISHLIST PAGE
-     ================================================ -->
-
-<section
-    id="wishlist-page"
-    class="kw-wishlist-page"
->
-
+<section id="wishlist-page" class="kw-wishlist-page">
     <div class="kw-wishlist-container">
-
-        <!-- HEADER -->
         <div class="kw-wishlist-header">
-
             <div>
-
-                <div class="kw-wishlist-breadcrumb">
-                    KURO WEAR / CUSTOMER
-                </div>
-
-                <h1 class="kw-wishlist-title">
-                    Wishlist Saya
-                </h1>
-
-                <p class="kw-wishlist-description">
-                    Koleksi favorit yang kamu simpan.
-                </p>
-
+                <h1 class="kw-wishlist-title">Wishlist Saya</h1>
+                <p class="kw-wishlist-description">Koleksi favorit yang kamu simpan.</p>
             </div>
-
-
             <div class="kw-wishlist-total">
-
                 <i class="bi bi-heart"></i>
-
-                <span data-wishlist-count>
-                    {{ products|length }}
-                </span>
-
+                <span data-wishlist-count>{{ products|length }}</span>
                 Produk
-
             </div>
-
         </div>
 
-
-        <!-- ====================================
-             WISHLIST PRODUCTS
-             ==================================== -->
-
         {% if products %}
-
         <div class="kw-wishlist-grid">
-
             {% for p in products %}
-
             <article class="kw-wishlist-card">
-
-                <!-- PRODUCT IMAGE -->
                 <div class="kw-wishlist-image-box">
-
-                    <a
-                        href="{{ url_for('shop.product_detail', product_id=p.id) }}"
-                        class="kw-wishlist-image-link"
-                    >
-
+                    <a href="{{ url_for('shop.product_detail', product_id=p.id) }}" class="kw-wishlist-image-link">
                         {% if p.image %}
-
-                        <img
-                            src="{{ p.image }}"
-                            alt="{{ p.name }}"
-                            class="kw-wishlist-image"
-                            loading="lazy"
-                        >
-
+                        <img src="{{ p.image }}" alt="{{ p.name }}" class="kw-wishlist-image" loading="lazy">
                         {% else %}
-
-                        <div class="kw-wishlist-no-image">
-                            <i class="bi bi-image"></i>
-                        </div>
-
+                        <div class="kw-wishlist-no-image"><i class="bi bi-image"></i></div>
                         {% endif %}
-
                     </a>
 
-
-                    <!-- WISHLIST HEART -->
-                    <button
-                        type="button"
-                        class="kw-wishlist-heart"
+                    <button type="button" class="kw-wishlist-heart"
                         data-wishlist-product="{{ p.id }}"
                         data-wishlist-url="{{ url_for('shop.wishlist_toggle', product_id=p.id) }}"
                         data-csrf="{{ csrf_token() }}"
                         data-login-url="{{ url_for('auth.login') }}"
                         aria-pressed="true"
                         aria-label="Hapus dari Wishlist"
-                        title="Hapus dari Wishlist"
-                    >
-
+                        title="Hapus dari Wishlist">
                         <i class="bi bi-heart-fill text-danger"></i>
-
                     </button>
-
                 </div>
 
-
-                <!-- PRODUCT INFORMATION -->
                 <div class="kw-wishlist-card-body">
-
-                    <div class="kw-wishlist-category">
-                        {{ p.category_badge }}
-                    </div>
-
-
-                    <a
-                        href="{{ url_for('shop.product_detail', product_id=p.id) }}"
-                        class="kw-wishlist-product-link"
-                    >
-
-                        <h2 class="kw-wishlist-product-name">
-                            {{ p.name }}
-                        </h2>
-
+                    <div class="kw-wishlist-category">{{ p.category_badge }}</div>
+                    <a href="{{ url_for('shop.product_detail', product_id=p.id) }}" class="kw-wishlist-product-link">
+                        <h2 class="kw-wishlist-product-name">{{ p.name }}</h2>
                     </a>
-
-
-                    <div class="kw-wishlist-stock">
-                        {{ p.stock }}
-                    </div>
-
-
-                    <div class="kw-wishlist-price">
-                        {{ p.price_formatted }}
-                    </div>
-
-
-                    <a
-                        href="{{ url_for('shop.product_detail', product_id=p.id) }}"
-                        class="kw-wishlist-view-btn"
-                    >
-
-                        <i class="bi bi-bag"></i>
-
-                        LIHAT PRODUK
-
+                    <div class="kw-wishlist-stock">{{ p.stock }}</div>
+                    <div class="kw-wishlist-price">{{ p.price_formatted }}</div>
+                    <a href="{{ url_for('shop.product_detail', product_id=p.id) }}" class="kw-wishlist-view-btn">
+                        <i class="bi bi-bag"></i> LIHAT PRODUK
                     </a>
-
                 </div>
-
             </article>
-
             {% endfor %}
-
         </div>
-
-
         {% else %}
-
-        <!-- ====================================
-             EMPTY WISHLIST
-             ==================================== -->
-
         <div class="kw-wishlist-empty">
-
-            <div class="kw-wishlist-empty-icon">
-                <i class="bi bi-heart"></i>
-            </div>
-
-
-            <h2 class="kw-wishlist-empty-title">
-                Wishlist Masih Kosong
-            </h2>
-
-
-            <p class="kw-wishlist-empty-desc">
-                Belum ada produk yang kamu favoritkan.
-                Jelajahi koleksi KURO WEAR dan tekan
-                ikon hati pada produk yang kamu sukai.
-            </p>
-
-
-            <a
-                href="{{ url_for('shop.catalog_all') }}"
-                class="kw-wishlist-explore"
-            >
-
-                <i class="bi bi-arrow-left"></i>
-
-                JELAJAHI KOLEKSI
-
+            <div class="kw-wishlist-empty-icon"><i class="bi bi-heart"></i></div>
+            <h2 class="kw-wishlist-empty-title">Wishlist Masih Kosong</h2>
+            <p class="kw-wishlist-empty-desc">Belum ada produk yang kamu favoritkan. Jelajahi koleksi KURO WEAR dan tekan ikon hati pada produk yang kamu sukai.</p>
+            <a href="{{ url_for('shop.catalog_all') }}" class="kw-wishlist-explore">
+                <i class="bi bi-arrow-left"></i> JELAJAHI KOLEKSI
             </a>
-
         </div>
-
         {% endif %}
-
     </div>
-
 </section>
 
-
-<!-- WISHLIST JAVASCRIPT -->
 <script src="{{ url_for('static', filename='js/wishlist.js') }}"></script>
-
 {% endblock %}

@@ -495,112 +495,240 @@
 
 
 {# ==========================================
-   4. MODAL SIZE GUIDE
+   4. MODAL SIZE GUIDE (KURO WEAR)
    ========================================== #}
 
 <div
-    class="modal fade"
+    class="modal fade kw-modal"
     id="kwSizeGuideModal"
     tabindex="-1"
     aria-labelledby="kwSizeGuideTitle"
     aria-hidden="true"
 >
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content kw-modal-content">
 
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content rounded-0">
-
-            <div class="modal-header">
-
-                <h5
-                    class="modal-title fw-bold"
-                    id="kwSizeGuideTitle"
-                >
-                    <i class="bi bi-rulers me-2"></i>
-
-                    {% if collection_type == 'women' %}
-                        SIZE GUIDE WANITA
-                    {% elif collection_type == 'men' %}
-                        SIZE GUIDE PRIA
-                    {% else %}
-                        SIZE GUIDE KURO WEAR
-                    {% endif %}
-                </h5>
-
+            <!-- MODAL HEADER -->
+            <div class="modal-header kw-modal-header border-0 pb-0">
+                <div>
+                    <h5 class="modal-title kw-modal-title fw-bold" id="kwSizeGuideTitle">
+                        <i class="bi bi-rulers text-danger me-2"></i>SIZE GUIDE KURO WEAR
+                    </h5>
+                    <p class="text-muted small mb-0 mt-1">
+                        Panduan ukuran tubuh Pria dan Wanita dalam sentimeter (cm).
+                    </p>
+                </div>
                 <button
                     type="button"
                     class="btn-close"
                     data-bs-dismiss="modal"
-                    aria-label="Tutup"
+                    aria-label="Tutup Size Guide"
                 ></button>
-
             </div>
 
+            <!-- MODAL BODY -->
             <div class="modal-body p-4">
 
-                <p class="text-muted small">
-                    Panduan ukuran umum dalam sentimeter (cm).
-                    Perhatikan detail ukuran setiap produk.
-                </p>
+                <!-- TABS WANITA / PRIA -->
+                <ul class="nav nav-pills kw-guide-tabs mb-4" id="kwSizeTabs" role="tablist">
+                    <li class="nav-item flex-fill" role="presentation">
+                        <button
+                            class="nav-link w-100 kw-guide-tab {{ 'active' if collection_type != 'men' else '' }}"
+                            id="kw-tab-women"
+                            data-bs-toggle="pill"
+                            data-bs-target="#kw-pane-women"
+                            type="button"
+                            role="tab"
+                            aria-controls="kw-pane-women"
+                            aria-selected="{{ 'true' if collection_type != 'men' else 'false' }}"
+                        >
+                            <i class="bi bi-gender-female me-1"></i> WANITA
+                        </button>
+                    </li>
+                    <li class="nav-item flex-fill" role="presentation">
+                        <button
+                            class="nav-link w-100 kw-guide-tab {{ 'active' if collection_type == 'men' else '' }}"
+                            id="kw-tab-men"
+                            data-bs-toggle="pill"
+                            data-bs-target="#kw-pane-men"
+                            type="button"
+                            role="tab"
+                            aria-controls="kw-pane-men"
+                            aria-selected="{{ 'true' if collection_type == 'men' else 'false' }}"
+                        >
+                            <i class="bi bi-gender-male me-1"></i> PRIA
+                        </button>
+                    </li>
+                </ul>
 
-                <div class="table-responsive">
-                    <table class="table table-bordered table-sm text-center">
+                <!-- TAB CONTENT -->
+                <div class="tab-content" id="kwSizeTabsContent">
 
-                        <thead>
-                            <tr>
-                                <th>Ukuran</th>
-                                <th>Dada</th>
-                                <th>Pinggang</th>
-                            </tr>
-                        </thead>
+                    <!-- TAB PANE: WANITA -->
+                    <div
+                        class="tab-pane fade {{ 'show active' if collection_type != 'men' else '' }}"
+                        id="kw-pane-women"
+                        role="tabpanel"
+                        aria-labelledby="kw-tab-women"
+                        tabindex="0"
+                    >
+                        <div class="d-flex align-items-center justify-content-between mb-2">
+                            <span class="kw-guide-panel-title">
+                                <i class="bi bi-person me-1 text-danger"></i> Panduan Ukuran Wanita
+                            </span>
+                            <span class="badge bg-light text-secondary border px-2 py-1" style="font-size: 11px;">
+                                Standar Ukuran Tubuh (cm)
+                            </span>
+                        </div>
 
-                        <tbody>
+                        <div class="table-responsive kw-guide-table-wrapper">
+                            <table class="table kw-guide-table align-middle text-center mb-0">
+                                <thead>
+                                    <tr>
+                                        <th scope="col" style="width: 20%;">Size</th>
+                                        <th scope="col" style="width: 26%;">Lingkar Dada</th>
+                                        <th scope="col" style="width: 27%;">Lingkar Pinggang</th>
+                                        <th scope="col" style="width: 27%;">Lingkar Pinggul</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td class="fw-bold text-dark">XS</td>
+                                        <td>76–80 cm</td>
+                                        <td>60–64 cm</td>
+                                        <td>84–88 cm</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="fw-bold text-dark">S</td>
+                                        <td>80–84 cm</td>
+                                        <td>64–68 cm</td>
+                                        <td>88–92 cm</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="fw-bold text-dark">M</td>
+                                        <td>84–88 cm</td>
+                                        <td>68–72 cm</td>
+                                        <td>92–96 cm</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="fw-bold text-dark">L</td>
+                                        <td>88–94 cm</td>
+                                        <td>72–78 cm</td>
+                                        <td>96–102 cm</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="fw-bold text-dark">XL</td>
+                                        <td>94–100 cm</td>
+                                        <td>78–84 cm</td>
+                                        <td>102–108 cm</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="fw-bold text-dark">XXL</td>
+                                        <td>100–106 cm</td>
+                                        <td>84–90 cm</td>
+                                        <td>108–114 cm</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
 
-                            {% if collection_type == 'women' %}
+                    <!-- TAB PANE: PRIA -->
+                    <div
+                        class="tab-pane fade {{ 'show active' if collection_type == 'men' else '' }}"
+                        id="kw-pane-men"
+                        role="tabpanel"
+                        aria-labelledby="kw-tab-men"
+                        tabindex="0"
+                    >
+                        <div class="d-flex align-items-center justify-content-between mb-2">
+                            <span class="kw-guide-panel-title">
+                                <i class="bi bi-person me-1 text-primary"></i> Panduan Ukuran Pria
+                            </span>
+                            <span class="badge bg-light text-secondary border px-2 py-1" style="font-size: 11px;">
+                                Standar Ukuran Tubuh (cm)
+                            </span>
+                        </div>
 
-                            <tr><td>XS</td><td>78–82</td><td>60–64</td></tr>
-                            <tr><td>S</td><td>82–86</td><td>64–68</td></tr>
-                            <tr><td>M</td><td>86–92</td><td>68–74</td></tr>
-                            <tr><td>L</td><td>92–98</td><td>74–80</td></tr>
-                            <tr><td>XL</td><td>98–104</td><td>80–86</td></tr>
+                        <div class="table-responsive kw-guide-table-wrapper">
+                            <table class="table kw-guide-table align-middle text-center mb-0">
+                                <thead>
+                                    <tr>
+                                        <th scope="col" style="width: 20%;">Size</th>
+                                        <th scope="col" style="width: 26%;">Lingkar Dada</th>
+                                        <th scope="col" style="width: 27%;">Lingkar Pinggang</th>
+                                        <th scope="col" style="width: 27%;">Lingkar Pinggul</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td class="fw-bold text-dark">XS</td>
+                                        <td>84–88 cm</td>
+                                        <td>68–72 cm</td>
+                                        <td>84–88 cm</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="fw-bold text-dark">S</td>
+                                        <td>88–92 cm</td>
+                                        <td>72–76 cm</td>
+                                        <td>88–92 cm</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="fw-bold text-dark">M</td>
+                                        <td>92–96 cm</td>
+                                        <td>76–80 cm</td>
+                                        <td>92–96 cm</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="fw-bold text-dark">L</td>
+                                        <td>96–102 cm</td>
+                                        <td>80–86 cm</td>
+                                        <td>96–102 cm</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="fw-bold text-dark">XL</td>
+                                        <td>102–108 cm</td>
+                                        <td>86–92 cm</td>
+                                        <td>102–108 cm</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="fw-bold text-dark">XXL</td>
+                                        <td>108–114 cm</td>
+                                        <td>92–98 cm</td>
+                                        <td>108–114 cm</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
 
-                            {% elif collection_type == 'men' %}
+                </div>
 
-                            <tr><td>XS</td><td>84–88</td><td>68–72</td></tr>
-                            <tr><td>S</td><td>88–94</td><td>72–78</td></tr>
-                            <tr><td>M</td><td>94–100</td><td>78–84</td></tr>
-                            <tr><td>L</td><td>100–106</td><td>84–90</td></tr>
-                            <tr><td>XL</td><td>106–114</td><td>90–98</td></tr>
-
-                            {% else %}
-
-                            <tr><td>XS</td><td>82–86</td><td>64–68</td></tr>
-                            <tr><td>S</td><td>86–90</td><td>68–72</td></tr>
-                            <tr><td>M</td><td>90–96</td><td>72–78</td></tr>
-                            <tr><td>L</td><td>96–102</td><td>78–84</td></tr>
-                            <tr><td>XL</td><td>102–108</td><td>84–90</td></tr>
-
-                            {% endif %}
-
-                        </tbody>
-
-                    </table>
+                <!-- CATATAN PENGUKURAN -->
+                <div class="kw-guide-note mt-3">
+                    <div class="fw-bold text-dark mb-1">
+                        <i class="bi bi-info-circle-fill me-1 text-danger"></i> Catatan Pengukuran
+                    </div>
+                    <div>
+                        Ukur lingkar dada, pinggang, dan pinggul menggunakan meteran baju dalam posisi berdiri tegak.<br>
+                        Angka di atas adalah referensi ukuran tubuh umum KURO WEAR (dalam sentimeter). Ukuran sebenarnya dapat sedikit berbeda tergantung model, bahan kain, dan siluet potongan pakaian.
+                    </div>
                 </div>
 
             </div>
 
-            <div class="modal-footer">
-
+            <!-- MODAL FOOTER -->
+            <div class="modal-footer kw-modal-footer border-0 pt-0">
                 <button
                     type="button"
-                    class="btn btn-dark rounded-0"
+                    class="btn btn-dark rounded-0 px-4 py-2 fw-semibold"
+                    style="font-size: 12px; letter-spacing: 0.5px;"
                     data-bs-dismiss="modal"
                 >
                     TUTUP
                 </button>
-
             </div>
 
         </div>
     </div>
-
 </div>

@@ -1,0 +1,247 @@
+{% extends 'admin/admin_base.html' %}
+{% block title %}Pesanan & Transaksi - Admin KURO WEAR{% endblock %}
+{% block extra_css %}
+<style>
+.orders-page { color: #1A1B22; font-family: 'Plus Jakarta Sans', sans-serif; }
+.orders-header { display: flex; justify-content: space-between; align-items: center; gap: 18px; margin-bottom: 30px; }
+.orders-header h1 { font-size: 28px; font-weight: 700; margin: 0 0 7px; }
+.orders-header p { font-size: 13px; color: #858585; margin: 0; }
+.orders-label { display: inline-flex; align-items: center; gap: 7px; background: #FFFFFF; border: 1px solid #E5E0D5; padding: 10px 14px; font-size: 11px; font-weight: 600; color: #575E70; border-radius: 4px; }
+.orders-stats { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px; margin-bottom: 28px; }
+.orders-stat { background: #FFFFFF; border: 1px solid #E8E7F1; padding: 22px; min-height: 142px; }
+.orders-stat-top { display: flex; justify-content: space-between; align-items: center; gap: 10px; }
+.orders-stat-label { font-size: 11px; font-weight: 700; letter-spacing: .4px; color: #858585; text-transform: uppercase; }
+.orders-stat-icon { font-size: 19px; color: #575E70; }
+.orders-stat-number { display: block; font-size: 30px; font-weight: 700; margin-top: 19px; line-height: 1; }
+.orders-stat-description { font-size: 11px; color: #858585; margin-top: 12px; }
+.orders-stat.important .orders-stat-number { color: #B7000C; }
+.orders-panel { background: #FFFFFF; border: 1px solid #E8E7F1; min-width: 0; }
+.orders-tabs { display: flex; align-items: center; gap: 30px; padding: 0 24px; border-bottom: 1px solid #E8E7F1; }
+.orders-tab { display: inline-flex; align-items: center; gap: 9px; padding: 20px 0 17px; border-bottom: 3px solid transparent; color: #858585; font-size: 13px; font-weight: 600; text-decoration: none; white-space: nowrap; }
+.orders-tab:hover { color: #1A1B22; }
+.orders-tab.active { color: #1A1B22; border-color: #1A1B22; }
+.orders-tab-count { background: #F1F0EA; color: #575E70; border-radius: 3px; padding: 2px 7px; font-size: 10px; }
+.orders-toolbar { display: flex; gap: 10px; flex-wrap: wrap; padding: 20px 24px; border-bottom: 1px solid #E8E7F1; }
+.orders-search { flex: 1 1 270px; display: flex; align-items: center; gap: 10px; background: #FFFFFF; border: 1px solid #DEDCD7; border-radius: 4px; padding: 0 13px; }
+.orders-search i { color: #858585; }
+.orders-search input { width: 100%; height: 42px; border: none; outline: none; background: transparent; font-size: 12px; color: #1A1B22; }
+.orders-select { min-height: 42px; min-width: 155px; padding: 0 12px; border: 1px solid #DEDCD7; border-radius: 4px; background: #FFFFFF; font-size: 12px; color: #1A1B22; }
+.orders-filter-btn { min-height: 42px; padding: 0 19px; border: none; background: #1A1B22; color: #FFFFFF; font-size: 12px; font-weight: 700; border-radius: 4px; }
+.orders-filter-btn:hover { background: #333333; }
+.orders-reset { display: inline-flex; align-items: center; padding: 0 8px; color: #575E70; font-size: 12px; text-decoration: none; }
+.orders-reset:hover { color: #B7000C; }
+.orders-table-wrap { overflow-x: auto; }
+.orders-table { width: 100%; min-width: 880px; border-collapse: collapse; }
+.orders-table th { padding: 16px 20px; background: #FAFAF9; color: #858585; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .5px; text-align: left; white-space: nowrap; }
+.orders-table td { padding: 19px 20px; border-top: 1px solid #F1F0EE; font-size: 12px; vertical-align: middle; }
+.orders-id { font-size: 12px; font-weight: 700; color: #1A1B22; }
+.orders-subtext { font-size: 11px; color: #858585; margin-top: 5px; }
+.orders-price { font-weight: 700; white-space: nowrap; }
+.orders-status { display: inline-flex; align-items: center; gap: 6px; padding: 6px 9px; border-radius: 4px; font-size: 10px; font-weight: 700; white-space: nowrap; }
+.orders-status::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
+.orders-status.pending { background: #FFF4DF; color: #9B6500; }
+.orders-status.success { background: #DFF7E9; color: #087344; }
+.orders-status.progress { background: #E8EDFF; color: #405CA8; }
+.orders-status.failed { background: #FDE8E8; color: #B7000C; }
+.orders-status.neutral { background: #F1F0EE; color: #575E70; }
+.orders-action { padding: 8px 12px; border: 1px solid #E5E0D5; border-radius: 4px; background: #FFFFFF; color: #1A1B22; font-size: 11px; font-weight: 700; }
+.orders-action:disabled { opacity: .45; cursor: not-allowed; }
+.orders-empty { display: flex; align-items: center; justify-content: center; flex-direction: column; text-align: center; padding: 65px 22px; }
+.orders-empty-icon { width: 65px; height: 65px; border-radius: 50%; background: #F4F2FD; color: #575E70; display: grid; place-items: center; font-size: 28px; margin-bottom: 18px; }
+.orders-empty h3 { font-size: 16px; font-weight: 700; margin-bottom: 9px; }
+.orders-empty p { max-width: 410px; font-size: 12px; line-height: 1.8; color: #858585; margin: 0; }
+.orders-footer { display: flex; justify-content: space-between; align-items: center; padding: 17px 24px; border-top: 1px solid #E8E7F1; color: #858585; font-size: 11px; }
+.orders-info-grid { display: grid; grid-template-columns: minmax(0, 1.5fr) minmax(250px, 1fr); gap: 22px; margin-top: 24px; }
+.orders-info-card { background: #FFFFFF; border: 1px solid #E8E7F1; padding: 22px; }
+.orders-info-card h3 { font-size: 14px; font-weight: 700; margin: 0 0 18px; }
+.orders-step { display: flex; gap: 13px; padding: 12px 0; border-bottom: 1px solid #F1F0EE; }
+.orders-step:last-child { border-bottom: none; }
+.orders-step-icon { width: 33px; height: 33px; flex-shrink: 0; display: grid; place-items: center; border-radius: 4px; background: #F4F1EA; color: #1A1B22; }
+.orders-step strong { display: block; font-size: 12px; margin-bottom: 5px; }
+.orders-step p { font-size: 11px; line-height: 1.6; color: #858585; margin: 0; }
+.orders-notice { background: #F5F2EB; padding: 14px; font-size: 11px; line-height: 1.8; color: #575E70; border-left: 3px solid #1A1B22; }
+@media (max-width: 1150px) {
+    .orders-stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .orders-info-grid { grid-template-columns: 1fr; }
+}
+@media (max-width: 650px) {
+    .orders-header { flex-direction: column; align-items: flex-start; }
+    .orders-header h1 { font-size: 24px; }
+    .orders-stats { gap: 10px; }
+    .orders-stat { padding: 15px; min-height: 125px; }
+    .orders-stat-number { font-size: 25px; }
+    .orders-tabs { gap: 20px; padding: 0 15px; }
+    .orders-toolbar { padding: 15px; }
+    .orders-select { flex: 1; }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="orders-page">
+    <div class="orders-header">
+        <div>
+            <h1>Pesanan & Transaksi</h1>
+            <p>Kelola pesanan pelanggan, status pembayaran, dan proses pengiriman.</p>
+        </div>
+        <div class="orders-label"><i class="bi bi-shield-check"></i> PANEL ADMIN KURO WEAR</div>
+    </div>
+
+    <div class="orders-stats">
+        {% for card in metrics %}
+        <div class="orders-stat {{ 'important' if card.important else '' }}">
+            <div class="orders-stat-top">
+                <span class="orders-stat-label">{{ card.label }}</span>
+                <i class="bi {{ card.icon }} orders-stat-icon"></i>
+            </div>
+            <strong class="orders-stat-number">{{ card.value }}</strong>
+            <div class="orders-stat-description">{{ card.description }}</div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <section class="orders-panel">
+        <div class="orders-tabs">
+            <a href="{{ url_for('admin.orders_index', view='orders') }}" class="orders-tab {{ 'active' if view == 'orders' else '' }}">
+                <i class="bi bi-box-seam"></i> Daftar Pesanan
+                <span class="orders-tab-count">{{ order_count }}</span>
+            </a>
+            <a href="{{ url_for('admin.orders_index', view='transactions') }}" class="orders-tab {{ 'active' if view == 'transactions' else '' }}">
+                <i class="bi bi-credit-card"></i> Riwayat Transaksi
+                <span class="orders-tab-count">{{ transaction_count }}</span>
+            </a>
+        </div>
+
+        <form class="orders-toolbar" method="GET" action="{{ url_for('admin.orders_index') }}">
+            <input type="hidden" name="view" value="{{ view }}">
+            <div class="orders-search">
+                <i class="bi bi-search"></i>
+                <input type="search" name="q" value="{{ search }}" maxlength="100" placeholder="{{ 'Cari nomor pesanan atau pelanggan...' if view == 'orders' else 'Cari nomor transaksi atau pesanan...' }}" aria-label="Pencarian">
+            </div>
+            <select class="orders-select" name="status" aria-label="Filter status">
+                {% for value, label in status_options %}
+                <option value="{{ value }}" {{ 'selected' if status == value else '' }}>{{ label }}</option>
+                {% endfor %}
+            </select>
+            <button type="submit" class="orders-filter-btn"><i class="bi bi-funnel me-1"></i> FILTER</button>
+            <a href="{{ url_for('admin.orders_index', view=view) }}" class="orders-reset">Reset</a>
+        </form>
+
+        <div class="orders-table-wrap">
+            <table class="orders-table">
+                {% if view == 'orders' %}
+                <thead>
+                    <tr>
+                        <th>No. Pesanan / Tanggal</th>
+                        <th>Pelanggan</th>
+                        <th>Jumlah Item</th>
+                        <th>Total</th>
+                        <th>Pembayaran</th>
+                        <th>Pengiriman</th>
+                        <th>Aksi</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for order in orders %}
+                    <tr>
+                        <td>
+                            <div class="orders-id">{{ order.number }}</div>
+                            <div class="orders-subtext">{{ order.created_at_text }}</div>
+                        </td>
+                        <td>
+                            <strong>{{ order.customer_name }}</strong>
+                            <div class="orders-subtext">{{ order.customer_email }}</div>
+                        </td>
+                        <td>{{ order.item_count }} item</td>
+                        <td><span class="orders-price">{{ order.total_text }}</span></td>
+                        <td><span class="orders-status {{ order.payment_style }}">{{ order.payment_label }}</span></td>
+                        <td><span class="orders-status {{ order.fulfillment_style }}">{{ order.fulfillment_label }}</span></td>
+                        <td><a href="{{ url_for('admin.order_detail', order_number=order.number) }}" class="orders-action" style="display:inline-block;text-decoration:none;">Rincian</a></td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="7">
+                            <div class="orders-empty">
+                                <div class="orders-empty-icon"><i class="bi bi-bag-x"></i></div>
+                                <h3>Belum ada data pesanan</h3>
+                                <p>Pesanan yang dibuat pelanggan melalui checkout akan ditampilkan di sini setelah modul penyimpanan pesanan terhubung.</p>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+                {% else %}
+                <thead>
+                    <tr>
+                        <th>ID Transaksi</th>
+                        <th>No. Pesanan</th>
+                        <th>Tanggal</th>
+                        <th>Metode Pembayaran</th>
+                        <th>Nominal</th>
+                        <th>Status Pembayaran</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for tx in transactions %}
+                    <tr>
+                        <td><div class="orders-id">{{ tx.transaction_id }}</div></td>
+                        <td>{{ tx.order_number }}</td>
+                        <td>{{ tx.created_at_text }}</td>
+                        <td>{{ tx.method }}</td>
+                        <td><span class="orders-price">{{ tx.amount_text }}</span></td>
+                        <td><span class="orders-status {{ tx.status_style }}">{{ tx.status_label }}</span></td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="6">
+                            <div class="orders-empty">
+                                <div class="orders-empty-icon"><i class="bi bi-receipt"></i></div>
+                                <h3>Belum ada data transaksi</h3>
+                                <p>Riwayat transaksi Midtrans akan ditampilkan setelah pembayaran dicatat dan statusnya diverifikasi oleh backend.</p>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+                {% endif %}
+            </table>
+        </div>
+        <div class="orders-footer">
+            <span>Menampilkan {{ orders|length if view == 'orders' else transactions|length }} data</span>
+            <span>KURO WEAR &mdash; Admin Panel</span>
+        </div>
+    </section>
+
+    <div class="orders-info-grid">
+        <section class="orders-info-card">
+            <h3>Alur Pengelolaan Pesanan</h3>
+            <div class="orders-step">
+                <div class="orders-step-icon"><i class="bi bi-credit-card"></i></div>
+                <div><strong>1. Konfirmasi Pembayaran</strong><p>Periksa hasil verifikasi transaksi dari payment gateway sebelum memproses pesanan.</p></div>
+            </div>
+            <div class="orders-step">
+                <div class="orders-step-icon"><i class="bi bi-box-seam"></i></div>
+                <div><strong>2. Persiapan Produk</strong><p>Siapkan produk sesuai warna, ukuran, dan jumlah yang tercatat pada saat checkout.</p></div>
+            </div>
+            <div class="orders-step">
+                <div class="orders-step-icon"><i class="bi bi-truck"></i></div>
+                <div><strong>3. Pengiriman</strong><p>Proses pengemasan, pengiriman, dan pencatatan nomor resi.</p></div>
+            </div>
+            <div class="orders-step">
+                <div class="orders-step-icon"><i class="bi bi-check-circle"></i></div>
+                <div><strong>4. Pesanan Selesai</strong><p>Tandai pesanan selesai ketika proses pengiriman dan penerimaan telah terkonfirmasi.</p></div>
+            </div>
+        </section>
+
+        <aside class="orders-info-card">
+            <h3><i class="bi bi-info-circle me-2"></i>Informasi Transaksi</h3>
+            <div class="orders-notice">
+                Halaman ini merupakan frontend awal. Pencatatan pesanan, sinkronisasi status pembayaran Midtrans, pengelolaan resi, refund, dan ekspor laporan akan diaktifkan setelah backend transaksi tersedia.
+            </div>
+            <p class="mt-3 mb-0" style="font-size:11px; line-height:1.8; color:#858585;">
+                Status pembayaran dan status pengiriman disimpan secara terpisah agar pesanan yang belum berhasil dibayar tidak otomatis dianggap siap dikirim.
+            </p>
+        </aside>
+    </div>
+</div>
+{% endblock %}

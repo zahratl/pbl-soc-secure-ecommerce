@@ -1,1145 +1,618 @@
+<!--tampilan dasar profil, termasuk sidebar, informasi pribadi, upload foto, dan gender. Bagian alamat serta riwayat pesanan sekarang sudah dinamis. -->
 {% extends 'base.html' %}
-
-{% block title %}
-Profil Saya - KURO WEAR
-{% endblock %}
-
+{% block title %}Profil Saya - KURO WEAR{% endblock %}
 {% block content %}
 
+{% set counts = namespace(created=0, payment=0, processing=0, shipped=0, completed=0) %}
+{% for order in orders %}
+    {% if order.payment_status == 'paid' and order.fulfillment_status == 'completed' %}
+        {% set counts.completed = counts.completed + 1 %}
+    {% elif order.payment_status == 'paid' and order.fulfillment_status == 'shipped' %}
+        {% set counts.shipped = counts.shipped + 1 %}
+    {% elif order.payment_status == 'paid' and order.fulfillment_status == 'processing' %}
+        {% set counts.processing = counts.processing + 1 %}
+    {% elif order.payment_status in ['initiating', 'token_error', 'failed', 'expired', 'canceled'] %}
+        {% set counts.created = counts.created + 1 %}
+    {% else %}
+        {% set counts.payment = counts.payment + 1 %}
+    {% endif %}
+{% endfor %}
+
 <style>
-/* ==========================================
-   KURO WEAR - CUSTOMER PROFILE
-   Compact, Responsive, Database Connected
-   ========================================== */
-
-.kw-profile-page {
-    background: #EDEBDD;
-    min-height: 75vh;
-    padding: 30px 20px 65px;
-    color: #1A1B22;
-    font-family: 'Inter', sans-serif;
-}
-
-.kw-profile-page * {
-    box-sizing: border-box;
-}
-
-.kwp-container {
-    max-width: 1200px;
-    width: 100%;
-    margin: 0 auto;
-}
-
-/* HEADER */
-
-.kwp-page-header {
-    margin-bottom: 24px;
-}
-
-.kwp-breadcrumb {
-    color: #727785;
-    font-size: 10px;
-    font-weight: 600;
-    letter-spacing: .8px;
-    margin-bottom: 8px;
-}
-
-.kwp-page-title {
-    font-size: 27px;
-    font-weight: 700;
-    margin: 0 0 6px;
-    letter-spacing: -.5px;
-}
-
-.kwp-page-desc {
-    font-size: 12px;
-    color: #575E70;
-    margin: 0;
-}
-
-/* LAYOUT */
-
-.kwp-layout {
-    display: grid;
-    grid-template-columns: 265px minmax(0, 1fr);
-    gap: 20px;
-    align-items: start;
-}
-
-.kwp-sidebar,
-.kwp-content {
-    min-width: 0;
-}
-
-.kwp-card {
-    background: white;
-    border: 1px solid #E8E7F1;
-    border-radius: 7px;
-    margin-bottom: 17px;
-    box-shadow: 0 1px 3px rgba(0,0,0,.035);
-}
-
-/* ACCOUNT SUMMARY */
-
-.kwp-account-card {
-    padding: 25px 18px;
-    text-align: center;
-}
-
-.kwp-avatar {
-    width: 78px;
-    height: 78px;
-    margin: 0 auto 14px;
-    border-radius: 50%;
-    background: #E3E3E3;
-    border: 2px solid #E8E7F1;
-    overflow: hidden;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.kwp-avatar img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-}
-
-.kwp-avatar i {
-    font-size: 35px;
-    color: #888;
-}
-
-.kwp-account-name {
-    font-size: 16px;
-    font-weight: 700;
-    margin: 0 0 5px;
-    overflow-wrap: anywhere;
-}
-
-.kwp-account-email {
-    font-size: 11px;
-    color: #575E70;
-    overflow-wrap: anywhere;
-    margin-bottom: 9px;
-}
-
-.kwp-account-joined {
-    font-size: 10px;
-    color: #777;
-}
-
-.kwp-account-divider {
-    height: 1px;
-    background: #E8E7F1;
-    margin: 18px 0 14px;
-}
-
-.kwp-account-row {
-    display: flex;
-    justify-content: space-between;
-    gap: 10px;
-    font-size: 11px;
-    padding: 7px 0;
-}
-
-.kwp-account-row span:first-child {
-    color: #6D7280;
-}
-
-.kwp-account-row span:last-child {
-    font-weight: 700;
-    text-align: right;
-}
-
-.kwp-status-active {
-    color: #047857;
-}
-
-.kwp-status-inactive {
-    color: #B7000C;
-}
-
-/* SIDEBAR MENU */
-
-.kwp-menu {
-    padding: 7px 0;
-}
-
-.kwp-menu-link {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    padding: 14px 18px;
-    font-size: 12px;
-    font-weight: 500;
-    color: #575E70;
-    text-decoration: none;
-    border-left: 3px solid transparent;
-}
-
-.kwp-menu-link i {
-    font-size: 16px;
-    width: 20px;
-    text-align: center;
-}
-
-.kwp-menu-link:hover {
-    color: #1A1B22;
-    background: #F8F7F3;
-}
-
-.kwp-menu-link.active {
-    background: #F4F2ED;
-    border-left-color: #B7000C;
-    color: #1A1B22;
-    font-weight: 700;
-}
-
-.kwp-menu-link.logout {
-    color: #B7000C;
-    border-top: 1px solid #E8E7F1;
-    margin-top: 8px;
-}
-
-/* CONTENT CARDS */
-
-.kwp-section {
-    padding: 23px 25px;
-    scroll-margin-top: 110px;
-}
-
-.kwp-section-head {
-    display: flex;
-    align-items: flex-start;
-    justify-content: space-between;
-    gap: 12px;
-    border-bottom: 1px solid #E8E7F1;
-    padding-bottom: 15px;
-    margin-bottom: 20px;
-}
-
-.kwp-section-title {
-    font-size: 16px;
-    font-weight: 700;
-    margin: 0 0 5px;
-}
-
-.kwp-section-desc {
-    font-size: 11px;
-    color: #667085;
-    margin: 0;
-    line-height: 1.6;
-}
-
-.kwp-section-meta {
-    font-size: 10px;
-    color: #767B86;
-    text-align: right;
-}
-
-/* AVATAR UPLOAD */
-
-.kwp-photo-area {
-    display: flex;
-    align-items: center;
-    gap: 18px;
-    background: #F5F4F0;
-    border-radius: 5px;
-    padding: 16px;
-    margin-bottom: 22px;
-}
-
-.kwp-photo-preview {
-    width: 69px;
-    height: 69px;
-    flex-shrink: 0;
-    border-radius: 50%;
-    background: #E3E3E3;
-    overflow: hidden;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.kwp-photo-preview img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-}
-
-.kwp-photo-preview i {
-    font-size: 29px;
-    color: #888;
-}
-
-.kwp-photo-content {
-    flex: 1;
-    min-width: 0;
-}
-
-.kwp-photo-title {
-    font-size: 13px;
-    font-weight: 700;
-    margin-bottom: 5px;
-}
-
-.kwp-photo-help {
-    font-size: 10px;
-    color: #667085;
-    margin-bottom: 11px;
-    line-height: 1.6;
-}
-
-.kwp-photo-actions {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
-    align-items: center;
-}
-
-.kwp-upload-form {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: 7px;
-}
-
-.kwp-file-input {
-    width: 190px;
-    max-width: 100%;
-    font-size: 10px;
-    color: #575E70;
-}
-
-.kwp-file-input::file-selector-button {
-    padding: 7px;
-    border: 1px solid #DDD;
-    background: white;
-    cursor: pointer;
-    margin-right: 7px;
-}
-
-.kwp-btn {
-    display: inline-flex;
-    justify-content: center;
-    align-items: center;
-    gap: 7px;
-    padding: 10px 15px;
-    min-height: 36px;
-    border: none;
-    font-size: 10px;
-    font-weight: 700;
-    letter-spacing: .35px;
-    cursor: pointer;
-    text-decoration: none;
-}
-
-.kwp-btn-dark {
-    color: white;
-    background: #2F3038;
-}
-
-.kwp-btn-dark:hover {
-    background: #1A1B22;
-    color: white;
-}
-
-.kwp-btn-red {
-    color: white;
-    background: #B7000C;
-}
-
-.kwp-btn-red:hover {
-    background: #93000A;
-    color: white;
-}
-
-.kwp-btn-light {
-    color: #B7000C;
-    background: #FFE7E7;
-}
-
-/* FORM */
-
-.kwp-form-grid {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 19px;
-}
-
-.kwp-field {
-    display: flex;
-    flex-direction: column;
-    min-width: 0;
-    gap: 8px;
-}
-
-.kwp-label {
-    font-size: 11px;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: .3px;
-}
-
-.kwp-input {
-    display: block;
-    width: 100%;
-    min-width: 0;
-    min-height: 41px;
-    padding: 10px 12px;
-    background: #F2F1EE;
-    border: 1px solid transparent;
-    border-radius: 3px;
-    color: #1A1B22;
-    font-family: inherit;
-    font-size: 12px;
-    outline: none;
-}
-
-.kwp-input:focus {
-    border-color: #1A1B22;
-    background: white;
-}
-
-.kwp-input[readonly] {
-    color: #6A6F79;
-    cursor: not-allowed;
-}
-
-.kwp-input-help {
-    font-size: 10px;
-    color: #737783;
-    line-height: 1.5;
-}
-
-.kwp-gender {
-    margin-top: 22px;
-}
-
-.kwp-gender-options {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 14px 22px;
-    margin-top: 13px;
-}
-
-.kwp-radio-label {
-    display: inline-flex;
-    align-items: center;
-    gap: 7px;
-    font-size: 12px;
-    cursor: pointer;
-}
-
-.kwp-radio-label input {
-    accent-color: #B7000C;
-    width: 15px;
-    height: 15px;
-}
-
-.kwp-form-actions {
-    display: flex;
-    justify-content: flex-end;
-    margin-top: 24px;
-    padding-top: 18px;
-    border-top: 1px solid #E8E7F1;
-}
-
-/* EMPTY SECTIONS */
-
-.kwp-empty-state {
-    min-height: 160px;
-    background: #F8F7F4;
-    border: 1px dashed #E3DED5;
-    border-radius: 5px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 9px;
-    text-align: center;
-    padding: 25px;
-}
-
-.kwp-empty-state > i {
-    font-size: 27px;
-    color: #89909B;
-}
-
-.kwp-empty-state strong {
-    font-size: 13px;
-    color: #1A1B22;
-}
-
-.kwp-empty-state p {
-    font-size: 11px;
-    line-height: 1.7;
-    color: #6E7684;
-    margin: 0;
-    max-width: 430px;
-}
-
-/* RESPONSIVE */
-
-@media (max-width: 991px) {
-    .kwp-layout {
-        grid-template-columns: 220px minmax(0, 1fr);
-        gap: 14px;
-    }
-
-    .kwp-section {
-        padding: 20px;
-    }
-}
-
-@media (max-width: 767px) {
-    .kw-profile-page {
-        padding: 23px 13px 45px;
-    }
-
-    .kwp-layout {
-        grid-template-columns: 1fr;
-    }
-
-    .kwp-account-card {
-        padding: 18px;
-    }
-
-    .kwp-form-grid {
-        grid-template-columns: 1fr;
-        gap: 15px;
-    }
-
-    .kwp-photo-area {
-        align-items: flex-start;
-    }
-
-    .kwp-menu {
-        display: grid;
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-    }
-
-    .kwp-menu-link {
-        padding: 13px;
-    }
-
-    .kwp-page-title {
-        font-size: 23px;
-    }
-
-    .kwp-section-head {
-        flex-wrap: wrap;
-    }
-
-    .kwp-section-meta {
-        text-align: left;
-    }
-}
-
-@media (max-width: 420px) {
-    .kwp-photo-area {
-        flex-direction: column;
-    }
-
-    .kwp-photo-preview {
-        align-self: center;
-    }
-
-    .kwp-menu {
-        grid-template-columns: 1fr;
-    }
-}
+.kw-profile-page{background:#EDEBDD;min-height:75vh;padding:30px 20px 65px;color:#1A1B22;font-family:'Inter',sans-serif}
+.kw-profile-page *{box-sizing:border-box}
+.kwp-container{max-width:1200px;margin:auto}
+.kwp-breadcrumb{font-size:10px;font-weight:600;letter-spacing:.8px;color:#727785;margin-bottom:8px}
+.kwp-page-title{font-size:27px;font-weight:750;margin:0 0 6px}
+.kwp-page-desc{font-size:12px;color:#575E70;margin:0 0 24px}
+.kwp-layout{display:grid;grid-template-columns:265px minmax(0,1fr);gap:20px;align-items:start}
+.kwp-sidebar,.kwp-content{min-width:0}
+.kwp-card{background:#fff;border:1px solid #E8E7F1;border-radius:7px;margin-bottom:17px;box-shadow:0 1px 3px #00000008}
+.kwp-account-card{padding:25px 18px;text-align:center}
+.kwp-avatar,.kwp-photo-preview{border-radius:50%;background:#E3E3E3;overflow:hidden;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.kwp-avatar{width:78px;height:78px;margin:0 auto 14px}
+.kwp-photo-preview{width:69px;height:69px}
+.kwp-avatar img,.kwp-photo-preview img{width:100%;height:100%;object-fit:cover}
+.kwp-avatar i,.kwp-photo-preview i{font-size:35px;color:#888}
+.kwp-account-name{font-size:16px;font-weight:700;margin:0 0 5px;overflow-wrap:anywhere}
+.kwp-account-email{font-size:11px;color:#575E70;overflow-wrap:anywhere}
+.kwp-account-joined{font-size:10px;color:#777;margin:10px 0 15px}
+.kwp-account-row{display:flex;justify-content:space-between;gap:10px;font-size:11px;padding:7px 0;border-top:1px solid #F2F0EA}
+.kwp-account-row span:first-child{color:#6D7280}
+.kwp-menu{padding:7px 0}
+.kwp-menu-link{display:flex;align-items:center;gap:12px;padding:14px 18px;font-size:12px;color:#575E70;text-decoration:none;border-left:3px solid transparent}
+.kwp-menu-link:hover,.kwp-menu-link.active{background:#F4F2ED;color:#1A1B22;border-left-color:#B7000C}
+.kwp-menu-link i{font-size:16px;width:20px;text-align:center}
+.kwp-menu-link.logout{color:#B7000C;border-top:1px solid #E8E7F1;margin-top:8px}
+.kwp-section{padding:23px 25px;scroll-margin-top:110px}
+.kwp-section-head{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;border-bottom:1px solid #E8E7F1;padding-bottom:15px;margin-bottom:20px}
+.kwp-section-title{font-size:16px;font-weight:700;margin:0 0 5px}
+.kwp-section-desc,.kwp-muted{font-size:11px;color:#667085;line-height:1.7;margin:0}
+.kwp-section-meta{font-size:10px;color:#767B86}
+.kwp-photo-area{display:flex;align-items:center;gap:18px;background:#F5F4F0;padding:16px;border-radius:5px;margin-bottom:22px}
+.kwp-photo-content{flex:1;min-width:0}
+.kwp-photo-title{font-size:13px;font-weight:700}
+.kwp-photo-actions,.kwp-upload-form{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.kwp-photo-actions{margin-top:10px}
+.kwp-file-input{max-width:195px;font-size:10px}
+.kwp-btn{display:inline-flex;align-items:center;justify-content:center;gap:7px;min-height:36px;padding:10px 15px;border:0;font-size:10px;font-weight:700;text-decoration:none;cursor:pointer}
+.kwp-btn-dark{background:#2F3038;color:#fff}
+.kwp-btn-red{background:#B7000C;color:#fff}
+.kwp-btn-light{background:#FFE7E7;color:#B7000C}
+.kwp-btn:hover{filter:brightness(.92);color:inherit}
+.kwp-form-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px}
+.kwp-field{display:flex;flex-direction:column;gap:8px;min-width:0}
+.kwp-label{font-size:11px;font-weight:700;letter-spacing:.3px;text-transform:uppercase}
+.kwp-input{width:100%;min-height:41px;padding:10px 12px;background:#F2F1EE;border:1px solid transparent;border-radius:3px;color:#1A1B22;font-family:inherit;font-size:12px;outline:none}
+.kwp-input:focus{border-color:#1A1B22;background:#fff}
+.kwp-input[readonly]{color:#6A6F79;cursor:not-allowed}
+.kwp-input-help{font-size:10px;color:#737783}
+.kwp-gender{margin-top:22px}
+.kwp-gender-options{display:flex;gap:14px 22px;flex-wrap:wrap;margin-top:13px}
+.kwp-radio-label{display:inline-flex;align-items:center;gap:7px;font-size:12px}
+.kwp-radio-label input{accent-color:#B7000C}
+.kwp-form-actions{display:flex;justify-content:flex-end;margin-top:24px;padding-top:18px;border-top:1px solid #E8E7F1}
+.kwp-address-summary{padding:15px;background:#F8F7F4;border:1px solid #E3DED5;border-radius:5px;margin-bottom:18px;font-size:12px;line-height:1.8}
+.kwp-address-summary strong{display:block;margin-bottom:4px}
+.kwp-address-summary p{margin:0;white-space:pre-line;overflow-wrap:anywhere}
+
+.kwp-order-filters{display:flex;gap:9px;overflow-x:auto;padding:2px 0 17px;margin-bottom:20px;scrollbar-width:thin}
+.kwp-filter-btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;white-space:nowrap;border:1px solid #E3E0D9;background:#F9F8F5;color:#575E70;padding:11px 13px;border-radius:5px;font-size:11px;font-weight:700;cursor:pointer;transition:background .15s,color .15s}
+.kwp-filter-btn:hover{border-color:#B7000C;color:#B7000C}
+.kwp-filter-btn.active{background:#B7000C;border-color:#B7000C;color:#fff}
+.kwp-filter-count{display:inline-flex;align-items:center;justify-content:center;min-width:21px;height:21px;padding:0 5px;background:#EAE8E3;border-radius:4px;font-size:10px;color:#575E70}
+.kwp-filter-btn.active .kwp-filter-count{background:#FFFFFF30;color:#fff}
+.kwp-order{border:1px solid #E8E7F1;border-radius:7px;overflow:hidden;margin:0 0 17px;background:#fff}
+.kwp-order[hidden]{display:none!important}
+.kwp-order-top{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;background:#F8F7F4;padding:16px 18px}
+.kwp-order-number{font-size:12px;font-weight:700;overflow-wrap:anywhere;margin-bottom:4px}
+.kwp-order-badges{display:flex;gap:7px;flex-wrap:wrap}
+.kwp-status{display:inline-flex;align-items:center;gap:5px;padding:7px 10px;border-radius:4px;background:#EEF0FA;color:#405CA8;font-size:10px;font-weight:700}
+.kwp-status.paid,.kwp-status.completed{background:#DFF7E9;color:#087344}
+.kwp-status.pending{background:#FFF4DF;color:#9B6500}
+.kwp-status.failed{background:#FCE6E5;color:#A42424}
+.kwp-order-body{padding:18px}
+.kwp-order-product{display:flex;align-items:flex-start;gap:15px;padding:13px 0;border-bottom:1px solid #EEECE6}
+.kwp-order-product:first-child{padding-top:0}
+.kwp-order-photo{width:88px;height:112px;object-fit:cover;border-radius:4px;background:#E8E5DC;flex-shrink:0}
+.kwp-order-no-photo{width:88px;height:112px;display:flex;align-items:center;justify-content:center;color:#9298A2;background:#F0EFEB;border-radius:4px;flex-shrink:0}
+.kwp-order-product-details{flex:1;min-width:0}
+.kwp-order-product-name{display:block;margin-bottom:5px;font-size:13px;font-weight:700;color:#1A1B22}
+.kwp-order-product-meta{font-size:11px;color:#667085;line-height:1.8}
+.kwp-order-product-price{font-size:12px;font-weight:700;white-space:nowrap}
+.kwp-review-link{display:inline-flex;align-items:center;justify-content:center;gap:7px;margin-top:12px;padding:9px 13px;background:#B7000C;color:#fff!important;border-radius:4px;text-decoration:none;font-size:10px;font-weight:700}
+.kwp-review-link:hover{background:#880008;color:#fff}
+.kwp-order-info{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:15px;margin-top:19px;padding:17px;background:#FAF9F6;border:1px solid #EEECE6;border-radius:5px;font-size:11px}
+.kwp-order-info strong{display:block;margin-top:5px;font-size:12px;color:#1A1B22;overflow-wrap:anywhere}
+.kwp-order-info .kwp-muted{font-size:10px}
+.kwp-progress{margin:19px 0;padding:14px 10px;border:1px solid #EEECE6;border-radius:5px}
+.kwp-progress-title{margin:0 0 13px;font-size:11px;font-weight:700}
+.kwp-progress-list{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:4px}
+.kwp-progress-step{text-align:center;min-width:0}
+.kwp-progress-icon{display:flex;align-items:center;justify-content:center;width:28px;height:28px;margin:0 auto 7px;border-radius:50%;background:#E8E6E0;color:#858585;font-size:12px;font-weight:700}
+.kwp-progress-step.done .kwp-progress-icon{background:#DFF7E9;color:#087344}
+.kwp-progress-step.current .kwp-progress-icon{background:#FFF1F1;color:#B7000C;border:1px solid #B7000C}
+.kwp-progress-label{display:block;font-size:9px;font-weight:600;color:#777;line-height:1.4}
+.kwp-progress-step.done .kwp-progress-label{color:#087344}
+.kwp-progress-step.current .kwp-progress-label{color:#B7000C}
+.kwp-order-details{margin-top:15px;border-top:1px solid #E8E7F1;padding-top:14px;font-size:11px;color:#575E70;line-height:1.8}
+.kwp-order-details summary{font-weight:700;cursor:pointer;color:#810100}
+.kwp-order-details p{margin:10px 0 0;overflow-wrap:anywhere}
+.kwp-empty-state{min-height:170px;background:#F8F7F4;border:1px dashed #E3DED5;display:flex;align-items:center;justify-content:center;flex-direction:column;text-align:center;gap:10px;padding:25px}
+.kwp-empty-state[hidden]{display:none!important}
+.kwp-empty-state i{font-size:28px;color:#89909B}
+.kwp-empty-state strong{font-size:13px}
+.kwp-empty-state p{font-size:11px;color:#667085;margin:0;line-height:1.7}
+@media(max-width:991px){.kwp-layout{grid-template-columns:220px minmax(0,1fr);gap:14px}.kwp-section{padding:20px}.kwp-order-photo,.kwp-order-no-photo{width:72px;height:96px}}
+@media(max-width:767px){.kw-profile-page{padding:23px 13px 45px}.kwp-layout{grid-template-columns:1fr}.kwp-menu{display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}.kwp-form-grid,.kwp-order-info{grid-template-columns:1fr}.kwp-page-title{font-size:23px}.kwp-photo-area{align-items:flex-start}.kwp-section-head{flex-wrap:wrap}.kwp-order-product-price{white-space:normal}.kwp-order-product{gap:11px}.kwp-progress-label{font-size:8px}}
+@media(max-width:420px){.kwp-menu{grid-template-columns:1fr}.kwp-photo-area{flex-direction:column}.kwp-order-top{padding:13px}.kwp-order-body{padding:13px}.kwp-order-photo,.kwp-order-no-photo{width:65px;height:86px}.kwp-order-product{flex-wrap:wrap}.kwp-order-product-price{margin-left:76px}.kwp-progress{padding:11px 5px}}
 </style>
 
-
 <section class="kw-profile-page">
-
     <div class="kwp-container">
-
-        <!-- HEADER HALAMAN -->
-        <div class="kwp-page-header">
-
-            <div class="kwp-breadcrumb">
-                KURO WEAR / CUSTOMER / PROFIL SAYA
-            </div>
-
-            <h1 class="kwp-page-title">
-                Profil Saya
-            </h1>
-
-            <p class="kwp-page-desc">
-                Kelola informasi pribadi dan preferensi akunmu.
-            </p>
-
-        </div>
-
+        <div class="kwp-breadcrumb">KURO WEAR / CUSTOMER / PROFIL SAYA</div>
+        <h1 class="kwp-page-title">Profil Saya</h1>
+        <p class="kwp-page-desc">Kelola informasi pribadi, alamat pengiriman, dan pantau perkembangan pesananmu.</p>
 
         <div class="kwp-layout">
-
-            <!-- ===========================
-                 SIDEBAR PROFIL
-                 =========================== -->
-
             <aside class="kwp-sidebar">
-
-                <!-- INFORMASI AKUN LOGIN -->
                 <div class="kwp-card kwp-account-card">
-
                     <div class="kwp-avatar">
-
                         {% if profile and profile.avatar_filename %}
-
-                        <img
-                            src="{{ url_for('static', filename='uploads/avatars/' ~ profile.avatar_filename) }}"
-                            alt="Foto profil {{ display_name }}"
-                        >
-
+                        <img src="{{ url_for('static', filename='uploads/avatars/' ~ profile.avatar_filename) }}" alt="Foto profil">
                         {% else %}
-
                         <i class="bi bi-person-fill"></i>
-
                         {% endif %}
-
                     </div>
 
-                    <h2 class="kwp-account-name">
-                        {{ display_name }}
-                    </h2>
-
-                    <div class="kwp-account-email">
-                        {{ current_user.email }}
-                    </div>
-
+                    <h2 class="kwp-account-name">{{ display_name }}</h2>
+                    <div class="kwp-account-email">{{ current_user.email }}</div>
                     <div class="kwp-account-joined">
-                        Bergabung:
-                        {% if current_user.created_at %}
-                            {{ current_user.created_at.strftime('%d %B %Y') }}
-                        {% else %}
-                            Tanggal belum tersedia
-                        {% endif %}
+                        Bergabung: {{ current_user.created_at.strftime('%d %B %Y') if current_user.created_at else 'Tanggal belum tersedia' }}
                     </div>
-
-                    <div class="kwp-account-divider"></div>
-
                     <div class="kwp-account-row">
-                        <span>ID Pelanggan</span>
-                        <span>#{{ current_user.id }}</span>
+                        <span>ID Pelanggan</span><strong>#{{ current_user.id }}</strong>
                     </div>
-
                     <div class="kwp-account-row">
-                        <span>Status Akun</span>
-
-                        {% if current_user.is_active %}
-                        <span class="kwp-status-active">
-                            Aktif
-                        </span>
-                        {% else %}
-                        <span class="kwp-status-inactive">
-                            Nonaktif
-                        </span>
-                        {% endif %}
+                        <span>Status Akun</span><strong>{{ 'Aktif' if current_user.is_active else 'Nonaktif' }}</strong>
                     </div>
-
                 </div>
 
-
-                <!-- NAVIGASI SIDEBAR -->
                 <nav class="kwp-card kwp-menu">
-
-                    <a
-                        href="#profile-section"
-                        class="kwp-menu-link active"
-                    >
-                        <i class="bi bi-person"></i>
-                        Profil Saya
+                    <a class="kwp-menu-link active" href="#profile-section">
+                        <i class="bi bi-person"></i> Profil Saya
                     </a>
-
-                    <a
-                        href="#address-section"
-                        class="kwp-menu-link"
-                    >
-                        <i class="bi bi-geo-alt"></i>
-                        Alamat Pengiriman
+                    <a class="kwp-menu-link" href="#address-section">
+                        <i class="bi bi-geo-alt"></i> Alamat Pengiriman
                     </a>
-
-                    <a
-                        href="#orders-section"
-                        class="kwp-menu-link"
-                    >
-                        <i class="bi bi-bag"></i>
-                        Riwayat Pesanan
+                    <a class="kwp-menu-link" href="#orders-section">
+                        <i class="bi bi-bag"></i> Riwayat Pesanan
                     </a>
-
-                    <a
-                        href="{{ url_for('shop.wishlist') }}"
-                        class="kwp-menu-link"
-                    >
-                        <i class="bi bi-heart"></i>
-                        Wishlist Saya
+                    <a class="kwp-menu-link" href="{{ url_for('shop.wishlist') }}">
+                        <i class="bi bi-heart"></i> Wishlist Saya
                     </a>
-
-                    <a
-                        href="{{ url_for('cart.view_cart') }}"
-                        class="kwp-menu-link"
-                    >
-                        <i class="bi bi-handbag"></i>
-                        Keranjang Belanja
+                    <a class="kwp-menu-link" href="{{ url_for('cart.view_cart') }}">
+                        <i class="bi bi-handbag"></i> Keranjang Belanja
                     </a>
-
-                    <a
-                        href="{{ url_for('auth.logout') }}"
-                        class="kwp-menu-link logout"
-                    >
-                        <i class="bi bi-box-arrow-right"></i>
-                        Logout
+                    <a class="kwp-menu-link logout" href="{{ url_for('auth.logout') }}">
+                        <i class="bi bi-box-arrow-right"></i> Logout
                     </a>
-
                 </nav>
-
             </aside>
 
-
-            <!-- ===========================
-                 KONTEN KANAN
-                 =========================== -->
-
             <main class="kwp-content">
-
-                <!-- PROFIL -->
-                <section
-                    id="profile-section"
-                    class="kwp-card kwp-section"
-                >
-
+                <section id="profile-section" class="kwp-card kwp-section">
                     <div class="kwp-section-head">
-
                         <div>
-                            <h2 class="kwp-section-title">
-                                Informasi Profil
-                            </h2>
-
-                            <p class="kwp-section-desc">
-                                Data pribadi yang tersimpan pada akun KURO WEAR.
-                            </p>
+                            <h2 class="kwp-section-title">Informasi Profil</h2>
+                            <p class="kwp-section-desc">Data pribadi yang tersimpan pada akun KURO WEAR.</p>
                         </div>
-
                         <span class="kwp-section-meta">
-                            Terakhir diperbarui:
-                            {% if profile and profile.updated_at %}
-                                {{ profile.updated_at.strftime('%d-%m-%Y') }}
-                            {% else %}
-                                Belum diperbarui
-                            {% endif %}
+                            Terakhir diperbarui: {{ profile.updated_at.strftime('%d-%m-%Y') if profile and profile.updated_at else 'Belum diperbarui' }}
                         </span>
-
                     </div>
 
-
-                    <!-- FOTO PROFIL -->
                     <div class="kwp-photo-area">
-
                         <div class="kwp-photo-preview">
-
                             {% if profile and profile.avatar_filename %}
-
-                            <img
-                                src="{{ url_for('static', filename='uploads/avatars/' ~ profile.avatar_filename) }}"
-                                alt="Foto profil customer"
-                            >
-
+                            <img src="{{ url_for('static', filename='uploads/avatars/' ~ profile.avatar_filename) }}" alt="Foto profil">
                             {% else %}
-
                             <i class="bi bi-person-fill"></i>
-
                             {% endif %}
-
                         </div>
-
 
                         <div class="kwp-photo-content">
-
-                            <div class="kwp-photo-title">
-                                Foto Profil
-                            </div>
-
-                            <p class="kwp-photo-help">
-                                Format JPG, PNG, atau WEBP.
-                                Ukuran maksimal 2 MB.
-                            </p>
-
+                            <div class="kwp-photo-title">Foto Profil</div>
+                            <p class="kwp-muted">JPG, PNG, WEBP maksimal 2 MB.</p>
 
                             <div class="kwp-photo-actions">
-
-                                <!-- UPLOAD FOTO -->
-                                <form
-                                    method="POST"
-                                    action="{{ url_for('customer.my_profile') }}"
-                                    enctype="multipart/form-data"
-                                    class="kwp-upload-form"
-                                >
-
-                                    <input
-                                        type="hidden"
-                                        name="csrf_token"
-                                        value="{{ csrf_token() }}"
-                                    >
-
-                                    <input
-                                        type="hidden"
-                                        name="action"
-                                        value="upload_avatar"
-                                    >
-
-                                    <input
-                                        type="file"
-                                        name="avatar"
-                                        accept="image/jpeg,image/png,image/webp"
-                                        class="kwp-file-input"
-                                        aria-label="Pilih foto profil"
-                                        required
-                                    >
-
-                                    <button
-                                        type="submit"
-                                        class="kwp-btn kwp-btn-dark"
-                                    >
-                                        <i class="bi bi-upload"></i>
-                                        UPLOAD FOTO
+                                <form method="POST" action="{{ url_for('customer.my_profile') }}" enctype="multipart/form-data" class="kwp-upload-form">
+                                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                    <input type="hidden" name="action" value="upload_avatar">
+                                    <input class="kwp-file-input" type="file" name="avatar" accept="image/jpeg,image/png,image/webp" required>
+                                    <button class="kwp-btn kwp-btn-dark" type="submit">
+                                        <i class="bi bi-upload"></i> UPLOAD FOTO
                                     </button>
-
                                 </form>
-
 
                                 {% if profile and profile.avatar_filename %}
-
-                                <!-- HAPUS FOTO -->
-                                <form
-                                    method="POST"
-                                    action="{{ url_for('customer.my_profile') }}"
-                                    onsubmit="return confirm('Hapus foto profil ini?');"
-                                >
-
-                                    <input
-                                        type="hidden"
-                                        name="csrf_token"
-                                        value="{{ csrf_token() }}"
-                                    >
-
-                                    <input
-                                        type="hidden"
-                                        name="action"
-                                        value="delete_avatar"
-                                    >
-
-                                    <button
-                                        type="submit"
-                                        class="kwp-btn kwp-btn-light"
-                                    >
-                                        HAPUS FOTO
-                                    </button>
-
+                                <form method="POST" action="{{ url_for('customer.my_profile') }}" onsubmit="return confirm('Hapus foto profil ini?')">
+                                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                    <input type="hidden" name="action" value="delete_avatar">
+                                    <button class="kwp-btn kwp-btn-light" type="submit">HAPUS FOTO</button>
                                 </form>
-
                                 {% endif %}
-
                             </div>
-
                         </div>
-
                     </div>
 
-
-                    <!-- FORM INFORMASI PRIBADI -->
-                    <form
-                        method="POST"
-                        action="{{ url_for('customer.my_profile') }}"
-                    >
-
-                        <input
-                            type="hidden"
-                            name="csrf_token"
-                            value="{{ csrf_token() }}"
-                        >
-
-                        <input
-                            type="hidden"
-                            name="action"
-                            value="save"
-                        >
-
+                    <form method="POST" action="{{ url_for('customer.my_profile') }}">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                        <input type="hidden" name="action" value="save">
 
                         <div class="kwp-form-grid">
-
-                            <!-- NAMA -->
                             <div class="kwp-field">
-
-                                <label
-                                    for="kwpDisplayName"
-                                    class="kwp-label"
-                                >
-                                    Nama Lengkap / Tampilan
-                                </label>
-
-                                <input
-                                    type="text"
-                                    id="kwpDisplayName"
-                                    name="display_name"
-                                    class="kwp-input"
-                                    value="{{ display_name }}"
-                                    minlength="2"
-                                    maxlength="100"
-                                    required
-                                >
-
-                                <span class="kwp-input-help">
-                                    Nama ini juga digunakan dalam data
-                                    pelanggan di Admin.
-                                </span>
-
+                                <label class="kwp-label" for="displayName">Nama Lengkap / Tampilan</label>
+                                <input class="kwp-input" id="displayName" type="text" name="display_name"
+                                       value="{{ display_name }}" minlength="2" maxlength="100" required>
                             </div>
 
-
-                            <!-- EMAIL -->
                             <div class="kwp-field">
-
-                                <label
-                                    for="kwpEmail"
-                                    class="kwp-label"
-                                >
-                                    Email Terdaftar
-                                </label>
-
-                                <input
-                                    type="email"
-                                    id="kwpEmail"
-                                    class="kwp-input"
-                                    value="{{ current_user.email }}"
-                                    readonly
-                                >
-
-                                <span class="kwp-input-help">
-                                    Email login tidak dapat diubah melalui halaman ini.
-                                </span>
-
+                                <label class="kwp-label" for="profileEmail">Email Terdaftar</label>
+                                <input class="kwp-input" id="profileEmail" type="email" value="{{ current_user.email }}" readonly>
                             </div>
 
-
-                            <!-- WHATSAPP -->
                             <div class="kwp-field">
-
-                                <label
-                                    for="kwpPhone"
-                                    class="kwp-label"
-                                >
-                                    Nomor WhatsApp / HP
-                                </label>
-
-                                <input
-                                    type="tel"
-                                    id="kwpPhone"
-                                    name="phone"
-                                    class="kwp-input"
-                                    value="{{ profile.phone if profile and profile.phone else '' }}"
-                                    maxlength="25"
-                                    placeholder="Contoh: +628123456789"
-                                >
-
-                                <span class="kwp-input-help">
-                                    Kosongkan jika belum diisi.
-                                </span>
-
+                                <label class="kwp-label" for="profilePhone">Nomor WhatsApp / HP</label>
+                                <input class="kwp-input" id="profilePhone" type="tel" name="phone"
+                                       value="{{ private_field(profile, 'phone') if profile and private_field(profile, 'phone') else '' }}" maxlength="25">
                             </div>
 
-
-                            <!-- TANGGAL LAHIR -->
                             <div class="kwp-field">
-
-                                <label
-                                    for="kwpBirthDate"
-                                    class="kwp-label"
-                                >
-                                    Tanggal Lahir
-                                </label>
-
-                                <input
-                                    type="date"
-                                    id="kwpBirthDate"
-                                    name="birth_date"
-                                    class="kwp-input"
-                                    value="{{ profile.birth_date.isoformat() if profile and profile.birth_date else '' }}"
-                                >
-
-                                <span class="kwp-input-help">
-                                    Tidak wajib diisi.
-                                </span>
-
+                                <label class="kwp-label" for="birthDate">Tanggal Lahir</label>
+                                <input class="kwp-input" id="birthDate" type="date" name="birth_date"
+                                       value="{{ private_field(profile, 'birth_date').isoformat() if profile and private_field(profile, 'birth_date') else '' }}">
                             </div>
-
                         </div>
 
-
-                        <!-- GENDER -->
                         <div class="kwp-gender">
-
-                            <div class="kwp-label">
-                                Gender
-                            </div>
-
+                            <label class="kwp-label">Gender</label>
                             <div class="kwp-gender-options">
-
                                 <label class="kwp-radio-label">
-
-                                    <input
-                                        type="radio"
-                                        name="gender"
-                                        value="men"
-                                        {% if profile and profile.gender == 'men' %}checked{% endif %}
-                                    >
-
-                                    Man
+                                    <input type="radio" name="gender" value="men" {% if profile and profile.gender == 'men' %}checked{% endif %}> Man
                                 </label>
-
-
                                 <label class="kwp-radio-label">
-
-                                    <input
-                                        type="radio"
-                                        name="gender"
-                                        value="women"
-                                        {% if profile and profile.gender == 'women' %}checked{% endif %}
-                                    >
-
-                                    Women
+                                    <input type="radio" name="gender" value="women" {% if profile and profile.gender == 'women' %}checked{% endif %}> Women
                                 </label>
-
-
                                 <label class="kwp-radio-label">
-
-                                    <input
-                                        type="radio"
-                                        name="gender"
-                                        value="other"
-                                        {% if profile and profile.gender == 'other' %}checked{% endif %}
-                                    >
-
-                                    Other / Prefer Not to Say
+                                    <input type="radio" name="gender" value="other" {% if profile and profile.gender == 'other' %}checked{% endif %}> Other / Prefer Not to Say
                                 </label>
+                            </div>
+                        </div>
 
+                        <div class="kwp-form-actions">
+                            <button type="submit" class="kwp-btn kwp-btn-red">
+                                <i class="bi bi-check-lg"></i> SIMPAN PERUBAHAN
+                            </button>
+                        </div>
+                    </form>
+                </section>
+
+                <section id="address-section" class="kwp-card kwp-section">
+                    <div class="kwp-section-head">
+                        <div>
+                            <h2 class="kwp-section-title">Alamat Pengiriman</h2>
+                            <p class="kwp-section-desc">Alamat utama yang digunakan otomatis saat Checkout.</p>
+                        </div>
+                    </div>
+
+                    {% if address %}
+                    <div class="kwp-address-summary">
+                        <strong><i class="bi bi-geo-alt me-1"></i> Alamat Utama Tersimpan</strong>
+                        <p>{{ private_field(address, 'recipient_name') }} · {{ private_field(address, 'phone') }}</p>
+                        <p>{{ private_field(address, 'full_address') }}</p>
+                        <p>{{ address.city }}{% if address.postal_code %}, {{ address.postal_code }}{% endif %}</p>
+                    </div>
+                    {% elif fallback_order %}
+                    <div class="kwp-address-summary">
+                        <strong>Alamat dari transaksi terakhir</strong>
+                        <p>{{ private_field(fallback_order, 'recipient_name') }} · {{ private_field(fallback_order, 'phone') }}</p>
+                        <p>{{ private_field(fallback_order, 'full_address') }} · {{ fallback_order.city }}</p>
+                        <p class="kwp-muted">Periksa data berikut lalu simpan sebagai alamat utama.</p>
+                    </div>
+                    {% else %}
+                    <div class="kwp-address-summary">
+                        Belum ada alamat tersimpan. Tambahkan alamat pengirimanmu di bawah.
+                    </div>
+                    {% endif %}
+
+                    <form method="POST" action="{{ url_for('customer.my_profile') }}">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                        <input type="hidden" name="action" value="save_address">
+
+                        <div class="kwp-form-grid">
+                            <div class="kwp-field">
+                                <label class="kwp-label" for="recipientName">Nama Penerima</label>
+                                <input class="kwp-input" id="recipientName" name="recipient_name" maxlength="100"
+                                       value="{{ private_field(address, 'recipient_name') if address else private_field(fallback_order, 'recipient_name') if fallback_order else display_name }}" required>
                             </div>
 
+                            <div class="kwp-field">
+                                <label class="kwp-label" for="recipientPhone">Nomor WhatsApp</label>
+                                <input class="kwp-input" id="recipientPhone" name="phone" maxlength="25"
+                                       value="{{ private_field(address, 'phone') if address else private_field(fallback_order, 'phone') if fallback_order else private_field(profile, 'phone') if profile and private_field(profile, 'phone') else '' }}" required>
+                            </div>
+
+                            <div class="kwp-field">
+                                <label class="kwp-label" for="recipientCity">Kota / Kecamatan</label>
+                                <input class="kwp-input" id="recipientCity" name="city" maxlength="100"
+                                       value="{{ address.city if address else fallback_order.city if fallback_order else '' }}" required>
+                            </div>
+
+                            <div class="kwp-field">
+                                <label class="kwp-label" for="postalCode">Kode Pos</label>
+                                <input class="kwp-input" id="postalCode" name="postal_code" inputmode="numeric"
+                                       pattern="[0-9]{5}" maxlength="5"
+                                       value="{{ address.postal_code if address and address.postal_code else '' }}" placeholder="Contoh: 29431">
+                                <span class="kwp-input-help">Diperlukan saat integrasi pengiriman JNE resmi.</span>
+                            </div>
+
+                            <div class="kwp-field" style="grid-column:1/-1">
+                                <label class="kwp-label" for="fullAddress">Alamat Lengkap</label>
+                                <textarea class="kwp-input" id="fullAddress" name="full_address" maxlength="500" rows="3"
+                                          required>{{ private_field(address, 'full_address') if address else private_field(fallback_order, 'full_address') if fallback_order else '' }}</textarea>
+                            </div>
                         </div>
 
-
-                        <!-- SIMPAN -->
                         <div class="kwp-form-actions">
-
-                            <button
-                                type="submit"
-                                class="kwp-btn kwp-btn-red"
-                            >
-                                <i class="bi bi-check-lg"></i>
-                                SIMPAN PERUBAHAN
+                            <button class="kwp-btn kwp-btn-red" type="submit">
+                                <i class="bi bi-geo-alt"></i> SIMPAN ALAMAT
                             </button>
-
                         </div>
-
                     </form>
-
                 </section>
 
-
-                <!-- ===========================
-                     ALAMAT PENGIRIMAN
-                     =========================== -->
-
-                <section
-                    id="address-section"
-                    class="kwp-card kwp-section"
-                >
-
+                <section id="orders-section" class="kwp-card kwp-section">
                     <div class="kwp-section-head">
-
                         <div>
-                            <h2 class="kwp-section-title">
-                                Alamat Pengiriman
-                            </h2>
-
-                            <p class="kwp-section-desc">
-                                Informasi alamat untuk pengiriman pesanan.
-                            </p>
+                            <h2 class="kwp-section-title">Riwayat Pesanan</h2>
+                            <p class="kwp-section-desc">Lihat produk yang dibeli, pantau pengiriman, dan berikan ulasan setelah pesanan selesai.</p>
                         </div>
-
+                        <span class="kwp-section-meta">{{ orders|length }} pesanan</span>
                     </div>
 
+                    <div class="kwp-order-filters" role="group" aria-label="Filter status pesanan">
+                        <button type="button" class="kwp-filter-btn active" data-order-filter="all" aria-pressed="true">
+                            Semua <span class="kwp-filter-count">{{ orders|length }}</span>
+                        </button>
+                        <button type="button" class="kwp-filter-btn" data-order-filter="created" aria-pressed="false">
+                            Pesanan Dibuat <span class="kwp-filter-count">{{ counts.created }}</span>
+                        </button>
+                        <button type="button" class="kwp-filter-btn" data-order-filter="payment" aria-pressed="false">
+                            Pembayaran <span class="kwp-filter-count">{{ counts.payment }}</span>
+                        </button>
+                        <button type="button" class="kwp-filter-btn" data-order-filter="processing" aria-pressed="false">
+                            Dikemas <span class="kwp-filter-count">{{ counts.processing }}</span>
+                        </button>
+                        <button type="button" class="kwp-filter-btn" data-order-filter="shipped" aria-pressed="false">
+                            Dikirim <span class="kwp-filter-count">{{ counts.shipped }}</span>
+                        </button>
+                        <button type="button" class="kwp-filter-btn" data-order-filter="completed" aria-pressed="false">
+                            Selesai <span class="kwp-filter-count">{{ counts.completed }}</span>
+                        </button>
+                    </div>
 
+                    <p class="kwp-muted" id="kwpFilterDescription" style="margin-bottom:17px">
+                        Menampilkan seluruh pesananmu.
+                    </p>
+
+                    <div id="kwpOrderList">
+                        {% for order in orders %}
+                        {% set shipment = shipments.get(order.id) %}
+
+                        {% if order.payment_status == 'paid' and order.fulfillment_status == 'completed' %}
+                            {% set order_stage = 'completed' %}
+                        {% elif order.payment_status == 'paid' and order.fulfillment_status == 'shipped' %}
+                            {% set order_stage = 'shipped' %}
+                        {% elif order.payment_status == 'paid' and order.fulfillment_status == 'processing' %}
+                            {% set order_stage = 'processing' %}
+                        {% elif order.payment_status in ['initiating', 'token_error', 'failed', 'expired', 'canceled'] %}
+                            {% set order_stage = 'created' %}
+                        {% else %}
+                            {% set order_stage = 'payment' %}
+                        {% endif %}
+
+                        <article class="kwp-order" data-order-stage="{{ order_stage }}">
+                            <div class="kwp-order-top">
+                                <div>
+                                    <div class="kwp-order-number">{{ order.order_number }}</div>
+                                    <p class="kwp-muted">{{ format_date(order.created_at) }}</p>
+                                </div>
+
+                                <div class="kwp-order-badges">
+                                    <span class="kwp-status {{ 'paid' if order.payment_status == 'paid' else 'failed' if order.payment_status in ['failed','expired','canceled','token_error'] else 'pending' }}">
+                                        {{ order_payment_label(order.payment_status) }}
+                                    </span>
+                                    <span class="kwp-status {{ 'completed' if order_stage == 'completed' else '' }}">
+                                        {{ order_delivery_label(order) }}
+                                    </span>
+                                </div>
+                            </div>
+
+                            <div class="kwp-order-body">
+                                {% for item in order.items %}
+                                {% set photo = item.image_path or '' %}
+
+                                <div class="kwp-order-product">
+                                    {% if photo.startswith('http://') or photo.startswith('https://') or photo.startswith('/') %}
+                                    <img class="kwp-order-photo" src="{{ photo }}" alt="{{ item.product_name }}" loading="lazy">
+                                    {% elif photo %}
+                                    <img class="kwp-order-photo" src="{{ url_for('static', filename=photo) }}" alt="{{ item.product_name }}" loading="lazy">
+                                    {% else %}
+                                    <div class="kwp-order-no-photo">
+                                        <i class="bi bi-image"></i>
+                                    </div>
+                                    {% endif %}
+
+                                    <div class="kwp-order-product-details">
+                                        <strong class="kwp-order-product-name">{{ item.product_name }}</strong>
+                                        <div class="kwp-order-product-meta">
+                                            {{ item.color_name }} / {{ item.size }}<br>
+                                            {{ item.quantity }} pcs × {{ rupiah(item.unit_price) }}
+                                        </div>
+
+                                        {% if order.payment_status == 'paid' and order.fulfillment_status == 'completed' %}
+                                        <a class="kwp-review-link" href="{{ url_for('shop.product_detail', product_id=item.product_id) }}#kpdReviews">
+                                            <i class="bi bi-star-fill"></i> BERI / LIHAT ULASAN
+                                        </a>
+                                        {% endif %}
+                                    </div>
+
+                                    <div class="kwp-order-product-price">
+                                        {{ rupiah(item.line_total) }}
+                                    </div>
+                                </div>
+                                {% endfor %}
+
+                                <div class="kwp-order-info">
+                                    <div>
+                                        <span class="kwp-muted">Total Pembayaran</span>
+                                        <strong>{{ rupiah(order.total) }}</strong>
+                                    </div>
+
+                                    <div>
+                                        <span class="kwp-muted">Tanggal Pengiriman</span>
+                                        <strong>{{ format_date(shipment.shipped_at) if shipment and shipment.shipped_at else 'Belum dikirim' }}</strong>
+                                    </div>
+
+                                    <div>
+                                        <span class="kwp-muted">Kurir</span>
+                                        <strong>{{ shipment.courier if shipment and shipment.courier else 'JNE Express Reguler (direncanakan)' }}</strong>
+                                    </div>
+
+                                    <div>
+                                        <span class="kwp-muted">
+                                            {{ 'Kode Simulasi Internal' if shipment and shipment.tracking_number and shipment.tracking_number.startswith('KW-INT-') else 'Nomor Resi' }}
+                                        </span>
+                                        <strong>{{ shipment.tracking_number if shipment and shipment.tracking_number else 'Belum diterbitkan' }}</strong>
+                                    </div>
+                                </div>
+
+                                <div class="kwp-progress">
+                                    <p class="kwp-progress-title">Perkembangan Pesanan</p>
+                                    <div class="kwp-progress-list">
+                                        <div class="kwp-progress-step done">
+                                            <div class="kwp-progress-icon"><i class="bi bi-check-lg"></i></div>
+                                            <span class="kwp-progress-label">Dibuat</span>
+                                        </div>
+
+                                        <div class="kwp-progress-step {{ 'done' if order.payment_status == 'paid' else 'current' if order_stage == 'payment' else '' }}">
+                                            <div class="kwp-progress-icon">
+                                                {% if order.payment_status == 'paid' %}<i class="bi bi-check-lg"></i>{% else %}2{% endif %}
+                                            </div>
+                                            <span class="kwp-progress-label">Pembayaran</span>
+                                        </div>
+
+                                        <div class="kwp-progress-step {{ 'done' if shipment and shipment.processing_at else 'current' if order_stage == 'processing' else '' }}">
+                                            <div class="kwp-progress-icon">
+                                                {% if shipment and shipment.processing_at %}<i class="bi bi-check-lg"></i>{% else %}3{% endif %}
+                                            </div>
+                                            <span class="kwp-progress-label">Dikemas</span>
+                                        </div>
+
+                                        <div class="kwp-progress-step {{ 'done' if shipment and shipment.shipped_at else 'current' if order_stage == 'shipped' else '' }}">
+                                            <div class="kwp-progress-icon">
+                                                {% if shipment and shipment.shipped_at %}<i class="bi bi-check-lg"></i>{% else %}4{% endif %}
+                                            </div>
+                                            <span class="kwp-progress-label">Dikirim</span>
+                                        </div>
+
+                                        <div class="kwp-progress-step {{ 'done' if shipment and shipment.completed_at else 'current' if order_stage == 'completed' else '' }}">
+                                            <div class="kwp-progress-icon">
+                                                {% if shipment and shipment.completed_at %}<i class="bi bi-check-lg"></i>{% else %}5{% endif %}
+                                            </div>
+                                            <span class="kwp-progress-label">Selesai</span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <details class="kwp-order-details">
+                                    <summary>Lihat detail &amp; alamat pesanan</summary>
+                                    <p>
+                                        <strong>Alamat saat pemesanan:</strong>
+                                        {{ private_field(order, 'recipient_name') }},
+                                        {{ private_field(order, 'phone') }},
+                                        {{ private_field(order, 'full_address') }},
+                                        {{ order.city }}
+                                    </p>
+                                    <p>
+                                        <strong>Pembayaran:</strong>
+                                        {{ order_payment_label(order.payment_status) }}
+                                        {% if order.paid_at %} · {{ format_date(order.paid_at) }}{% endif %}
+                                    </p>
+                                    {% if shipment and shipment.completed_at %}
+                                    <p><strong>Pesanan selesai:</strong> {{ format_date(shipment.completed_at) }}</p>
+                                    {% endif %}
+                                    {% if shipment and shipment.notes %}
+                                    <p><strong>Catatan pengiriman:</strong> {{ shipment.notes }}</p>
+                                    {% endif %}
+                                    {% if shipment and shipment.tracking_number and shipment.tracking_number.startswith('KW-INT-') %}
+                                    <p>Kode pengiriman tersebut hanya untuk simulasi KURO WEAR dan bukan resi resmi JNE.</p>
+                                    {% endif %}
+                                </details>
+                            </div>
+                        </article>
+                        {% endfor %}
+                    </div>
+
+                    <div class="kwp-empty-state" id="kwpFilterEmpty" hidden>
+                        <i class="bi bi-box-seam"></i>
+                        <strong>Belum Ada Pesanan pada Status Ini</strong>
+                        <p>Pilih status lain atau lihat semua pesananmu.</p>
+                    </div>
+
+                    {% if not orders %}
                     <div class="kwp-empty-state">
-
-                        <i class="bi bi-geo-alt"></i>
-
-                        <strong>
-                            Belum Ada Alamat Tersimpan
-                        </strong>
-
-                        <p>
-                            Modul alamat pengiriman belum terhubung.
-                            Alamat yang nantinya ditambahkan akan
-                            disimpan berdasarkan akun customer.
-                        </p>
-
-                    </div>
-
-                </section>
-
-
-                <!-- ===========================
-                     RIWAYAT PESANAN
-                     =========================== -->
-
-                <section
-                    id="orders-section"
-                    class="kwp-card kwp-section"
-                >
-
-                    <div class="kwp-section-head">
-
-                        <div>
-                            <h2 class="kwp-section-title">
-                                Riwayat Pesanan
-                            </h2>
-
-                            <p class="kwp-section-desc">
-                                Daftar pesanan dan status transaksi.
-                            </p>
-                        </div>
-
-                    </div>
-
-
-                    <div class="kwp-empty-state">
-
                         <i class="bi bi-bag-check"></i>
-
-                        <strong>
-                            Belum Ada Riwayat Pesanan
-                        </strong>
-
-                        <p>
-                            Riwayat transaksi akan tersedia
-                            setelah sistem pemesanan dan checkout
-                            KURO WEAR diaktifkan.
-                        </p>
-
+                        <strong>Belum Ada Riwayat Pesanan</strong>
+                        <p>Pesanan akan muncul setelah kamu melakukan checkout.</p>
+                        <a href="{{ url_for('shop.catalog_all') }}" class="kwp-btn kwp-btn-dark">
+                            JELAJAHI PRODUK
+                        </a>
                     </div>
-
+                    {% endif %}
                 </section>
-
             </main>
-
         </div>
-
     </div>
-
 </section>
 
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const filters = [...document.querySelectorAll('[data-order-filter]')];
+    const orders = [...document.querySelectorAll('[data-order-stage]')];
+    const emptyState = document.getElementById('kwpFilterEmpty');
+    const description = document.getElementById('kwpFilterDescription');
+
+    if (!filters.length || !description) return;
+
+    const descriptions = {
+        all: 'Menampilkan seluruh pesananmu.',
+        created: 'Pesanan yang baru dibuat atau tidak berhasil melanjutkan pembayaran.',
+        payment: 'Pesanan yang sedang menunggu pembayaran atau sudah lunas dan menunggu diproses.',
+        processing: 'Pesanan yang sedang dikemas oleh Admin.',
+        shipped: 'Pesanan yang sudah masuk tahap pengiriman.',
+        completed: 'Pesanan yang sudah selesai dan dapat diberikan ulasan.'
+    };
+
+    function applyFilter(stage) {
+        let visibleCount = 0;
+
+        filters.forEach(button => {
+            const active = button.dataset.orderFilter === stage;
+            button.classList.toggle('active', active);
+            button.setAttribute('aria-pressed', String(active));
+        });
+
+        orders.forEach(order => {
+            const visible = stage === 'all' || order.dataset.orderStage === stage;
+            order.hidden = !visible;
+
+            if (visible) visibleCount++;
+        });
+
+        description.textContent = descriptions[stage] || descriptions.all;
+
+        if (emptyState) {
+            emptyState.hidden = visibleCount > 0 || orders.length === 0;
+        }
+    }
+
+    filters.forEach(button => {
+        button.addEventListener('click', () => applyFilter(button.dataset.orderFilter));
+    });
+
+    applyFilter('all');
+});
+</script>
 {% endblock %}

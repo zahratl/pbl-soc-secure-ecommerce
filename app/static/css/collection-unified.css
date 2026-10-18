@@ -599,3 +599,129 @@
         font-size: 20px;
     }
 }
+
+/* ==========================================
+   SIZE GUIDE MODAL STYLING (KURO WEAR)
+   ========================================== */
+
+.kw-modal-content {
+    border-radius: 4px;
+    border: 1px solid #E3E3E3;
+    background: #FFFFFF;
+    box-shadow: 0 16px 48px rgba(0, 0, 0, 0.12);
+}
+
+.kw-modal-header {
+    padding: 24px 28px 14px;
+}
+
+.kw-modal-title {
+    font-size: 18px;
+    letter-spacing: 0.5px;
+    color: #1A1B22;
+}
+
+.kw-guide-tabs {
+    display: flex;
+    gap: 10px;
+}
+
+.kw-guide-tab {
+    min-height: 42px;
+    border: 1px solid #DDD !important;
+    border-radius: 3px !important;
+    background: #F3F2EF !important;
+    color: #575E70 !important;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    transition: all 0.2s ease;
+}
+
+.kw-guide-tab:hover {
+    background: #E8E6E0 !important;
+    color: #1A1B22 !important;
+}
+
+.kw-guide-tab.active,
+.kw-guide-tab[aria-selected="true"] {
+    background: #2F3038 !important;
+    border-color: #2F3038 !important;
+    color: #FFFFFF !important;
+}
+
+.kw-guide-panel-title {
+    font-size: 13.5px;
+    font-weight: 700;
+    color: #1A1B22;
+    margin: 0;
+}
+
+.kw-guide-table-wrapper {
+    border: 1px solid #E3E3E3;
+    border-radius: 3px;
+    background: #FFFFFF;
+    overflow-x: auto;
+}
+
+.kw-guide-table {
+    margin-bottom: 0;
+    font-size: 12px;
+}
+
+.kw-guide-table th {
+    background: #F0EFEB !important;
+    color: #1A1B22 !important;
+    font-weight: 700;
+    padding: 12px 10px;
+    border-bottom: 1px solid #DDD;
+    white-space: nowrap;
+}
+
+.kw-guide-table td {
+    padding: 11px 10px;
+    color: #575E70;
+    border-bottom: 1px solid #EAEAEA;
+    white-space: nowrap;
+}
+
+.kw-guide-table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+.kw-guide-table tbody tr:hover {
+    background: #FAF8F5;
+}
+
+.kw-guide-note {
+    background: #F8F7F4;
+    border-left: 3px solid #B7000C;
+    padding: 14px 16px;
+    border-radius: 0 3px 3px 0;
+    font-size: 11.5px;
+    line-height: 1.7;
+    color: #575E70;
+}
+
+.kw-modal-footer {
+    padding: 12px 28px 24px;
+}
+
+@media (max-width: 575px) {
+    .kw-modal-header {
+        padding: 18px 18px 10px;
+    }
+    .kw-modal-title {
+        font-size: 16px;
+    }
+    .kw-guide-table {
+        font-size: 11px;
+    }
+    .kw-guide-table th,
+    .kw-guide-table td {
+        padding: 9px 6px;
+    }
+    .kw-modal-footer {
+        padding: 10px 18px 18px;
+    }
+}

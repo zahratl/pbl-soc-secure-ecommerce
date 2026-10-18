@@ -1,718 +1,156 @@
-
 {% extends 'admin/admin_base.html' %}
-
-{% block title %}Produk & Stok - Admin KURO{% endblock %}
+{% block title %}Produk & Stok - Admin KURO WEAR{% endblock %}
 
 {% block extra_css %}
 <style>
-    .products-page {
-        color: #161616;
-        font-family: 'Plus Jakarta Sans', sans-serif;
-    }
-
-    /* HEADER */
-    .products-top {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        gap: 20px;
-        margin-bottom: 28px;
-    }
-
-    .products-top h1 {
-        font-size: 28px;
-        font-weight: 700;
-        margin: 0 0 6px;
-    }
-
-    .products-top p {
-        color: #949494;
-        font-size: 13px;
-        margin: 0;
-    }
-
-    .p-btn {
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        gap: 8px;
-        background: #161616;
-        color: #fff;
-        border: 1px solid #161616;
-        border-radius: 4px;
-        padding: 11px 16px;
-        text-decoration: none;
-        font-size: 12px;
-        font-weight: 700;
-        white-space: nowrap;
-    }
-
-    .p-btn:hover {
-        background: #333;
-        color: white;
-    }
-
-    .p-btn.secondary {
-        background: #fff;
-        color: #161616;
-        border-color: #dedede;
-    }
-
-    .p-btn.secondary:hover {
-        background: #f7f7f7;
-    }
-
-    /* KARTU RINGKASAN */
-    .p-metrics {
-        display: grid;
-        grid-template-columns: repeat(4, minmax(0, 1fr));
-        gap: 16px;
-        margin-bottom: 30px;
-    }
-
-    .p-metric {
-        background: #fff;
-        border: 1px solid #e8e8e8;
-        padding: 22px;
-        min-height: 133px;
-    }
-
-    .p-metric small {
-        color: #a0a0a0;
-        font-size: 11px;
-        font-weight: 700;
-        letter-spacing: .5px;
-    }
-
-    .p-metric strong {
-        display: block;
-        font-size: 29px;
-        line-height: 1.45;
-        margin-top: 8px;
-    }
-
-    .p-metric span {
-        font-size: 12px;
-        color: #9b9b9b;
-    }
-
-    .p-metric.danger strong {
-        color: #ad0714;
-    }
-
-    /* LAYOUT TABEL DAN PANEL */
-    .p-content {
-        display: grid;
-        grid-template-columns: minmax(0, 2.15fr) minmax(270px, 1fr);
-        gap: 24px;
-        align-items: start;
-    }
-
-    .p-panel {
-        background: #fff;
-        border: 1px solid #e8e8e8;
-        min-width: 0;
-    }
-
-    /* SEARCH DAN FILTER */
-    .p-search {
-        display: flex;
-        gap: 9px;
-        flex-wrap: wrap;
-        background: #fcfcfb;
-        padding: 16px;
-        border-bottom: 1px solid #efefef;
-    }
-
-    .p-search input {
-        flex: 1 1 200px;
-        min-width: 0;
-    }
-
-    .p-search input,
-    .p-search select {
-        border: 1px solid #d6d6d6;
-        border-radius: 4px;
-        background: #fff;
-        padding: 10px;
-        font-size: 12px;
-    }
-
-    .p-search button {
-        background: #161616;
-        color: #fff;
-        border: none;
-        border-radius: 3px;
-        padding: 10px 14px;
-    }
-
-    /* TABEL PRODUK */
-    .p-table-wrap {
-        overflow-x: auto;
-    }
-
-    .p-table {
-        border-collapse: collapse;
-        width: 100%;
-        min-width: 710px;
-    }
-
-    .p-table th {
-        background: #f9f9f8;
-        color: #888;
-        text-transform: uppercase;
-        letter-spacing: 1px;
-        font-size: 11px;
-        text-align: left;
-        padding: 16px;
-    }
-
-    .p-table td {
-        padding: 16px;
-        border-top: 1px solid #efefef;
-        font-size: 12px;
-        vertical-align: middle;
-    }
-
-    .p-product {
-        display: flex;
-        gap: 12px;
-        align-items: center;
-    }
-
-    .p-photo {
-        width: 50px;
-        height: 58px;
-        object-fit: cover;
-        border-radius: 3px;
-        background: #f1efea;
-        flex-shrink: 0;
-    }
-
-    .p-product b {
-        display: block;
-        font-size: 13px;
-    }
-
-    .p-muted {
-        color: #999;
-        font-size: 11px;
-    }
-
-    /* STATUS STOK */
-    .p-pill {
-        display: inline-block;
-        font-size: 11px;
-        font-weight: 600;
-        padding: 6px 8px;
-        border-radius: 4px;
-    }
-
-    .p-pill.safe {
-        background: #dff9ea;
-        color: #076b40;
-    }
-
-    .p-pill.low {
-        background: #ffe3e5;
-        color: #af0c1a;
-    }
-
-    .p-pill.draft {
-        background: #f0eee9;
-        color: #555;
-    }
-
-    /* IKON AKSI */
-    .p-actions {
-        display: flex;
-        justify-content: flex-end;
-        gap: 5px;
-    }
-
-    .p-actions form {
-        margin: 0;
-    }
-
-    .p-icon {
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        border: 1px solid #e8e8e8;
-        background: #f8f8f8;
-        color: #242424;
-        border-radius: 4px;
-        width: 32px;
-        height: 32px;
-        text-decoration: none;
-        cursor: pointer;
-    }
-
-    .p-icon:hover {
-        background: #e8e5df;
-        color: #161616;
-    }
-
-    .p-icon.delete {
-        color: #ae0b18;
-        background: #fff4f4;
-    }
-
-    .p-icon.delete:hover {
-        background: #ffe3e5;
-    }
-
-    /* PANEL PERINGATAN STOK */
-    .p-side {
-        padding: 22px;
-    }
-
-    .p-side h3 {
-        font-size: 15px;
-        font-weight: 700;
-        margin: 0 0 14px;
-    }
-
-    .p-side p {
-        color: #858585;
-        font-size: 12px;
-        line-height: 1.65;
-    }
-
-    .p-alert {
-        padding: 13px 0;
-        border-bottom: 1px solid #eee;
-        display: flex;
-        justify-content: space-between;
-        gap: 10px;
-        font-size: 12px;
-    }
-
-    .p-alert small {
-        display: block;
-        color: #999;
-        margin-top: 4px;
-    }
-
-    .p-alert strong {
-        color: #b10c20;
-        white-space: nowrap;
-    }
-
-    /* KONDISI DATA MASIH KOSONG */
-    .p-empty {
-        padding: 55px 25px;
-        text-align: center;
-        color: #929292;
-    }
-
-    .p-empty i {
-        font-size: 34px;
-        display: block;
-        margin-bottom: 12px;
-    }
-
-    /* RESPONSIVE */
-    @media (max-width: 1150px) {
-        .p-metrics {
-            grid-template-columns: repeat(2, 1fr);
-        }
-
-        .p-content {
-            grid-template-columns: 1fr;
-        }
-    }
-
-    @media (max-width: 700px) {
-        .products-top {
-            flex-direction: column;
-            align-items: flex-start;
-        }
-
-        .p-metrics {
-            grid-template-columns: 1fr 1fr;
-        }
-
-        .p-metric {
-            padding: 14px;
-        }
-    }
+    .products-page { color:#202126; }
+    .products-top { display:flex; align-items:flex-start; justify-content:space-between; flex-wrap:wrap; gap:20px; margin-bottom:26px; }
+    .products-top h1 { margin:0 0 7px; font-size:25px; font-weight:700; letter-spacing:-.5px; }
+    .products-top p { margin:0; color:#777A82; font-size:12px; }
+    .products-top-actions { display:flex; align-items:center; flex-wrap:wrap; gap:9px; }
+    .p-metrics { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:14px; margin-bottom:30px; }
+    .p-metric { min-height:145px; padding:20px; background:#fff; border:1px solid #E6E5E2; border-radius:7px; }
+    .p-metric small { font-size:11px; font-weight:600; color:#777A82; }
+    .p-metric strong { display:block; margin:16px 0 7px; font-size:26px; line-height:1.3; letter-spacing:-.6px; }
+    .p-metric span { color:#85878D; font-size:11px; line-height:1.6; }
+    .p-metric.danger strong { color:#A30B14; }
+    .p-content { display:grid; grid-template-columns:minmax(0,2.15fr) minmax(270px,1fr); gap:20px; align-items:start; }
+    .p-panel { min-width:0; overflow:hidden; background:#fff; border:1px solid #E6E5E2; border-radius:7px; }
+    .p-search { display:flex; flex-wrap:wrap; gap:9px; padding:16px; background:#FAFAF9; border-bottom:1px solid #EEEEEB; }
+    .p-search input { flex:1 1 200px; min-width:0; }
+    .p-search :is(input,select) { min-height:40px; padding:10px 13px; border:1px solid #DAD9D5; border-radius:6px; background-color:#fff; color:#202126; font-size:12px; }
+    .p-search select { padding-right:40px; }
+    .p-search button { display:inline-flex; align-items:center; justify-content:center; min-width:40px; min-height:40px; padding:8px 13px; border:1px solid #202126; border-radius:6px; background:#202126; color:#fff; cursor:pointer; }
+    .p-search button:hover { background:#373840; }
+    .p-table-wrap { overflow-x:auto; }
+    .p-table { width:100%; min-width:710px; border-collapse:collapse; }
+    .p-table th { padding:14px 16px; background:#FAFAF9; color:#85878D; font-size:10px; font-weight:600; text-align:left; text-transform:uppercase; letter-spacing:.4px; }
+    .p-table td { padding:16px; border-top:1px solid #EEEEEB; font-size:11px; vertical-align:middle; }
+    .p-product { display:flex; align-items:center; gap:12px; }
+    .p-photo { width:50px; height:62px; flex-shrink:0; object-fit:cover; border-radius:5px; background:#F1EFEA; }
+    .p-product b { display:block; margin-bottom:5px; font-size:12px; }
+    .p-muted { color:#85878D; font-size:10px; line-height:1.6; }
+    .p-pill { display:inline-flex; align-items:center; padding:6px 9px; border-radius:4px; font-size:10px; font-weight:600; white-space:nowrap; }
+    .p-pill.safe { background:#E4F4EA; color:#176743; }
+    .p-pill.low { background:#F9E8E7; color:#A30B14; }
+    .p-pill.draft { background:#F0EFED; color:#575A60; }
+    .p-actions { display:flex; justify-content:flex-end; gap:6px; }
+    .p-actions form { margin:0; }
+    .p-icon { display:inline-flex; align-items:center; justify-content:center; width:34px; height:34px; border:1px solid #E6E5E2; border-radius:6px; background:#fff; color:#202126; text-decoration:none; cursor:pointer; }
+    .p-icon:hover { background:#F4F3F1; color:#202126; }
+    .p-icon.delete { background:#FFF5F4; color:#A30B14; }
+    .p-icon.delete:hover { background:#F9E8E7; }
+    .p-side { padding:20px; }
+    .p-side h2 { margin:0 0 13px; font-size:14px; font-weight:700; }
+    .p-side>p { margin:0 0 12px; color:#85878D; font-size:11px; line-height:1.8; }
+    .p-alert { display:flex; justify-content:space-between; gap:10px; padding:14px 0; border-bottom:1px solid #EEEEEB; font-size:11px; }
+    .p-alert small { display:block; margin-top:5px; color:#85878D; font-size:10px; }
+    .p-alert strong { color:#A30B14; white-space:nowrap; }
+    .p-empty { padding:55px 25px; color:#85878D; text-align:center; }
+    .p-empty i { display:block; margin-bottom:12px; font-size:29px; }
+    @media(max-width:1150px) { .p-metrics { grid-template-columns:repeat(2,minmax(0,1fr)); } .p-content { grid-template-columns:1fr; } }
+    @media(max-width:700px) { .products-top { flex-direction:column; align-items:flex-start; } .p-metric { padding:15px; } .p-metric strong { font-size:23px; } .products-top-actions { width:100%; } .products-top-actions .admin-btn { flex:1; } }
 </style>
 {% endblock %}
 
-
 {% block content %}
 <div class="products-page">
-
-    <!-- HEADER HALAMAN -->
-    <div class="products-top">
+    <header class="products-top">
         <div>
-            <h1>Produk & Stok</h1>
-            <p>
-                Kelola katalog produk busana, varian,
-                dan inventori fisik gudang.
-            </p>
+            <h1>Produk &amp; Stok</h1>
+            <p>Kelola katalog produk busana, varian, dan inventori fisik gudang.</p>
         </div>
-
-        <div class="d-flex gap-2 flex-wrap">
-
-            <a href="{{ url_for('shop.catalog_all') }}"
-               target="_blank"
-               class="p-btn secondary">
-                LIHAT TOKO
-                <i class="bi bi-box-arrow-up-right"></i>
-            </a>
-
-            <a href="{{ url_for('admin.product_create') }}"
-               class="p-btn">
-                <i class="bi bi-plus-lg"></i>
-                TAMBAH PRODUK
-            </a>
-
+        <div class="products-top-actions">
+            <a href="{{ url_for('shop.catalog_all') }}" target="_blank" rel="noopener noreferrer" class="admin-btn secondary"><i class="bi bi-box-arrow-up-right"></i> Lihat Toko</a>
+            <a href="{{ url_for('admin.product_create') }}" class="admin-btn"><i class="bi bi-plus-lg"></i> Tambah Produk</a>
         </div>
-    </div>
+    </header>
 
+    <section class="p-metrics" aria-label="Ringkasan stok">
+        <div class="p-metric"><small>Total SKU</small><strong>{{ count }}</strong><span>Seluruh produk terdaftar</span></div>
+        <div class="p-metric"><small>Stok Aman</small><strong>{{ safe_count }}</strong><span>Produk di atas batas minimum</span></div>
+        <div class="p-metric danger"><small>Stok Menipis</small><strong>{{ low_count }}</strong><span>Produk perlu restock</span></div>
+        <div class="p-metric"><small>Unit Gudang</small><strong>{{ unit_count }}</strong><span>Total seluruh ukuran dan warna</span></div>
+    </section>
 
-    <!-- RINGKASAN INVENTORI -->
-    <div class="p-metrics">
-
-        <div class="p-metric">
-            <small>TOTAL SKU</small>
-            <strong>{{ count }}</strong>
-            <span>Seluruh produk terdaftar</span>
-        </div>
-
-        <div class="p-metric">
-            <small>STOK AMAN</small>
-            <strong>{{ safe_count }}</strong>
-            <span>Produk di atas batas minimum</span>
-        </div>
-
-        <div class="p-metric danger">
-            <small>STOK MENIPIS</small>
-            <strong>{{ low_count }}</strong>
-            <span>Produk perlu restock</span>
-        </div>
-
-        <div class="p-metric">
-            <small>UNIT GUDANG</small>
-            <strong>{{ unit_count }}</strong>
-            <span>Total seluruh ukuran dan warna</span>
-        </div>
-
-    </div>
-
-
-    <!-- AREA TABEL DAN PERINGATAN -->
     <div class="p-content">
-
-        <!-- TABEL PRODUK -->
-        <div class="p-panel">
-
-            <!-- PENCARIAN DAN FILTER -->
-            <form class="p-search"
-                  method="GET"
-                  action="{{ url_for('admin.products') }}">
-
-                <input
-                    type="search"
-                    name="q"
-                    value="{{ request.args.get('q', '') }}"
-                    placeholder="Cari nama produk, SKU, kategori..."
-                    aria-label="Cari produk"
-                >
-
-                <select name="category" aria-label="Kategori">
+        <section class="p-panel" aria-label="Daftar produk">
+            <form class="p-search" method="GET" action="{{ url_for('admin.products') }}">
+                <input type="search" name="q" value="{{ request.args.get('q', '') }}" placeholder="Cari nama produk, SKU, kategori..." aria-label="Cari produk">
+                <select name="category" aria-label="Kategori produk">
                     <option value="">Semua Kategori</option>
-
-                    <option value="women"
-                        {{ 'selected' if category == 'women' }}>
-                        Women
-                    </option>
-
-                    <option value="men"
-                        {{ 'selected' if category == 'men' }}>
-                        Men
-                    </option>
-
-                    <option value="unisex"
-                        {{ 'selected' if category == 'unisex' }}>
-                        Unisex
-                    </option>
+                    {% for value, label in [('women','Women'), ('men','Men'), ('unisex','Unisex')] %}
+                    <option value="{{ value }}" {{ 'selected' if category == value else '' }}>{{ label }}</option>
+                    {% endfor %}
                 </select>
-
-                <select name="status" aria-label="Status">
+                <select name="status" aria-label="Status produk">
                     <option value="">Semua Status</option>
-
-                    <option value="published"
-                        {{ 'selected' if status == 'published' }}>
-                        Published
-                    </option>
-
-                    <option value="draft"
-                        {{ 'selected' if status == 'draft' }}>
-                        Draft
-                    </option>
+                    {% for value, label in [('published','Published'), ('draft','Draft')] %}
+                    <option value="{{ value }}" {{ 'selected' if status == value else '' }}>{{ label }}</option>
+                    {% endfor %}
                 </select>
-
-                <button type="submit" title="Cari Produk">
-                    <i class="bi bi-search"></i>
-                </button>
-
+                <button type="submit" aria-label="Cari produk" title="Cari Produk"><i class="bi bi-search"></i></button>
             </form>
 
-
-            <!-- TABEL -->
             <div class="p-table-wrap">
-
                 <table class="p-table">
-
-                    <thead>
-                        <tr>
-                            <th>Produk</th>
-                            <th>SKU</th>
-                            <th>Harga</th>
-                            <th>Stok & Status</th>
-                            <th style="text-align:right;">
-                                Aksi
-                            </th>
-                        </tr>
-                    </thead>
-
+                    <thead><tr><th>Produk</th><th>SKU</th><th>Harga</th><th>Stok &amp; Status</th><th style="text-align:right">Aksi</th></tr></thead>
                     <tbody>
-
                         {% for product in products %}
-
                         <tr>
-
-                            <!-- FOTO DAN NAMA PRODUK -->
                             <td>
                                 <div class="p-product">
-
                                     {% if product.main_image %}
-
-                                    <img
-                                        class="p-photo"
-                                        src="{{ url_for('static', filename=product.main_image) }}"
-                                        alt="{{ product.name }}"
-                                    >
-
+                                    <img class="p-photo" src="{{ url_for('static', filename=product.main_image) }}" alt="{{ product.name }}" loading="lazy">
                                     {% else %}
-
-                                    <div class="p-photo d-flex align-items-center justify-content-center">
-                                        <i class="bi bi-image"></i>
-                                    </div>
-
+                                    <div class="p-photo d-flex align-items-center justify-content-center"><i class="bi bi-image"></i></div>
                                     {% endif %}
-
-                                    <div>
-                                        <b>{{ product.name }}</b>
-
-                                        <span class="p-muted">
-                                            {{ product.category|upper }}
-                                            -
-                                            {{ product.subcategory }}
-                                        </span>
-                                    </div>
-
+                                    <div><b>{{ product.name }}</b><span class="p-muted">{{ product.category|upper }} - {{ product.subcategory }}</span></div>
                                 </div>
                             </td>
-
-
-                            <!-- SKU -->
+                            <td><span class="p-muted">{{ product.sku }}</span></td>
+                            <td><strong>Rp {{ '{:,}'.format(product.price).replace(',', '.') }}</strong></td>
                             <td>
-                                <span class="p-muted">
-                                    {{ product.sku }}
-                                </span>
-                            </td>
-
-
-                            <!-- HARGA -->
-                            <td>
-                                <b>
-                                    Rp {{ '{:,}'.format(product.price).replace(',', '.') }}
-                                </b>
-                            </td>
-
-
-                            <!-- STOK DAN STATUS -->
-                            <td>
-
                                 {% if product.status == 'draft' %}
-
-                                <span class="p-pill draft">
-                                    Draft - {{ product.total_stock }} pcs
-                                </span>
-
+                                <span class="p-pill draft">Draft - {{ product.total_stock }} pcs</span>
                                 {% elif product.low_stock_variants %}
-
-                                <span class="p-pill low">
-                                    {{ product.total_stock }} pcs
-                                    - Stok tipis
-                                </span>
-
+                                <span class="p-pill low">{{ product.total_stock }} pcs - Stok tipis</span>
                                 {% else %}
-
-                                <span class="p-pill safe">
-                                    {{ product.total_stock }} pcs
-                                    - Aman
-                                </span>
-
+                                <span class="p-pill safe">{{ product.total_stock }} pcs - Aman</span>
                                 {% endif %}
-
                             </td>
-
-
-                            <!-- TOMBOL AKSI -->
                             <td>
-
                                 <div class="p-actions">
-
-                                    <!-- EDIT -->
-                                    <a
-                                        class="p-icon"
-                                        title="Edit Produk"
-                                        aria-label="Edit Produk"
-                                        href="{{ url_for('admin.product_edit', product_id=product.id) }}"
-                                    >
-                                        <i class="bi bi-pencil-square"></i>
-                                    </a>
-
-
-                                    <!-- TAMBAH STOK -->
-                                    <a
-                                        class="p-icon"
-                                        title="Tambah Stok"
-                                        aria-label="Tambah Stok"
-                                        href="{{ url_for('admin.product_stock', product_id=product.id) }}"
-                                    >
-                                        <i class="bi bi-boxes"></i>
-                                    </a>
-
-
-                                    <!-- DELETE -->
-                                    <form
-                                        method="POST"
-                                        action="{{ url_for('admin.product_delete', product_id=product.id) }}"
-                                        onsubmit="return confirm('Yakin ingin menghapus produk ini secara permanen?');"
-                                    >
-
+                                    <a class="p-icon" href="{{ url_for('admin.product_edit', product_id=product.id) }}" title="Edit Produk" aria-label="Edit Produk"><i class="bi bi-pencil-square"></i></a>
+                                    <a class="p-icon" href="{{ url_for('admin.product_stock', product_id=product.id) }}" title="Tambah Stok" aria-label="Tambah Stok"><i class="bi bi-boxes"></i></a>
+                                    <form method="POST" action="{{ url_for('admin.product_delete', product_id=product.id) }}" onsubmit="return confirm('Yakin ingin menghapus produk ini secara permanen?')">
                                         {{ csrf_form.hidden_tag() }}
-
-                                        <button
-                                            class="p-icon delete"
-                                            type="submit"
-                                            title="Hapus Produk"
-                                            aria-label="Hapus Produk"
-                                        >
-                                            <i class="bi bi-trash3"></i>
-                                        </button>
-
+                                        <button class="p-icon delete" type="submit" title="Hapus Produk" aria-label="Hapus Produk"><i class="bi bi-trash3"></i></button>
                                     </form>
-
                                 </div>
-
                             </td>
-
                         </tr>
-
-
                         {% else %}
-
-                        <!-- TAMPILAN SAAT PRODUK BELUM ADA -->
-                        <tr>
-                            <td colspan="5">
-
-                                <div class="p-empty">
-
-                                    <i class="bi bi-box-seam"></i>
-
-                                    <b>Belum ada produk</b>
-
-                                    <p class="mb-0 mt-2">
-                                        Klik Tambah Produk untuk
-                                        memasukkan produk pertamamu.
-                                    </p>
-
-                                </div>
-
-                            </td>
-                        </tr>
-
+                        <tr><td colspan="5"><div class="p-empty"><i class="bi bi-box-seam"></i><strong>Belum ada produk</strong><p class="mb-0 mt-2">Klik Tambah Produk untuk memasukkan produk pertamamu.</p></div></td></tr>
                         {% endfor %}
-
                     </tbody>
-
                 </table>
-
             </div>
+        </section>
 
-        </div>
-
-
-        <!-- PANEL PERINGATAN STOK -->
         <aside class="p-panel p-side">
-
-            <h3>
-                <i
-                    class="bi bi-exclamation-circle-fill"
-                    style="color:#b10c20;">
-                </i>
-                Peringatan Stok Menipis
-            </h3>
-
-            <p>
-                {{ alert_count }} varian berada di bawah
-                atau sama dengan batas minimum.
-                Lakukan restock agar pesanan
-                tidak terkendala.
-            </p>
-
-
+            <h2><i class="bi bi-exclamation-circle-fill" style="color:#A30B14"></i> Peringatan Stok Menipis</h2>
+            <p>{{ alert_count }} varian berada di bawah atau sama dengan batas minimum. Lakukan restock agar pesanan tidak terkendala.</p>
             {% for product, variant in alerts %}
-
             <div class="p-alert">
-
-                <div>
-                    <b>{{ product.name }}</b>
-
-                    <small>
-                        {{ variant.color_name }}
-                        - Size {{ variant.size }}
-                    </small>
-                </div>
-
-                <div>
-                    <strong>
-                        {{ variant.stock }} pcs
-                    </strong>
-
-                    <small>
-                        Min. {{ variant.minimum_stock }} pcs
-                    </small>
-                </div>
-
+                <div><strong style="color:#202126">{{ product.name }}</strong><small>{{ variant.color_name }} - Size {{ variant.size }}</small></div>
+                <div class="text-end"><strong>{{ variant.stock }} pcs</strong><small>Min. {{ variant.minimum_stock }} pcs</small></div>
             </div>
-
             {% else %}
-
-            <p>
-                Belum ada peringatan stok.
-            </p>
-
+            <p>Belum ada peringatan stok.</p>
             {% endfor %}
-
-
-            <a
-                class="p-btn mt-3 w-100"
-                href="{{ url_for('admin.products', status='published') }}"
-            >
-                LIHAT PRODUK AKTIF
-            </a>
-
+            <a class="admin-btn secondary w-100 mt-3" href="{{ url_for('admin.products', status='published') }}">Lihat Produk Aktif</a>
         </aside>
-
     </div>
-
 </div>
 {% endblock %}
