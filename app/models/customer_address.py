@@ -2,6 +2,7 @@
 from datetime import datetime, timezone
 
 from app.extensions import db
+from app.services.customer_private_field import CustomerPrivateField
 
 def utc_now():
     return datetime.now(timezone.utc)
@@ -11,11 +12,11 @@ class CustomerAddress(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey("users.id"), unique=True, nullable=False, index=True)
 
-    recipient_name = db.Column(db.String(100), nullable=False)
-    phone = db.Column(db.String(25), nullable=False)
+    recipient_name = CustomerPrivateField("recipient_name", required=True)
+    phone = CustomerPrivateField("phone", required=True)
     city = db.Column(db.String(100), nullable=False)
     postal_code = db.Column(db.String(5))
-    full_address = db.Column(db.String(500), nullable=False)
+    full_address = CustomerPrivateField("full_address", required=True)
 
     recipient_name_enc = db.Column(db.Text, nullable=True)
     phone_enc = db.Column(db.Text, nullable=True)

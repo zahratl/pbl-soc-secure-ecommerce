@@ -15,7 +15,6 @@ from app.models.wishlist import WishlistItem
 from app.services.audit_logger import log_security_event, setup_audit_logger
 from app.services.customer_encryption_reader import read_customer_private
 from app.models.customer_address import CustomerAddress
-from app.services.customer_encryption_sync import register_customer_encryption_sync
 
 def create_app(config_mode=None):
     app = Flask(__name__)
@@ -29,7 +28,6 @@ def create_app(config_mode=None):
 
     db.init_app(app)
     app.add_template_global(read_customer_private, name="private_field")
-    register_customer_encryption_sync()
     login_manager.init_app(app)
     csrf.init_app(app)
     limiter.init_app(app)
