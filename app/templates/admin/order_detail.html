@@ -350,10 +350,10 @@
 
                 <div class="order-info">
                     <div class="order-info-line">
-                        <span>Nama</span><strong>{{ order.customer_name }}</strong>
+                        <span>Nama</span><strong>{{ private_field(order, 'customer_name') }}</strong>
                     </div>
                     <div class="order-info-line">
-                        <span>Email</span><strong>{{ order.customer_email }}</strong>
+                        <span>Email</span><strong>{{ private_field(order, 'customer_email') }}</strong>
                     </div>
                     <div class="order-info-line">
                         <span>Customer ID</span><strong>#{{ order.user_id }}</strong>
@@ -366,10 +366,10 @@
 
                 <div class="order-info">
                     <div class="order-info-line">
-                        <span>Penerima</span><strong>{{ order.recipient_name }}</strong>
+                        <span>Penerima</span><strong>{{ private_field(order, 'recipient_name') }}</strong>
                     </div>
                     <div class="order-info-line">
-                        <span>Telepon</span><strong>{{ order.phone }}</strong>
+                        <span>Telepon</span><strong>{{ private_field(order, 'phone') }}</strong>
                     </div>
                     <div class="order-info-line">
                         <span>Kota</span><strong>{{ order.city }}</strong>
@@ -377,7 +377,7 @@
                 </div>
 
                 <hr>
-                <div class="order-address">{{ order.full_address }}</div>
+                <div class="order-address">{{ private_field(order, 'full_address') }}</div>
             </section>
 
             <section class="order-card">

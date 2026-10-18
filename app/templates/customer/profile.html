@@ -245,13 +245,13 @@
                             <div class="kwp-field">
                                 <label class="kwp-label" for="profilePhone">Nomor WhatsApp / HP</label>
                                 <input class="kwp-input" id="profilePhone" type="tel" name="phone"
-                                       value="{{ profile.phone if profile and profile.phone else '' }}" maxlength="25">
+                                       value="{{ private_field(profile, 'phone') if profile and private_field(profile, 'phone') else '' }}" maxlength="25">
                             </div>
 
                             <div class="kwp-field">
                                 <label class="kwp-label" for="birthDate">Tanggal Lahir</label>
                                 <input class="kwp-input" id="birthDate" type="date" name="birth_date"
-                                       value="{{ profile.birth_date.isoformat() if profile and profile.birth_date else '' }}">
+                                       value="{{ private_field(profile, 'birth_date').isoformat() if profile and private_field(profile, 'birth_date') else '' }}">
                             </div>
                         </div>
 
@@ -289,15 +289,15 @@
                     {% if address %}
                     <div class="kwp-address-summary">
                         <strong><i class="bi bi-geo-alt me-1"></i> Alamat Utama Tersimpan</strong>
-                        <p>{{ address.recipient_name }} · {{ address.phone }}</p>
-                        <p>{{ address.full_address }}</p>
+                        <p>{{ private_field(address, 'recipient_name') }} · {{ private_field(address, 'phone') }}</p>
+                        <p>{{ private_field(address, 'full_address') }}</p>
                         <p>{{ address.city }}{% if address.postal_code %}, {{ address.postal_code }}{% endif %}</p>
                     </div>
                     {% elif fallback_order %}
                     <div class="kwp-address-summary">
                         <strong>Alamat dari transaksi terakhir</strong>
-                        <p>{{ fallback_order.recipient_name }} · {{ fallback_order.phone }}</p>
-                        <p>{{ fallback_order.full_address }} · {{ fallback_order.city }}</p>
+                        <p>{{ private_field(fallback_order, 'recipient_name') }} · {{ private_field(fallback_order, 'phone') }}</p>
+                        <p>{{ private_field(fallback_order, 'full_address') }} · {{ fallback_order.city }}</p>
                         <p class="kwp-muted">Periksa data berikut lalu simpan sebagai alamat utama.</p>
                     </div>
                     {% else %}
@@ -314,13 +314,13 @@
                             <div class="kwp-field">
                                 <label class="kwp-label" for="recipientName">Nama Penerima</label>
                                 <input class="kwp-input" id="recipientName" name="recipient_name" maxlength="100"
-                                       value="{{ address.recipient_name if address else fallback_order.recipient_name if fallback_order else display_name }}" required>
+                                       value="{{ private_field(address, 'recipient_name') if address else private_field(fallback_order, 'recipient_name') if fallback_order else display_name }}" required>
                             </div>
 
                             <div class="kwp-field">
                                 <label class="kwp-label" for="recipientPhone">Nomor WhatsApp</label>
                                 <input class="kwp-input" id="recipientPhone" name="phone" maxlength="25"
-                                       value="{{ address.phone if address else fallback_order.phone if fallback_order else profile.phone if profile and profile.phone else '' }}" required>
+                                       value="{{ private_field(address, 'phone') if address else private_field(fallback_order, 'phone') if fallback_order else private_field(profile, 'phone') if profile and private_field(profile, 'phone') else '' }}" required>
                             </div>
 
                             <div class="kwp-field">
@@ -340,7 +340,7 @@
                             <div class="kwp-field" style="grid-column:1/-1">
                                 <label class="kwp-label" for="fullAddress">Alamat Lengkap</label>
                                 <textarea class="kwp-input" id="fullAddress" name="full_address" maxlength="500" rows="3"
-                                          required>{{ address.full_address if address else fallback_order.full_address if fallback_order else '' }}</textarea>
+                                          required>{{ private_field(address, 'full_address') if address else private_field(fallback_order, 'full_address') if fallback_order else '' }}</textarea>
                             </div>
                         </div>
 
@@ -520,9 +520,9 @@
                                     <summary>Lihat detail &amp; alamat pesanan</summary>
                                     <p>
                                         <strong>Alamat saat pemesanan:</strong>
-                                        {{ order.recipient_name }},
-                                        {{ order.phone }},
-                                        {{ order.full_address }},
+                                        {{ private_field(order, 'recipient_name') }},
+                                        {{ private_field(order, 'phone') }},
+                                        {{ private_field(order, 'full_address') }},
                                         {{ order.city }}
                                     </p>
                                     <p>

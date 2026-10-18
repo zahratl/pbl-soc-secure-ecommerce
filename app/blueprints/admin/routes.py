@@ -19,7 +19,9 @@ from app.models.payment import PaymentTransaction
 from app.models.product import Product, ProductVariant
 from app.models.user import User
 from app.services.audit_logger import log_security_event
+from app.services.customer_encryption_reader import read_customer_private
 from .forms import ProductForm, SIZES, parse_variants
+from app.models.customer_address import CustomerAddress
 
 admin_bp = Blueprint('admin', __name__, url_prefix='/admin')
 
@@ -242,7 +244,9 @@ def orders_index():
         if status == 'stock_issue' and order.fulfillment_status != 'stock_issue' and not (order.payment_status == 'paid' and order.stock_deducted_at is None):
             continue
 
-        if search.casefold() not in f'{order.order_number} {order.customer_name} {order.customer_email}'.casefold():
+        order_name = read_customer_private(order, 'customer_name') or ''
+        order_email = read_customer_private(order, 'customer_email') or ''
+        if search.casefold() not in f'{order.order_number} {order_name} {order_email}'.casefold():
             continue
 
         payment_label, payment_style = _order_payment_view(order)
@@ -251,8 +255,8 @@ def orders_index():
         orders.append({
             'number': order.order_number,
             'created_at_text': _order_date(order.created_at),
-            'customer_name': order.customer_name,
-            'customer_email': order.customer_email,
+            'customer_name': order_name,
+            'customer_email': order_email,
             'item_count': sum(item.quantity for item in order.items),
             'total_text': _rupiah(order.total),
             'payment_label': payment_label,
@@ -269,7 +273,8 @@ def orders_index():
         if status and payment.transaction_status != status:
             continue
 
-        if search.casefold() not in f'{payment.midtrans_transaction_id or ""} {order.order_number} {order.customer_email}'.casefold():
+        order_email = read_customer_private(order, 'customer_email') or ''
+        if search.casefold() not in f'{payment.midtrans_transaction_id or ""} {order.order_number} {order_email}'.casefold():
             continue
 
         status_label, status_style = _payment_transaction_view(payment)
@@ -609,9 +614,9 @@ def _customer_rows():
             'id': user.id,
             'name': (profile.display_name if profile else None) or user.name or user.email.split('@')[0],
             'email': user.email,
-            'phone': profile.phone if profile else None,
+            'phone': read_customer_private(profile, 'phone') if profile else None,
             'gender': profile.gender if profile else None,
-            'birth_date': profile.birth_date if profile else None,
+            'birth_date': read_customer_private(profile, 'birth_date') if profile else None,
             'avatar': profile.avatar_filename if profile else None,
             'verified': _account_verified(user)
         })
@@ -673,7 +678,6 @@ def users_index():
         sort=sort
     )
 
-
 @admin_bp.route('/users/<int:user_id>/edit', methods=['GET', 'POST'])
 @admin_only
 def user_edit(user_id):
@@ -723,12 +727,41 @@ def user_edit(user_id):
         db.session.commit()
 
         flash('Data customer berhasil diperbarui.', 'success')
-
         return redirect(url_for('admin.user_edit', user_id=user.id))
 
     account = next(item for item in _customer_rows() if item['id'] == user.id)
 
-    return render_template('admin/user_edit.html', account=account)
+    customer_orders = Order.query.filter_by(user_id=user.id).order_by(Order.id.desc()).all()
+    paid_orders = [order for order in customer_orders if order.payment_status == 'paid']
+
+    order_stats = {
+        'total_orders': len(customer_orders),
+        'paid_orders': len(paid_orders),
+        'total_spent': sum(int(order.total or 0) for order in paid_orders),
+        'items_bought': sum(int(item.quantity or 0) for order in paid_orders for item in order.items)
+    }
+
+    saved = CustomerAddress.query.filter_by(user_id=user.id).first()
+    saved_address = None
+
+    if saved:
+        saved_address = {
+            'recipient_name': read_customer_private(saved, 'recipient_name'),
+            'phone': read_customer_private(saved, 'phone'),
+            'full_address': read_customer_private(saved, 'full_address'),
+            'city': saved.city,
+            'postal_code': saved.postal_code or ''
+        }
+
+    return render_template(
+        'admin/user_edit.html',
+        account=account,
+        customer_orders=customer_orders,
+        order_stats=order_stats,
+        saved_address=saved_address,
+        rupiah=_rupiah,
+        format_order_date=_order_date
+    )
 
 
 def _csv_safe(value):

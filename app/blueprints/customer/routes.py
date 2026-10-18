@@ -14,6 +14,7 @@ from app.models.customer_address import CustomerAddress, validate_address
 from app.models.customer_profile import CustomerProfile
 from app.models.order import Order
 from app.models.shipment import OrderShipment
+from app.services.customer_encryption_reader import read_customer_private
 
 
 customer_bp = Blueprint('customer', __name__)
@@ -186,7 +187,7 @@ def my_profile():
                     profile = CustomerProfile(user_id=current_user.id)
                     db.session.add(profile)
 
-                if not profile.phone:
+                if not read_customer_private(profile, 'phone'):
                     profile.phone = fields['phone']
 
                 db.session.commit()

@@ -24,6 +24,7 @@ from app.models.payment import PaymentTransaction
 from app.models.product import Product, ProductVariant
 from app.models.shipment import OrderShipment
 from app.models.wishlist import WishlistItem
+from app.services.customer_encryption_reader import read_customer_private
 
 
 cart_bp = Blueprint('cart', __name__)
@@ -138,32 +139,38 @@ def checkout_items(selected_ids=None):
 
 
 def current_address():
-    saved = CustomerAddress.query.filter_by(user_id=current_user.id).first()
+    saved = CustomerAddress.query.filter_by(
+        user_id=current_user.id
+    ).first()
 
     if saved:
-        return saved.as_dict()
+        return {
+            'recipient_name': read_customer_private(
+                saved, 'recipient_name'
+            ),
+            'phone': read_customer_private(saved, 'phone'),
+            'city': saved.city,
+            'postal_code': saved.postal_code or '',
+            'full_address': read_customer_private(
+                saved, 'full_address'
+            ),
+        }
 
-    if session.get('shipping_address_user_id') == current_user.id:
-        previous = session.get('shipping_address') or {}
-
-        if all(previous.get(key) for key in ('recipient_name', 'phone', 'city', 'full_address')):
-            return {
-                'recipient_name': previous['recipient_name'],
-                'phone': previous['phone'],
-                'city': previous['city'],
-                'postal_code': previous.get('postal_code', ''),
-                'full_address': previous['full_address']
-            }
-
-    last_order = Order.query.filter_by(user_id=current_user.id).order_by(Order.id.desc()).first()
+    last_order = Order.query.filter_by(
+        user_id=current_user.id
+    ).order_by(Order.id.desc()).first()
 
     if last_order:
         return {
-            'recipient_name': last_order.recipient_name,
-            'phone': last_order.phone,
+            'recipient_name': read_customer_private(
+                last_order, 'recipient_name'
+            ),
+            'phone': read_customer_private(last_order, 'phone'),
             'city': last_order.city,
             'postal_code': '',
-            'full_address': last_order.full_address
+            'full_address': read_customer_private(
+                last_order, 'full_address'
+            ),
         }
 
     return None
@@ -769,7 +776,7 @@ def save_address():
         profile = CustomerProfile(user_id=current_user.id)
         db.session.add(profile)
 
-    if not profile.phone:
+    if not read_customer_private(profile, 'phone'):
         profile.phone = address_data['phone']
 
     try:
@@ -780,14 +787,14 @@ def save_address():
 
         return jsonify({'status': 'error', 'message': 'Alamat gagal disimpan ke database.'}), 500
 
-    session['shipping_address'] = saved.as_dict()
-    session['shipping_address_user_id'] = current_user.id
+    session.pop('shipping_address', None)
+    session.pop('shipping_address_user_id', None)
     session.pop('pending_snap', None)
 
     return jsonify({
         'status': 'success',
         'message': 'Alamat tersimpan di Profil dan Checkout.',
-        'address': saved.as_dict()
+        'address': current_address()
     })
 
 

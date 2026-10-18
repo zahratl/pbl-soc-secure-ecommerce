@@ -1,723 +1,286 @@
-{% extends "admin/admin_base.html" %}
-
-{% block title %}
-Edit Akun Customer - Admin KURO WEAR
-{% endblock %}
-
+{% extends 'admin/admin_base.html' %}
+{% block title %}Edit Akun Customer - Admin KURO WEAR{% endblock %}
 
 {% block extra_css %}
 <style>
-    .account-edit {
-        color: #161616;
-        font-family: 'Plus Jakarta Sans', sans-serif;
-    }
-
-    .account-edit * {
-        box-sizing: border-box;
-    }
-
-    .ae-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: flex-end;
-        gap: 20px;
-        flex-wrap: wrap;
-        padding-bottom: 24px;
-        border-bottom: 1px solid #e5e7eb;
-        margin-bottom: 28px;
-    }
-
-    .ae-breadcrumb {
-        font-size: 11px;
-        letter-spacing: 1px;
-        color: #666;
-        margin-bottom: 12px;
-        text-transform: uppercase;
-    }
-
-    .ae-back {
-        display: inline-flex;
-        align-items: center;
-        gap: 8px;
-        font-size: 13px;
-        color: #161616;
-        text-decoration: none;
-    }
-
-    .ae-back:hover {
-        color: #9e0b0f;
-    }
-
-    .ae-button {
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        gap: 9px;
-        border: 0;
-        padding: 13px 18px;
-        background: #dcd5ff;
-        color: #161616;
-        font-size: 11px;
-        font-weight: 700;
-        letter-spacing: .5px;
-        cursor: pointer;
-        text-decoration: none;
-    }
-
-    .ae-button:hover {
-        background: #c8bdfd;
-        color: #161616;
-    }
-
-    .ae-button-neutral {
-        background: #f5f2eb;
-    }
-
-    .ae-layout {
-        display: grid;
-        grid-template-columns: minmax(0, 2fr) minmax(280px, 1fr);
-        gap: 24px;
-        align-items: start;
-    }
-
-    .ae-card {
-        background: #fff;
-        border: 1px solid #ececec;
-        padding: 24px;
-        margin-bottom: 24px;
-    }
-
-    .ae-profile {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        gap: 18px;
-        flex-wrap: wrap;
-    }
-
-    .ae-profile-left {
-        display: flex;
-        align-items: center;
-        gap: 16px;
-    }
-
-    .ae-avatar {
-        width: 78px;
-        height: 78px;
-        border-radius: 50%;
-        background: #f0eee8;
-        border: 1px solid #ddd;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        overflow: hidden;
-        flex-shrink: 0;
-    }
-
-    .ae-avatar img {
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-    }
-
-    .ae-name {
-        font-size: 19px;
-        font-weight: 700;
-        margin: 0 0 6px;
-    }
-
-    .ae-subtext {
-        font-size: 12px;
-        color: #777;
-        line-height: 1.7;
-        overflow-wrap: anywhere;
-    }
-
-    .ae-badge {
-        display: inline-flex;
-        align-items: center;
-        gap: 5px;
-        font-size: 10px;
-        font-weight: 700;
-        padding: 5px 9px;
-        background: #f0eee9;
-        color: #555;
-    }
-
-    .ae-badge.success {
-        background: #d1fae5;
-        color: #047857;
-    }
-
-    .ae-badge.danger {
-        background: #ffe1e1;
-        color: #a10a16;
-    }
-
-    .ae-card-title {
-        font-size: 16px;
-        font-weight: 700;
-        margin-bottom: 5px;
-    }
-
-    .ae-card-description {
-        font-size: 12px;
-        line-height: 1.7;
-        color: #777;
-        padding-bottom: 18px;
-        border-bottom: 1px solid #eee;
-        margin-bottom: 22px;
-    }
-
-    .ae-form-grid {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 20px;
-    }
-
-    .ae-field {
-        display: flex;
-        flex-direction: column;
-        gap: 9px;
-    }
-
-    .ae-field label {
-        font-size: 11px;
-        font-weight: 700;
-        letter-spacing: .5px;
-        text-transform: uppercase;
-    }
-
-    .ae-field input,
-    .ae-field select {
-        width: 100%;
-        min-height: 42px;
-        border: 1px solid #b9bdc4;
-        padding: 11px 13px;
-        background: #fff;
-        color: #161616;
-        font-size: 13px;
-        outline: none;
-    }
-
-    .ae-field input:focus,
-    .ae-field select:focus {
-        border-color: #161616;
-    }
-
-    .ae-field input[readonly] {
-        background: #f6f6f6;
-        color: #777;
-        cursor: not-allowed;
-    }
-
-    .ae-hint {
-        font-size: 11px;
-        color: #999;
-        line-height: 1.6;
-    }
-
-    .ae-info-row {
-        display: flex;
-        justify-content: space-between;
-        gap: 14px;
-        padding: 14px 0;
-        border-bottom: 1px solid #eee;
-        font-size: 12px;
-    }
-
-    .ae-info-row span:first-child {
-        color: #777;
-    }
-
-    .ae-info-row span:last-child {
-        font-weight: 600;
-        text-align: right;
-        overflow-wrap: anywhere;
-    }
-
-    .ae-empty {
-        padding: 30px 15px;
-        text-align: center;
-        color: #999;
-    }
-
-    .ae-empty i {
-        display: block;
-        font-size: 30px;
-        margin-bottom: 12px;
-    }
-
-    .ae-empty p {
-        font-size: 12px;
-        line-height: 1.7;
-    }
-
-    .ae-save-bottom {
-        display: flex;
-        justify-content: flex-end;
-        gap: 12px;
-        margin-top: 20px;
-    }
-
-    @media (max-width: 1050px) {
-        .ae-layout {
-            grid-template-columns: 1fr;
-        }
-    }
-
-    @media (max-width: 600px) {
-        .ae-form-grid {
-            grid-template-columns: 1fr;
-        }
-
-        .ae-profile-left {
-            align-items: flex-start;
-        }
-
-        .ae-header {
-            align-items: flex-start;
-        }
-    }
+.account-edit{color:#161616;font-family:'Plus Jakarta Sans',sans-serif}
+.account-edit *{box-sizing:border-box}
+.ae-header{display:flex;justify-content:space-between;align-items:flex-end;gap:20px;flex-wrap:wrap;padding-bottom:24px;border-bottom:1px solid #e5e7eb;margin-bottom:28px}
+.ae-breadcrumb{font-size:11px;letter-spacing:1px;color:#666;margin-bottom:12px;text-transform:uppercase}
+.ae-back{display:inline-flex;align-items:center;gap:8px;font-size:13px;color:#161616;text-decoration:none}
+.ae-back:hover{color:#9e0b0f}
+.ae-button{display:inline-flex;align-items:center;justify-content:center;gap:9px;border:0;border-radius:7px;padding:13px 18px;background:#dcd5ff;color:#161616;font-size:11px;font-weight:700;letter-spacing:.5px;cursor:pointer;text-decoration:none}
+.ae-button:hover{background:#c8bdfd;color:#161616}
+.ae-button-neutral{background:#f5f2eb}
+.ae-layout{display:grid;grid-template-columns:minmax(0,2fr) minmax(280px,1fr);gap:24px;align-items:start}
+.ae-layout>*{min-width:0}
+.ae-card{background:#fff;border:1px solid #ececec;border-radius:7px;padding:24px;margin-bottom:24px}
+.ae-profile{display:flex;justify-content:space-between;align-items:center;gap:18px;flex-wrap:wrap}
+.ae-profile-left{display:flex;align-items:center;gap:16px;min-width:0}
+.ae-avatar{width:78px;height:78px;border-radius:50%;background:#f0eee8;border:1px solid #ddd;display:flex;align-items:center;justify-content:center;overflow:hidden;flex-shrink:0}
+.ae-avatar img{width:100%;height:100%;object-fit:cover}
+.ae-name{font-size:19px;font-weight:700;margin:0 0 6px;overflow-wrap:anywhere}
+.ae-subtext{font-size:12px;color:#777;line-height:1.7;overflow-wrap:anywhere}
+.ae-badge{display:inline-flex;align-items:center;gap:5px;font-size:10px;font-weight:700;padding:5px 9px;border-radius:4px;background:#f0eee9;color:#555}
+.ae-badge.success{background:#d1fae5;color:#047857}
+.ae-badge.danger{background:#ffe1e1;color:#a10a16}
+.ae-badge.pending{background:#fff4df;color:#9b6500}
+.ae-card-title{font-size:16px;font-weight:700;margin:0 0 5px}
+.ae-card-description{font-size:12px;line-height:1.7;color:#777;padding-bottom:18px;border-bottom:1px solid #eee;margin-bottom:22px}
+.ae-form-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+.ae-field{display:flex;flex-direction:column;gap:9px;min-width:0}
+.ae-field label{font-size:11px;font-weight:700;letter-spacing:.5px;text-transform:uppercase}
+.ae-field input,.ae-field select{width:100%;min-height:42px;border:1px solid #b9bdc4;border-radius:5px;padding:11px 13px;background:#fff;color:#161616;font-size:13px;outline:none}
+.ae-field input:focus,.ae-field select:focus{border-color:#161616}
+.ae-field input[readonly]{background:#f6f6f6;color:#777;cursor:not-allowed}
+.ae-hint{font-size:11px;color:#999;line-height:1.6}
+.ae-info-row{display:flex;justify-content:space-between;gap:14px;padding:14px 0;border-bottom:1px solid #eee;font-size:12px}
+.ae-info-row span:first-child{color:#777}
+.ae-info-row span:last-child{font-weight:600;text-align:right;overflow-wrap:anywhere}
+.ae-empty{padding:24px 12px;text-align:center;color:#999}
+.ae-empty i{display:block;font-size:30px;margin-bottom:12px}
+.ae-empty p{font-size:12px;line-height:1.7;margin:0}
+.ae-save-bottom{display:flex;justify-content:flex-end;gap:12px;margin-top:20px}
+.ae-stat-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin:18px 0 20px}
+.ae-stat{background:#f8f7f4;border:1px solid #efede8;border-radius:7px;padding:13px;min-width:0}
+.ae-stat-label{font-size:10px;color:#727784;margin-bottom:7px}
+.ae-stat-value{font-size:17px;font-weight:750;overflow-wrap:anywhere;line-height:1.35}
+.ae-stat-value.money{font-size:13px}
+.ae-subheading{font-size:12px;font-weight:700;margin:0 0 12px}
+.ae-orders{display:grid;gap:12px;max-height:630px;overflow-y:auto;padding-right:3px}
+.ae-order{border:1px solid #e9e7e2;border-radius:7px;overflow:hidden}
+.ae-order-head{padding:12px;background:#faf9f6;display:flex;justify-content:space-between;align-items:flex-start;gap:8px;flex-wrap:wrap}
+.ae-order-id{font-size:11px;font-weight:700;overflow-wrap:anywhere;text-decoration:none;color:#161616}
+.ae-order-id:hover{color:#a10a16;text-decoration:underline}
+.ae-order-date{font-size:10px;color:#777;margin-top:4px}
+.ae-order-body{padding:12px}
+.ae-order-product{display:flex;gap:10px;padding:9px 0;border-bottom:1px solid #f0efeb;align-items:flex-start}
+.ae-order-product:first-child{padding-top:0}
+.ae-order-product:last-child{border-bottom:0}
+.ae-order-photo{width:45px;height:58px;object-fit:cover;border-radius:5px;background:#f2f0eb;flex-shrink:0}
+.ae-order-photo-empty{width:45px;height:58px;border-radius:5px;background:#f2f0eb;display:grid;place-items:center;color:#999;flex-shrink:0}
+.ae-order-product-info{min-width:0;flex:1}
+.ae-order-product-name{font-size:11px;font-weight:700;line-height:1.5;overflow-wrap:anywhere}
+.ae-order-product-meta{font-size:10px;color:#777;line-height:1.65;margin-top:3px}
+.ae-order-total{display:flex;justify-content:space-between;gap:8px;align-items:center;border-top:1px solid #eee;margin-top:10px;padding-top:11px;font-size:11px}
+.ae-order-total strong{font-size:12px}
+.ae-order-view{display:inline-block;margin-top:10px;color:#9e0b0f;font-size:11px;font-weight:700;text-decoration:none}
+.ae-order-view:hover{text-decoration:underline}
+.ae-address{background:#faf9f6;border:1px solid #eeeae3;border-radius:7px;padding:15px;overflow-wrap:anywhere}
+.ae-address-label{display:flex;align-items:center;gap:7px;color:#9e0b0f;font-size:11px;font-weight:700;margin-bottom:11px}
+.ae-address-name{font-size:13px;font-weight:700;margin-bottom:5px}
+.ae-address-phone,.ae-address-detail{font-size:12px;line-height:1.8;color:#575e70;margin:0}
+.ae-address-detail{white-space:pre-line;margin-top:8px}
+@media(max-width:1050px){.ae-layout{grid-template-columns:1fr}}
+@media(max-width:600px){.ae-form-grid{grid-template-columns:1fr}.ae-profile-left{align-items:flex-start}.ae-header{align-items:flex-start}.ae-card{padding:17px}.ae-save-bottom{flex-wrap:wrap}}
 </style>
 {% endblock %}
 
-
 {% block content %}
-
 <div class="account-edit">
-
-    <!-- HEADER -->
     <div class="ae-header">
-
         <div>
-            <div class="ae-breadcrumb">
-                AKUN & PENGGUNA /
-                DAFTAR AKUN /
-                EDIT AKUN #{{ account.id }}
-            </div>
-
-            <a
-                href="{{ url_for('admin.users_index') }}"
-                class="ae-back"
-            >
-                <i class="bi bi-arrow-left"></i>
-                Kembali ke Daftar Akun
-            </a>
+            <div class="ae-breadcrumb">AKUN &amp; PENGGUNA / DAFTAR AKUN / EDIT AKUN #{{ account.id }}</div>
+            <a href="{{ url_for('admin.users_index') }}" class="ae-back"><i class="bi bi-arrow-left"></i> Kembali ke Daftar Akun</a>
         </div>
-
-        <button
-            type="submit"
-            form="customerEditForm"
-            class="ae-button"
-        >
-            <i class="bi bi-floppy"></i>
-            SIMPAN PERUBAHAN AKUN
-        </button>
-
+        <button type="submit" form="customerEditForm" class="ae-button"><i class="bi bi-floppy"></i> SIMPAN PERUBAHAN AKUN</button>
     </div>
-
 
     <div class="ae-layout">
-
-        <!-- KOLOM KIRI -->
         <main>
-
-            <!-- INFORMASI AKUN -->
             <div class="ae-card">
-
                 <div class="ae-profile">
-
                     <div class="ae-profile-left">
-
-                        <!-- AVATAR -->
                         <div class="ae-avatar">
-
                             {% if account.avatar %}
-
-                            <img
-                                src="{{ url_for('static', filename='uploads/avatars/' ~ account.avatar) }}"
-                                alt="Avatar {{ account.name }}"
-                            >
-
+                            <img src="{{ url_for('static', filename='uploads/avatars/' ~ account.avatar) }}" alt="Avatar {{ account.name }}">
                             {% else %}
-
-                            <i
-                                class="bi bi-person-fill"
-                                style="font-size:36px;color:#999;"
-                            ></i>
-
+                            <i class="bi bi-person-fill" style="font-size:36px;color:#999;"></i>
                             {% endif %}
-
                         </div>
-
-                        <!-- IDENTITAS -->
                         <div>
-
-                            <h1 class="ae-name">
-                                {{ account.name }}
-                            </h1>
-
-                            <div class="ae-subtext">
-                                {{ account.email }}
-                            </div>
-
-                            <div class="ae-subtext">
-                                ID Customer #{{ account.id }}
-                            </div>
-
+                            <h1 class="ae-name">{{ account.name }}</h1>
+                            <div class="ae-subtext">{{ account.email }}</div>
+                            <div class="ae-subtext">ID Customer #{{ account.id }}</div>
                         </div>
-
                     </div>
-
-                    <!-- STATUS EMAIL -->
                     <div>
-
                         {% if account.verified is sameas true %}
-
-                        <span class="ae-badge success">
-                            <i class="bi bi-patch-check"></i>
-                            EMAIL TERVERIFIKASI
-                        </span>
-
+                        <span class="ae-badge success"><i class="bi bi-patch-check"></i> EMAIL TERVERIFIKASI</span>
                         {% elif account.verified is sameas false %}
-
-                        <span class="ae-badge danger">
-                            BELUM TERVERIFIKASI
-                        </span>
-
+                        <span class="ae-badge danger">BELUM TERVERIFIKASI</span>
                         {% else %}
-
-                        <span class="ae-badge">
-                            VERIFIKASI BELUM TERSEDIA
-                        </span>
-
+                        <span class="ae-badge">VERIFIKASI BELUM TERSEDIA</span>
                         {% endif %}
-
                     </div>
-
                 </div>
-
             </div>
 
-
-            <!-- FORM EDIT CUSTOMER -->
-            <form
-                id="customerEditForm"
-                method="POST"
-                action="{{ url_for('admin.user_edit', user_id=account.id) }}"
-            >
-
-                <!-- CSRF -->
-                <input
-                    type="hidden"
-                    name="csrf_token"
-                    value="{{ csrf_token() }}"
-                >
-
-
-                <!-- DATA PRIBADI -->
+            <form id="customerEditForm" method="POST" action="{{ url_for('admin.user_edit', user_id=account.id) }}">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                 <div class="ae-card">
-
-                    <h2 class="ae-card-title">
-                        Data Pribadi & Kontak
-                    </h2>
-
-                    <p class="ae-card-description">
-                        Perbarui informasi profil customer.
-                        Perubahan akan tersimpan di database
-                        dan ditampilkan pada halaman Profil Saya
-                        milik customer tersebut.
-                    </p>
-
-
+                    <h2 class="ae-card-title">Data Pribadi &amp; Kontak</h2>
+                    <p class="ae-card-description">Perbarui informasi profil customer. Perubahan akan tersimpan di database dan ditampilkan pada halaman Profil Saya milik customer tersebut.</p>
                     <div class="ae-form-grid">
-
-                        <!-- NAMA -->
                         <div class="ae-field">
-
-                            <label for="displayName">
-                                NAMA LENGKAP / TAMPILAN
-                            </label>
-
-                            <input
-                                type="text"
-                                id="displayName"
-                                name="display_name"
-                                value="{{ account.name }}"
-                                minlength="2"
-                                maxlength="100"
-                                required
-                            >
-
-                            <span class="ae-hint">
-                                Maksimal 100 karakter.
-                            </span>
-
+                            <label for="displayName">NAMA LENGKAP / TAMPILAN</label>
+                            <input type="text" id="displayName" name="display_name" value="{{ account.name }}" minlength="2" maxlength="100" required>
+                            <span class="ae-hint">Maksimal 100 karakter.</span>
                         </div>
-
-
-                        <!-- EMAIL -->
                         <div class="ae-field">
-
-                            <label for="accountEmail">
-                                EMAIL TERDAFTAR
-                            </label>
-
-                            <input
-                                type="email"
-                                id="accountEmail"
-                                value="{{ account.email }}"
-                                readonly
-                            >
-
-                            <span class="ae-hint">
-                                Email login tidak diubah melalui
-                                halaman ini.
-                            </span>
-
+                            <label for="accountEmail">EMAIL TERDAFTAR</label>
+                            <input type="email" id="accountEmail" value="{{ account.email }}" readonly>
+                            <span class="ae-hint">Email login tidak diubah melalui halaman ini.</span>
                         </div>
-
-
-                        <!-- WHATSAPP -->
                         <div class="ae-field">
-
-                            <label for="accountPhone">
-                                NOMOR WHATSAPP / SELULER
-                            </label>
-
-                            <input
-                                type="tel"
-                                id="accountPhone"
-                                name="phone"
-                                value="{{ account.phone or '' }}"
-                                maxlength="25"
-                                placeholder="Contoh: +628123456789"
-                            >
-
-                            <span class="ae-hint">
-                                Kosongkan jika belum ada nomor.
-                            </span>
-
+                            <label for="accountPhone">NOMOR WHATSAPP / SELULER</label>
+                            <input type="tel" id="accountPhone" name="phone" value="{{ account.phone or '' }}" maxlength="25" placeholder="Contoh: +628123456789">
+                            <span class="ae-hint">Kosongkan jika belum ada nomor.</span>
                         </div>
-
-
-                        <!-- TANGGAL LAHIR -->
                         <div class="ae-field">
-
-                            <label for="accountBirthDate">
-                                TANGGAL LAHIR
-                            </label>
-
-                            <input
-                                type="date"
-                                id="accountBirthDate"
-                                name="birth_date"
-                                value="{{ account.birth_date.isoformat() if account.birth_date else '' }}"
-                            >
-
-                            <span class="ae-hint">
-                                Tidak wajib diisi.
-                            </span>
-
+                            <label for="accountBirthDate">TANGGAL LAHIR</label>
+                            <input type="date" id="accountBirthDate" name="birth_date" value="{{ account.birth_date.isoformat() if account.birth_date else '' }}">
+                            <span class="ae-hint">Tidak wajib diisi.</span>
                         </div>
-
-
-                        <!-- GENDER -->
                         <div class="ae-field">
-
-                            <label for="accountGender">
-                                GENDER
-                            </label>
-
-                            <select
-                                id="accountGender"
-                                name="gender"
-                            >
-
-                                <option
-                                    value=""
-                                    {{ 'selected' if not account.gender else '' }}
-                                >
-                                    Belum diisi
-                                </option>
-
-                                <option
-                                    value="men"
-                                    {{ 'selected' if account.gender == 'men' else '' }}
-                                >
-                                    Man
-                                </option>
-
-                                <option
-                                    value="women"
-                                    {{ 'selected' if account.gender == 'women' else '' }}
-                                >
-                                    Women
-                                </option>
-
-                                <option
-                                    value="other"
-                                    {{ 'selected' if account.gender == 'other' else '' }}
-                                >
-                                    Other
-                                </option>
-
+                            <label for="accountGender">GENDER</label>
+                            <select id="accountGender" name="gender">
+                                <option value="" {{ 'selected' if not account.gender else '' }}>Belum diisi</option>
+                                <option value="men" {{ 'selected' if account.gender == 'men' else '' }}>Man</option>
+                                <option value="women" {{ 'selected' if account.gender == 'women' else '' }}>Women</option>
+                                <option value="other" {{ 'selected' if account.gender == 'other' else '' }}>Other</option>
                             </select>
-
-                            <span class="ae-hint">
-                                Terhubung dengan data Gender
-                                di Profil Saya.
-                            </span>
-
+                            <span class="ae-hint">Terhubung dengan data Gender di Profil Saya.</span>
                         </div>
-
                     </div>
-
                 </div>
-
-
-                <!-- TOMBOL SIMPAN -->
                 <div class="ae-save-bottom">
-
-                    <a
-                        href="{{ url_for('admin.users_index') }}"
-                        class="ae-button ae-button-neutral"
-                    >
-                        BATALKAN
-                    </a>
-
-                    <button
-                        type="submit"
-                        class="ae-button"
-                    >
-                        <i class="bi bi-check-lg"></i>
-                        SIMPAN PERUBAHAN
-                    </button>
-
+                    <a href="{{ url_for('admin.users_index') }}" class="ae-button ae-button-neutral">BATALKAN</a>
+                    <button type="submit" class="ae-button"><i class="bi bi-check-lg"></i> SIMPAN PERUBAHAN</button>
                 </div>
-
             </form>
-
         </main>
 
-
-        <!-- KOLOM KANAN -->
         <aside>
-
-            <!-- STATUS CUSTOMER -->
             <div class="ae-card">
-
-                <h2 class="ae-card-title">
-                    Informasi Akun
-                </h2>
-
-                <p class="ae-card-description">
-                    Ringkasan data akun customer
-                    yang tersimpan.
-                </p>
-
-                <div class="ae-info-row">
-                    <span>ID Customer</span>
-                    <span>#{{ account.id }}</span>
-                </div>
-
-                <div class="ae-info-row">
-                    <span>Nama</span>
-                    <span>{{ account.name }}</span>
-                </div>
-
-                <div class="ae-info-row">
-                    <span>WhatsApp</span>
-                    <span>
-                        {{ account.phone or 'Belum diisi' }}
-                    </span>
-                </div>
-
-                <div class="ae-info-row">
-                    <span>Gender</span>
-                    <span>
-                        {{ account.gender|upper if account.gender else 'Belum diisi' }}
-                    </span>
-                </div>
-
-                <div class="ae-info-row">
-                    <span>Tanggal Lahir</span>
-                    <span>
-                        {{ account.birth_date.strftime('%d-%m-%Y') if account.birth_date else 'Belum diisi' }}
-                    </span>
-                </div>
-
+                <h2 class="ae-card-title">Informasi Akun</h2>
+                <p class="ae-card-description">Ringkasan data akun customer yang tersimpan.</p>
+                <div class="ae-info-row"><span>ID Customer</span><span>#{{ account.id }}</span></div>
+                <div class="ae-info-row"><span>Nama</span><span>{{ account.name }}</span></div>
+                <div class="ae-info-row"><span>WhatsApp</span><span>{{ account.phone or 'Belum diisi' }}</span></div>
+                <div class="ae-info-row"><span>Gender</span><span>{{ account.gender|upper if account.gender else 'Belum diisi' }}</span></div>
+                <div class="ae-info-row"><span>Tanggal Lahir</span><span>{{ account.birth_date.strftime('%d-%m-%Y') if account.birth_date else 'Belum diisi' }}</span></div>
             </div>
 
-
-            <!-- RIWAYAT PESANAN -->
             <div class="ae-card">
+                <h2 class="ae-card-title">Statistik Belanja Pelanggan</h2>
+                <p class="ae-subtext">Ringkasan transaksi dan produk yang dipesan customer ini.</p>
 
-                <h2 class="ae-card-title">
-                    Statistik Belanja Pelanggan
-                </h2>
+                <div class="ae-stat-grid">
+                    <div class="ae-stat">
+                        <div class="ae-stat-label">Total Pesanan</div>
+                        <div class="ae-stat-value">{{ order_stats.total_orders }}</div>
+                    </div>
+                    <div class="ae-stat">
+                        <div class="ae-stat-label">Pesanan Lunas</div>
+                        <div class="ae-stat-value">{{ order_stats.paid_orders }}</div>
+                    </div>
+                    <div class="ae-stat">
+                        <div class="ae-stat-label">Total Belanja Lunas</div>
+                        <div class="ae-stat-value money">{{ rupiah(order_stats.total_spent) }}</div>
+                    </div>
+                    <div class="ae-stat">
+                        <div class="ae-stat-label">Produk Dibeli (pcs)</div>
+                        <div class="ae-stat-value">{{ order_stats.items_bought }}</div>
+                    </div>
+                </div>
 
+                <h3 class="ae-subheading">Riwayat Pesanan &amp; Produk</h3>
+
+                {% if customer_orders %}
+                <div class="ae-orders">
+                    {% for order in customer_orders %}
+                    <div class="ae-order">
+                        <div class="ae-order-head">
+                            <div>
+                                <a class="ae-order-id" href="{{ url_for('admin.order_detail', order_number=order.order_number) }}">{{ order.order_number }}</a>
+                                <div class="ae-order-date">{{ format_order_date(order.created_at) }}</div>
+                            </div>
+                            {% if order.payment_status == 'paid' %}
+                            <span class="ae-badge success">LUNAS</span>
+                            {% elif order.payment_status in ('pending', 'initiating') %}
+                            <span class="ae-badge pending">MENUNGGU PEMBAYARAN</span>
+                            {% else %}
+                            <span class="ae-badge danger">{{ order.payment_status|replace('_', ' ')|upper }}</span>
+                            {% endif %}
+                        </div>
+
+                        <div class="ae-order-body">
+                            {% for item in order.items %}
+                            {% set photo = item.image_path or '' %}
+
+                            <div class="ae-order-product">
+                                {% if photo.startswith('http://') or photo.startswith('https://') or photo.startswith('/') %}
+                                <img class="ae-order-photo" src="{{ photo }}" alt="Foto {{ item.product_name }}" loading="lazy">
+                                {% elif photo %}
+                                <img class="ae-order-photo" src="{{ url_for('static', filename=photo) }}" alt="Foto {{ item.product_name }}" loading="lazy">
+                                {% else %}
+                                <div class="ae-order-photo-empty"><i class="bi bi-image"></i></div>
+                                {% endif %}
+
+                                <div class="ae-order-product-info">
+                                    <div class="ae-order-product-name">{{ item.product_name }}</div>
+                                    <div class="ae-order-product-meta">{{ item.color_name }} / {{ item.size }} · {{ item.quantity }} pcs</div>
+                                    <div class="ae-order-product-meta">{{ rupiah(item.line_total) }}</div>
+                                </div>
+                            </div>
+                            {% endfor %}
+
+                            <div class="ae-order-total">
+                                <span>Total Pesanan</span>
+                                <strong>{{ rupiah(order.total) }}</strong>
+                            </div>
+                            <a class="ae-order-view" href="{{ url_for('admin.order_detail', order_number=order.order_number) }}">
+                                Lihat rincian pesanan <i class="bi bi-arrow-up-right"></i>
+                            </a>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
                 <div class="ae-empty">
-
                     <i class="bi bi-bag"></i>
-
-                    <p>
-                        Belum ada statistik pesanan
-                        yang terhubung.
-                    </p>
-
+                    <p>Customer belum memiliki riwayat pesanan.</p>
                 </div>
-
+                {% endif %}
             </div>
 
-
-            <!-- ALAMAT CUSTOMER -->
             <div class="ae-card">
+                <h2 class="ae-card-title">Buku Alamat Tersimpan</h2>
+                <p class="ae-subtext" style="margin-bottom:15px">Alamat utama yang disimpan customer pada Profil atau Checkout.</p>
 
-                <h2 class="ae-card-title">
-                    Buku Alamat Tersimpan
-                </h2>
-
+                {% if saved_address %}
+                <div class="ae-address">
+                    <div class="ae-address-label"><i class="bi bi-geo-alt"></i> ALAMAT UTAMA</div>
+                    <div class="ae-address-name">{{ saved_address.recipient_name }}</div>
+                    <p class="ae-address-phone"><i class="bi bi-telephone"></i> {{ saved_address.phone }}</p>
+                    <p class="ae-address-detail">{{ saved_address.full_address }}</p>
+                    <p class="ae-address-detail">{{ saved_address.city }}{% if saved_address.postal_code %}, {{ saved_address.postal_code }}{% endif %}</p>
+                </div>
+                {% else %}
                 <div class="ae-empty">
-
                     <i class="bi bi-geo-alt"></i>
-
-                    <p>
-                        Modul alamat pengiriman
-                        belum terhubung.
-                    </p>
-
+                    <p>Customer belum menyimpan alamat utama.</p>
                 </div>
-
+                {% endif %}
             </div>
 
-
-            <!-- KEAMANAN -->
             <div class="ae-card">
-
-                <h2 class="ae-card-title">
-                    Keamanan Akun
-                </h2>
-
-                <p class="ae-subtext">
-                    Password dan autentikasi customer
-                    dikelola melalui sistem login.
-                </p>
-
-                <p class="ae-subtext"
-                   style="margin-top:12px;">
-                    Perubahan nama, WhatsApp, tanggal
-                    lahir, dan Gender tidak akan
-                    mengubah password customer.
-                </p>
-
+                <h2 class="ae-card-title">Keamanan Akun</h2>
+                <p class="ae-subtext">Password dan autentikasi customer dikelola melalui sistem login.</p>
+                <p class="ae-subtext" style="margin-top:12px">Perubahan nama, WhatsApp, tanggal lahir, dan Gender tidak akan mengubah password customer.</p>
             </div>
-
         </aside>
-
     </div>
-
 </div>
-
 {% endblock %}

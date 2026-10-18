@@ -1,6 +1,6 @@
 import os
 
-from flask import Flask, abort, redirect, request, url_for
+from flask import Flask, abort, redirect, request, session, url_for
 from flask_login import current_user
 
 from app.config import Config, ProductionConfig, TestingConfig
@@ -13,7 +13,9 @@ from app.models.product import Product, ProductVariant
 from app.models.user import User
 from app.models.wishlist import WishlistItem
 from app.services.audit_logger import log_security_event, setup_audit_logger
+from app.services.customer_encryption_reader import read_customer_private
 from app.models.customer_address import CustomerAddress
+from app.services.customer_encryption_sync import register_customer_encryption_sync
 
 def create_app(config_mode=None):
     app = Flask(__name__)
@@ -26,6 +28,8 @@ def create_app(config_mode=None):
         app.config.from_object(Config)
 
     db.init_app(app)
+    app.add_template_global(read_customer_private, name="private_field")
+    register_customer_encryption_sync()
     login_manager.init_app(app)
     csrf.init_app(app)
     limiter.init_app(app)
@@ -59,6 +63,8 @@ def create_app(config_mode=None):
 
     @app.before_request
     def protect_application_routes():
+        session.pop("shipping_address", None)
+        session.pop("shipping_address_user_id", None)
         endpoint = request.endpoint or ''
         blueprint = request.blueprint or ''
         hostname = request.host.split(':')[0].lower()
