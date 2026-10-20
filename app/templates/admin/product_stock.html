@@ -1,0 +1,278 @@
+{% extends 'admin/admin_base.html' %}
+
+{% block title %}Tambah Stok - Admin KURO WEAR{% endblock %}
+
+{% block extra_css %}
+<style>
+    .restock-page { color: #1a1a1a; font-family: 'Plus Jakarta Sans', sans-serif; }
+    .rs-crumb { margin-bottom: 30px; font-size: 12px; letter-spacing: .4px; }
+    .rs-crumb a { color: #5d5d5d; text-decoration: none; }
+    .rs-crumb span { font-weight: 700; }
+    .rs-header { display: flex; justify-content: space-between; align-items: center; gap: 16px; flex-wrap: wrap; margin-bottom: 26px; }
+    .rs-header h1 { margin: 0 0 8px; font-size: 26px; font-weight: 700; }
+    .rs-header p { margin: 0; font-size: 13px; color: #777; max-width: 530px; line-height: 1.6; }
+    .rs-actions { display: flex; gap: 10px; flex-wrap: wrap; }
+    .rs-btn { display: inline-flex; justify-content: center; align-items: center; gap: 8px; padding: 12px 15px; font-size: 12px; font-weight: 700; letter-spacing: .3px; border-radius: 3px; text-decoration: none; cursor: pointer; }
+    .rs-btn-back { background: transparent; color: #222; border: 1px solid #e3dfd7; }
+    .rs-btn-back:hover { color: #222; background: #f5f2eb; }
+    .rs-btn-save { background: #f2efe8; border: 1px solid #f2efe8; color: #1a1a1a; }
+    .rs-btn-save:hover { background: #e5e0d6; }
+    .rs-btn-save:disabled { opacity: .45; cursor: not-allowed; }
+    .rs-product, .rs-panel { background: #fff; border: 1px solid #eae6df; border-radius: 8px; }
+    .rs-product { display: flex; align-items: center; gap: 20px; padding: 24px; margin-bottom: 30px; }
+    .rs-photo { width: 100px; height: 126px; flex-shrink: 0; object-fit: cover; border-radius: 6px; background: #f2efe8; }
+    .rs-no-photo { display: grid; place-items: center; font-size: 28px; color: #9a958b; }
+    .rs-meta { display: flex; flex-wrap: wrap; gap: 22px; color: #555; font-size: 12px; margin-bottom: 10px; }
+    .rs-product h2 { font-size: 17px; font-weight: 700; margin-bottom: 10px; }
+    .rs-product-detail { font-size: 12px; color: #5d5d5d; display: flex; gap: 20px; flex-wrap: wrap; margin-bottom: 10px; }
+    .rs-stock-note { font-size: 12px; color: #404040; }
+    .rs-stock-note i { color: #bd1020; margin-right: 5px; }
+    .rs-panel { padding: 25px 24px; }
+    .rs-panel h3 { font-size: 15px; font-weight: 700; margin-bottom: 6px; }
+    .rs-help { font-size: 12px; color: #858585; line-height: 1.6; margin-bottom: 20px; }
+    .rs-table-scroll { overflow-x: auto; border: 1px solid #e9e4dc; border-radius: 7px; }
+    .rs-table { width: 100%; min-width: 840px; border-collapse: collapse; }
+    .rs-table th { text-transform: uppercase; letter-spacing: .3px; font-size: 10px; color: #777; font-weight: 700; background: #f7f5f1; padding: 14px 12px; white-space: nowrap; }
+    .rs-table td { padding: 15px 12px; border-top: 1px solid #eeeae5; font-size: 12px; vertical-align: middle; }
+    .rs-size { display: inline-block; padding: 8px; min-width: 38px; text-align: center; background: #f5f2ec; border: 1px solid #ebe6de; border-radius: 4px; font-weight: 700; }
+    .rs-subtle { display: block; margin-top: 5px; font-size: 11px; color: #858585; }
+    .rs-number { font-size: 15px; font-weight: 700; }
+    .rs-critical-num { color: #d21423; }
+    .rs-pill { display: inline-block; white-space: nowrap; padding: 6px 9px; border-radius: 20px; font-size: 10px; font-weight: 700; }
+    .rs-pill.critical { background: #fff0f0; border: 1px solid #ffc9cf; color: #c20e1e; }
+    .rs-pill.warning { background: #fff9e7; border: 1px solid #ffde84; color: #9d5700; }
+    .rs-pill.safe { background: #eff6ff; border: 1px solid #bed9ff; color: #1756a9; }
+    .rs-stepper { display: inline-flex; align-items: stretch; overflow: hidden; border: 1px solid #dedbd6; border-radius: 5px; }
+    .rs-stepper button { width: 35px; border: 0; background: #faf9f7; font-size: 17px; font-weight: 700; }
+    .rs-stepper button:hover { background: #ece8e1; }
+    .rs-stepper input { width: 66px; padding: 8px 3px; border: 0; border-left: 1px solid #eee; border-right: 1px solid #eee; outline: none; text-align: center; font-size: 13px; font-weight: 700; background: #fff; -moz-appearance: textfield; appearance: textfield;}
+    .rs-stepper input::-webkit-outer-spin-button, .rs-stepper input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+    .rs-projected { font-size: 15px; font-weight: 700; }
+    .rs-projected-status { margin-left: 8px; font-size: 11px; font-weight: 600; }
+    .rs-projected-status.safe { color: #087242; }
+    .rs-projected-status.warning { color: #9d5700; }
+    .rs-projected-status.critical { color: #c20e1e; }
+    .rs-summary { display: grid; grid-template-columns: 2fr 1fr 1fr 1.4fr; align-items: center; gap: 16px; background: #f6f3ed; border: 1px solid #ebe6dc; border-radius: 7px; margin-top: 20px; padding: 21px; }
+    .rs-summary small { display: block; font-size: 10px; font-weight: 700; letter-spacing: .3px; color: #898781; margin-bottom: 7px; }
+    .rs-summary strong { font-size: 15px; }
+    .rs-summary .rs-added { color: #b50919; }
+    .rs-summary-first { border-right: 1px solid #e6dfd4; padding-right: 14px; }
+    .rs-validation { font-size: 12px; color: #b50919; margin-top: 14px; min-height: 18px; }
+    .rs-empty { text-align: center; padding: 40px 16px; color: #858585; font-size: 13px; }
+    @media (max-width: 1150px) { .rs-summary { grid-template-columns: repeat(2, 1fr); } .rs-summary-first { border-right: none; } }
+    @media (max-width: 650px) { .rs-header h1 { font-size: 23px; } .rs-product { align-items: flex-start; padding: 15px; } .rs-photo { width: 76px; height: 100px; } .rs-panel { padding: 16px; } .rs-summary { grid-template-columns: 1fr 1fr; padding: 14px; } }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="restock-page">
+    <div class="rs-crumb">
+        <a href="{{ url_for('admin.products') }}">PRODUK & STOK</a>
+        &nbsp;/&nbsp; <span>TAMBAH STOK</span>
+    </div>
+
+    <form id="restockForm" method="POST" action="{{ url_for('admin.product_stock', product_id=product.id) }}" data-unit-cost="{{ product.cost or 0 }}">
+        {{ csrf_form.hidden_tag() }}
+
+        <div class="rs-header">
+            <div>
+                <h1>Tambah Stok Produk</h1>
+                <p>Pencatatan barang masuk dari supplier atau restock gudang untuk inventori KURO WEAR.</p>
+            </div>
+            <div class="rs-actions">
+                <a href="{{ url_for('admin.products') }}" class="rs-btn rs-btn-back">
+                    <i class="bi bi-arrow-left"></i> KEMBALI KE KATALOG
+                </a>
+                <button type="submit" class="rs-btn rs-btn-save" {% if not product.variants %}disabled{% endif %}>
+                    <i class="bi bi-archive"></i> SIMPAN PEMBARUAN STOK
+                </button>
+            </div>
+        </div>
+
+        <section class="rs-product">
+            {% if product.main_image %}
+                <img class="rs-photo" src="{{ url_for('static', filename=product.main_image) }}" alt="{{ product.name }}">
+            {% else %}
+                <div class="rs-photo rs-no-photo"><i class="bi bi-image"></i></div>
+            {% endif %}
+            <div>
+                <div class="rs-meta">
+                    <span>SKU: <strong>{{ product.sku }}</strong></span>
+                    <span>{{ product.subcategory|upper }} / {{ product.category|upper }}</span>
+                </div>
+                <h2>{{ product.name }}</h2>
+                <div class="rs-product-detail">
+                    <span>Warna: <strong>{{ product.variants|map(attribute='color_name')|unique|join(', ') or '-' }}</strong></span>
+                    <span>Harga Retail: <strong>Rp {{ '{:,}'.format(product.price).replace(',', '.') }}</strong></span>
+                </div>
+                <div class="rs-stock-note">
+                    {% if product.low_stock_variants %}
+                        <i class="bi bi-exclamation-triangle"></i>
+                        <strong>Sisa {{ product.total_stock }} pcs</strong> — ada {{ product.low_stock_variants|length }} varian yang mencapai batas minimum.
+                    {% else %}
+                        <i class="bi bi-box-seam" style="color:#777"></i>
+                        Total stok terdaftar: <strong>{{ product.total_stock }} pcs</strong>.
+                    {% endif %}
+                </div>
+            </div>
+        </section>
+
+        <section class="rs-panel">
+            <h3>Perincian Varian Ukuran & Tambahan Unit</h3>
+            <p class="rs-help">Masukkan jumlah unit baru untuk setiap warna dan ukuran. Jumlah ini akan <strong>ditambahkan</strong> ke stok sekarang, bukan mengganti stok lama.</p>
+
+            {% if product.variants %}
+                <div class="rs-table-scroll">
+                    <table class="rs-table">
+                        <thead>
+                            <tr>
+                                <th>Varian / Ukuran</th>
+                                <th>Stok Saat Ini</th>
+                                <th>Status Stok</th>
+                                <th>Jumlah Masuk (pcs)</th>
+                                <th>Proyeksi Pasca Restock</th>
+                                <th>Ambang Minimum</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for variant in product.variants %}
+                            <tr class="rs-variant-row" data-current="{{ variant.stock }}" data-minimum="{{ variant.minimum_stock }}">
+                                <td>
+                                    <span class="rs-size">{{ variant.size }}</span>
+                                    <span class="rs-subtle">{{ variant.color_name }}</span>
+                                </td>
+                                <td>
+                                    <span class="rs-number {{ 'rs-critical-num' if variant.stock <= variant.minimum_stock else '' }}">{{ variant.stock }}</span>
+                                    <span class="rs-subtle" style="display:inline">pcs</span>
+                                </td>
+                                <td>
+                                    {% if variant.stock <= variant.minimum_stock %}
+                                        <span class="rs-pill critical">● Kritis</span>
+                                    {% elif variant.stock <= variant.minimum_stock + 3 %}
+                                        <span class="rs-pill warning">● Mendekati Minimum</span>
+                                    {% else %}
+                                        <span class="rs-pill safe">● Cukup</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <div class="rs-stepper">
+                                        <button type="button" class="rs-minus" aria-label="Kurangi jumlah masuk">−</button>
+                                        <input type="number" class="rs-add" name="add_{{ variant.id }}" value="0" min="0" max="999999" step="1" inputmode="numeric" aria-label="Tambah stok {{ variant.color_name }} ukuran {{ variant.size }}">
+                                        <button type="button" class="rs-plus" aria-label="Tambah jumlah masuk">+</button>
+                                    </div>
+                                </td>
+                                <td>
+                                    <span class="rs-projected">{{ variant.stock }}</span> pcs
+                                    <span class="rs-projected-status">{{ 'Perlu restock' if variant.stock <= variant.minimum_stock else 'Aman' }}</span>
+                                </td>
+                                <td><span class="rs-subtle">Min. {{ variant.minimum_stock }} pcs</span></td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="rs-summary">
+                    <div class="rs-summary-first">
+                        <small>RINGKASAN TAMBAHAN STOK MASUK</small>
+                        <strong>Total Tambahan Unit: <span class="rs-added" id="addedTotal">+0 pcs</span></strong>
+                    </div>
+                    <div>
+                        <small>STOK AWAL TERDAFTAR</small>
+                        <strong>{{ product.total_stock }} pcs</strong>
+                    </div>
+                    <div>
+                        <small>TOTAL PASCA MASUK</small>
+                        <strong id="afterTotal">{{ product.total_stock }} pcs</strong>
+                    </div>
+                    <div>
+                        <small>ESTIMASI NILAI MODAL MASUK</small>
+                        <strong id="assetTotal">Rp 0</strong>
+                    </div>
+                </div>
+                <div id="restockValidation" class="rs-validation" role="status" aria-live="polite"></div>
+            {% else %}
+                <div class="rs-empty">
+                    <i class="bi bi-box-seam" style="font-size:28px"></i>
+                    <p class="mt-3">Produk ini belum memiliki varian ukuran. Tambahkan varian melalui halaman Edit Produk terlebih dahulu.</p>
+                    <a href="{{ url_for('admin.product_edit', product_id=product.id) }}" class="rs-btn rs-btn-back">EDIT PRODUK</a>
+                </div>
+            {% endif %}
+        </section>
+    </form>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const form = document.getElementById('restockForm');
+    const rows = [...document.querySelectorAll('.rs-variant-row')];
+    const addedTotal = document.getElementById('addedTotal');
+    const afterTotal = document.getElementById('afterTotal');
+    const assetTotal = document.getElementById('assetTotal');
+    const validation = document.getElementById('restockValidation');
+    const unitCost = Number(form.dataset.unitCost) || 0;
+    const formatNumber = n => new Intl.NumberFormat('id-ID').format(n);
+    const formatMoney = n => new Intl.NumberFormat('id-ID', {
+        style: 'currency', currency: 'IDR', maximumFractionDigits: 0
+    }).format(n);
+
+    function updateTotals() {
+        let added = 0;
+        let current = 0;
+        rows.forEach(row => {
+            const input = row.querySelector('.rs-add');
+            const stock = Number(row.dataset.current);
+            const minimum = Number(row.dataset.minimum);
+            const extra = Math.min(999999, Math.max(0, parseInt(input.value, 10) || 0));
+            const projected = stock + extra;
+            current += stock;
+            added += extra;
+            row.querySelector('.rs-projected').textContent = formatNumber(projected);
+            const status = row.querySelector('.rs-projected-status');
+            if (projected <= minimum) {
+                status.className = 'rs-projected-status critical';
+                status.textContent = 'Perlu restock';
+            } else if (projected <= minimum + 3) {
+                status.className = 'rs-projected-status warning';
+                status.textContent = 'Mendekati minimum';
+            } else {
+                status.className = 'rs-projected-status safe';
+                status.textContent = 'Aman';
+            }
+        });
+        if (addedTotal) addedTotal.textContent = '+' + formatNumber(added) + ' pcs';
+        if (afterTotal) afterTotal.textContent = formatNumber(current + added) + ' pcs';
+        if (assetTotal) assetTotal.textContent = formatMoney(added * unitCost);
+        if (validation) validation.textContent = '';
+        return added;
+    }
+
+    rows.forEach(row => {
+        const input = row.querySelector('.rs-add');
+        row.querySelector('.rs-minus').addEventListener('click', () => {
+            input.value = Math.max(0, (parseInt(input.value, 10) || 0) - 1);
+            updateTotals();
+        });
+        row.querySelector('.rs-plus').addEventListener('click', () => {
+            input.value = Math.min(999999, (parseInt(input.value, 10) || 0) + 1);
+            updateTotals();
+        });
+        input.addEventListener('input', updateTotals);
+        input.addEventListener('change', () => {
+            input.value = Math.min(999999, Math.max(0, parseInt(input.value, 10) || 0));
+            updateTotals();
+        });
+    });
+
+    form.addEventListener('submit', function (event) {
+        if (updateTotals() === 0) {
+            event.preventDefault();
+            if (validation) validation.textContent = 'Isi minimal satu jumlah tambahan stok sebelum menyimpan.';
+        }
+    });
+    updateTotals();
+});
+</script>
+{% endblock %}

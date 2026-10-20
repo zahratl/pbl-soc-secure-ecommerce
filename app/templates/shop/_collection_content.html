@@ -1,0 +1,734 @@
+
+{# ==========================================
+   KATEGORI BERDASARKAN HALAMAN
+   ========================================== #}
+
+{% set all_categories = [
+    ('Skirts', 'Midi & Pleated', 'img/dashboard_skirt.png'),
+    ('Pants', 'Trousers & Chino', 'img/dashboard_pants.png'),
+    ('Outer', 'Jackets & Coats', 'img/dashboard_outer.png'),
+    ('Shirts', 'Linen & Cotton', 'img/dashboard_shirt.png'),
+    ('T-Shirts', 'Cotton Essentials', 'img/dashboard_t-shirt.png'),
+] %}
+
+{% if collection_type == 'men' %}
+    {% set categories = all_categories|rejectattr('0', 'equalto', 'Skirts')|list %}
+{% else %}
+    {% set categories = all_categories %}
+{% endif %}
+
+{# ==========================================
+   1. KARTU KATEGORI
+   ========================================== #}
+
+<section class="kw-category-section">
+
+    <div class="kw-category-heading">
+        <strong>
+            {% if collection_type == 'women' %}
+                KATEGORI SILUET BUSANA WANITA
+            {% elif collection_type == 'men' %}
+                KATEGORI SILUET BUSANA PRIA
+            {% else %}
+                PILIH KATEGORI SILUET
+            {% endif %}
+        </strong>
+
+        <span>Temukan gaya favoritmu</span>
+    </div>
+
+    <div class="kw-category-grid {{ 'kw-four' if collection_type == 'men' else '' }}">
+
+        {% for cat in categories %}
+
+        {% set sil = (
+            silhouettes
+            | selectattr('category', 'equalto', cat[0])
+            | first
+        ) | default(none) %}
+
+        <button
+            type="button"
+            class="kw-category-card"
+            data-kw-category-card="{{ cat[0] }}"
+            aria-label="Filter kategori {{ cat[0] }}"
+        >
+
+            <div class="kw-category-img">
+                <img
+                    src="{{ sil.image if sil else url_for('static', filename=cat[2]) }}"
+                    alt="{{ cat[0] }}"
+                    loading="lazy"
+                >
+            </div>
+
+            <div class="kw-category-name">
+                {{ cat[0]|upper }}
+            </div>
+
+            <div class="kw-category-subtitle">
+                {{ cat[1] }}
+            </div>
+
+        </button>
+
+        {% endfor %}
+
+    </div>
+
+</section>
+
+
+{# ==========================================
+   2. FILTER SIDEBAR & CONTENT
+   ========================================== #}
+
+<div class="kw-layout">
+
+    <aside class="kw-sidebar">
+
+        <div class="kw-sidebar-head">
+
+            <div class="kw-sidebar-heading">
+                <i class="bi bi-sliders"></i>
+                FILTER KATALOG
+            </div>
+
+            <button
+                type="button"
+                class="kw-reset"
+                data-kw-reset
+            >
+                Reset Semua
+            </button>
+
+        </div>
+
+
+        <!-- SEGMENTASI GENDER -->
+        <div class="kw-filter-group">
+
+            <div class="kw-filter-title">
+                SEGMENTASI GENDER
+            </div>
+
+            {% if collection_type == 'women' %}
+
+                {% set genders = [
+                    ('all', 'Semua Koleksi'),
+                    ('women', 'Wanita (Women Collection)'),
+                    ('unisex', 'Unisex / Genderless Fit')
+                ] %}
+
+            {% elif collection_type == 'men' %}
+
+                {% set genders = [
+                    ('all', 'Semua Koleksi'),
+                    ('men', 'Pria (Men Collection)'),
+                    ('unisex', 'Unisex / Genderless Fit')
+                ] %}
+
+            {% else %}
+
+                {% set genders = [
+                    ('all', 'Semua Koleksi'),
+                    ('men', 'Pria (Men Collection)'),
+                    ('women', 'Wanita (Women Collection)'),
+                    ('unisex', 'Unisex / Genderless Fit')
+                ] %}
+
+            {% endif %}
+
+            {% for gender in genders %}
+
+            <div class="kw-checkbox-line">
+                <label class="kw-checkbox-label">
+
+                    <input
+                        type="checkbox"
+                        data-kw-gender
+                        value="{{ gender[0] }}"
+                        {% if gender[0] == 'all' %}checked{% endif %}
+                    >
+
+                    <span>{{ gender[1] }}</span>
+
+                </label>
+            </div>
+
+            {% endfor %}
+
+        </div>
+
+
+        <!-- KATEGORI PRODUK -->
+        <div class="kw-filter-group">
+
+            <div class="kw-filter-title">
+                KATEGORI PRODUK
+            </div>
+
+            {% for cat in categories %}
+
+            <div class="kw-checkbox-line">
+
+                <label class="kw-checkbox-label">
+
+                    <input
+                        type="checkbox"
+                        data-kw-category-checkbox
+                        value="{{ cat[0] }}"
+                        checked
+                    >
+
+                    <span>
+                        {% if cat[0] == 'Outer' %}
+                            Outer & Coat
+                        {% elif cat[0] == 'Skirts' %}
+                            Skirts (Rok)
+                        {% elif cat[0] == 'Pants' %}
+                            Pants & Trousers
+                        {% elif cat[0] == 'Shirts' %}
+                            Shirts (Kemeja)
+                        {% elif cat[0] == 'T-Shirts' %}
+                            T-Shirts
+                        {% endif %}
+                    </span>
+
+                </label>
+
+                <span class="kw-category-count">
+                    ({{ products|selectattr('category', 'equalto', cat[0])|list|length }})
+                </span>
+
+            </div>
+
+            {% endfor %}
+
+        </div>
+
+
+        <!-- UKURAN -->
+        <div class="kw-filter-group">
+
+            <div class="kw-size-heading">
+
+                <div class="kw-filter-title">
+                    UKURAN
+                </div>
+
+                <button
+                    type="button"
+                    class="kw-size-guide"
+                    data-bs-toggle="modal"
+                    data-bs-target="#kwSizeGuideModal"
+                >
+                    <i class="bi bi-rulers"></i>
+                    SIZE GUIDE
+                </button>
+
+            </div>
+
+            <div class="kw-size-grid">
+
+                {% for size in ['XS', 'S', 'M', 'L', 'XL', 'XXL'] %}
+
+                <button
+                    type="button"
+                    class="kw-size-btn"
+                    data-kw-size="{{ size }}"
+                    aria-pressed="false"
+                >
+                    {{ size }}
+                </button>
+
+                {% endfor %}
+
+            </div>
+
+        </div>
+
+    </aside>
+
+
+    {# ======================================
+       3. TOOLBAR DAN PRODUK
+       ====================================== #}
+
+    <main class="kw-content">
+
+        <div class="kw-toolbar">
+
+            <!-- PILIHAN CEPAT -->
+            <div class="kw-pills">
+
+                {% if collection_type == 'women' %}
+
+                    {% set quick_filters = [
+                        ('all', 'Semua (Women)'),
+                        ('Skirts', 'Skirts'),
+                        ('Pants', 'Pants'),
+                        ('Outer', 'Outer'),
+                        ('Shirts_Tee', 'Shirts & T-Shirts')
+                    ] %}
+
+                {% elif collection_type == 'men' %}
+
+                    {% set quick_filters = [
+                        ('all', 'Semua (Men)'),
+                        ('Outer', 'Outer'),
+                        ('Pants', 'Pants'),
+                        ('Shirts', 'Shirts'),
+                        ('T-Shirts', 'T-Shirts')
+                    ] %}
+
+                {% else %}
+
+                    {% set quick_filters = [
+                        ('all', 'Semua (All)'),
+                        ('unisex', 'Men & Women'),
+                        ('Outer', 'Outer'),
+                        ('skirts_pants', 'Skirts & Pants'),
+                        ('Shirts', 'Shirts')
+                    ] %}
+
+                {% endif %}
+
+                {% for quick in quick_filters %}
+
+                <button
+                    type="button"
+                    class="kw-pill {{ 'kw-active' if loop.first else '' }}"
+                    data-kw-quick="{{ quick[0] }}"
+                >
+                    {{ quick[1] }}
+                </button>
+
+                {% endfor %}
+
+            </div>
+
+            <!-- SORTING -->
+            <div class="kw-sort">
+
+                <label for="kw-sort-select">
+                    Urutkan:
+                </label>
+
+                <select
+                    id="kw-sort-select"
+                    data-kw-sort
+                >
+                    <option value="newest">
+                        Koleksi Terbaru
+                    </option>
+
+                    <option value="price_asc">
+                        Harga Terendah
+                    </option>
+
+                    <option value="price_desc">
+                        Harga Tertinggi
+                    </option>
+                </select>
+
+            </div>
+
+        </div>
+
+
+        <!-- GRID PRODUK SQLITE -->
+        <div class="kw-product-grid" data-kw-grid>
+
+            {% for p in products %}
+
+            <article
+                class="kw-product-card"
+                data-kw-product
+                data-kw-id="{{ p.id }}"
+                data-kw-category="{{ p.category }}"
+                data-kw-gender="{{ p.gender }}"
+                data-kw-price="{{ p.price }}"
+                data-kw-sizes="{{ p.sizes|join(',') }}"
+            >
+
+                <!-- FOTO -->
+                <div class="kw-product-image">
+
+                    <a href="{{ url_for('shop.product_detail', product_id=p.id) }}">
+
+                        {% if p.image %}
+
+                        <img
+                            src="{{ p.image }}"
+                            alt="{{ p.name }}"
+                            loading="lazy"
+                        >
+
+                        {% else %}
+
+                        <div class="d-flex align-items-center justify-content-center h-100">
+                            <i class="bi bi-image fs-1 text-secondary"></i>
+                        </div>
+
+                        {% endif %}
+
+                    </a>
+
+                    <span class="kw-product-tag">
+                        {{ p.category_badge }}
+                    </span>
+
+                    <!-- WISHLIST SQLITE -->
+                    <button
+                        type="button"
+                        class="kw-heart"
+                        data-wishlist-product="{{ p.id }}"
+                        data-wishlist-url="{{ url_for('shop.wishlist_toggle', product_id=p.id) }}"
+                        data-csrf="{{ csrf_token() }}"
+                        data-login-url="{{ url_for('auth.login', next=request.path) }}"
+                        aria-pressed="{{ 'true' if p.wishlisted else 'false' }}"
+                        aria-label="{{ 'Hapus dari Wishlist' if p.wishlisted else 'Tambah ke Wishlist' }}"
+                        title="{{ 'Hapus dari Wishlist' if p.wishlisted else 'Tambah ke Wishlist' }}"
+                    >
+                        <i class="bi {{ 'bi-heart-fill text-danger' if p.wishlisted else 'bi-heart text-dark' }}"></i>
+                    </button>
+
+                </div>
+
+
+                <!-- INFORMASI PRODUK -->
+                <div class="kw-product-body">
+
+                    <div class="kw-product-stock">
+                        {{ p.gender_badge }}
+                    </div>
+
+                    <a
+                        href="{{ url_for('shop.product_detail', product_id=p.id) }}"
+                        class="text-decoration-none"
+                    >
+                        <h3>{{ p.name }}</h3>
+                    </a>
+
+                    <p class="kw-product-description">
+                        {{ p.desc }}
+                    </p>
+
+                    <div class="kw-product-bottom">
+
+                        <div class="kw-product-price">
+                            {{ p.price_formatted }}
+                        </div>
+
+                        <div class="kw-product-stock mt-2">
+                            {{ p.stock }}
+                            &bull;
+                            Belum ada ulasan
+                        </div>
+
+                        <a
+                            href="{{ url_for('shop.product_detail', product_id=p.id) }}"
+                            class="kw-product-link"
+                        >
+                            <i class="bi bi-handbag"></i>
+                            LIHAT PRODUK
+                        </a>
+
+                    </div>
+
+                </div>
+
+            </article>
+
+            {% endfor %}
+
+        </div>
+
+
+        <!-- EMPTY STATE -->
+        <div
+            class="kw-empty"
+            data-kw-empty
+            {% if products %}hidden{% endif %}
+        >
+
+            <i class="bi bi-search"></i>
+
+            <h3>
+                {% if products %}
+                    Tidak Ada Produk yang Sesuai
+                {% else %}
+                    Belum Ada Produk
+                {% endif %}
+            </h3>
+
+            <p>
+                {% if products %}
+
+                    Coba ubah atau reset filter kategori,
+                    gender, maupun ukuran.
+
+                {% else %}
+
+                    Koleksi KURO WEAR akan muncul
+                    setelah produk dipublikasikan oleh admin.
+
+                {% endif %}
+            </p>
+
+        </div>
+
+
+        <!-- JUMLAH PRODUK -->
+        <div class="kw-footer">
+
+            Menampilkan
+            <span data-kw-visible>{{ products|length }}</span>
+            dari {{ products|length }} produk
+
+        </div>
+
+    </main>
+
+</div>
+
+
+{# ==========================================
+   4. MODAL SIZE GUIDE (KURO WEAR)
+   ========================================== #}
+
+<div
+    class="modal fade kw-modal"
+    id="kwSizeGuideModal"
+    tabindex="-1"
+    aria-labelledby="kwSizeGuideTitle"
+    aria-hidden="true"
+>
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content kw-modal-content">
+
+            <!-- MODAL HEADER -->
+            <div class="modal-header kw-modal-header border-0 pb-0">
+                <div>
+                    <h5 class="modal-title kw-modal-title fw-bold" id="kwSizeGuideTitle">
+                        <i class="bi bi-rulers text-danger me-2"></i>SIZE GUIDE KURO WEAR
+                    </h5>
+                    <p class="text-muted small mb-0 mt-1">
+                        Panduan ukuran tubuh Pria dan Wanita dalam sentimeter (cm).
+                    </p>
+                </div>
+                <button
+                    type="button"
+                    class="btn-close"
+                    data-bs-dismiss="modal"
+                    aria-label="Tutup Size Guide"
+                ></button>
+            </div>
+
+            <!-- MODAL BODY -->
+            <div class="modal-body p-4">
+
+                <!-- TABS WANITA / PRIA -->
+                <ul class="nav nav-pills kw-guide-tabs mb-4" id="kwSizeTabs" role="tablist">
+                    <li class="nav-item flex-fill" role="presentation">
+                        <button
+                            class="nav-link w-100 kw-guide-tab {{ 'active' if collection_type != 'men' else '' }}"
+                            id="kw-tab-women"
+                            data-bs-toggle="pill"
+                            data-bs-target="#kw-pane-women"
+                            type="button"
+                            role="tab"
+                            aria-controls="kw-pane-women"
+                            aria-selected="{{ 'true' if collection_type != 'men' else 'false' }}"
+                        >
+                            <i class="bi bi-gender-female me-1"></i> WANITA
+                        </button>
+                    </li>
+                    <li class="nav-item flex-fill" role="presentation">
+                        <button
+                            class="nav-link w-100 kw-guide-tab {{ 'active' if collection_type == 'men' else '' }}"
+                            id="kw-tab-men"
+                            data-bs-toggle="pill"
+                            data-bs-target="#kw-pane-men"
+                            type="button"
+                            role="tab"
+                            aria-controls="kw-pane-men"
+                            aria-selected="{{ 'true' if collection_type == 'men' else 'false' }}"
+                        >
+                            <i class="bi bi-gender-male me-1"></i> PRIA
+                        </button>
+                    </li>
+                </ul>
+
+                <!-- TAB CONTENT -->
+                <div class="tab-content" id="kwSizeTabsContent">
+
+                    <!-- TAB PANE: WANITA -->
+                    <div
+                        class="tab-pane fade {{ 'show active' if collection_type != 'men' else '' }}"
+                        id="kw-pane-women"
+                        role="tabpanel"
+                        aria-labelledby="kw-tab-women"
+                        tabindex="0"
+                    >
+                        <div class="d-flex align-items-center justify-content-between mb-2">
+                            <span class="kw-guide-panel-title">
+                                <i class="bi bi-person me-1 text-danger"></i> Panduan Ukuran Wanita
+                            </span>
+                            <span class="badge bg-light text-secondary border px-2 py-1" style="font-size: 11px;">
+                                Standar Ukuran Tubuh (cm)
+                            </span>
+                        </div>
+
+                        <div class="table-responsive kw-guide-table-wrapper">
+                            <table class="table kw-guide-table align-middle text-center mb-0">
+                                <thead>
+                                    <tr>
+                                        <th scope="col" style="width: 20%;">Size</th>
+                                        <th scope="col" style="width: 26%;">Lingkar Dada</th>
+                                        <th scope="col" style="width: 27%;">Lingkar Pinggang</th>
+                                        <th scope="col" style="width: 27%;">Lingkar Pinggul</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td class="fw-bold text-dark">XS</td>
+                                        <td>76–80 cm</td>
+                                        <td>60–64 cm</td>
+                                        <td>84–88 cm</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="fw-bold text-dark">S</td>
+                                        <td>80–84 cm</td>
+                                        <td>64–68 cm</td>
+                                        <td>88–92 cm</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="fw-bold text-dark">M</td>
+                                        <td>84–88 cm</td>
+                                        <td>68–72 cm</td>
+                                        <td>92–96 cm</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="fw-bold text-dark">L</td>
+                                        <td>88–94 cm</td>
+                                        <td>72–78 cm</td>
+                                        <td>96–102 cm</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="fw-bold text-dark">XL</td>
+                                        <td>94–100 cm</td>
+                                        <td>78–84 cm</td>
+                                        <td>102–108 cm</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="fw-bold text-dark">XXL</td>
+                                        <td>100–106 cm</td>
+                                        <td>84–90 cm</td>
+                                        <td>108–114 cm</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- TAB PANE: PRIA -->
+                    <div
+                        class="tab-pane fade {{ 'show active' if collection_type == 'men' else '' }}"
+                        id="kw-pane-men"
+                        role="tabpanel"
+                        aria-labelledby="kw-tab-men"
+                        tabindex="0"
+                    >
+                        <div class="d-flex align-items-center justify-content-between mb-2">
+                            <span class="kw-guide-panel-title">
+                                <i class="bi bi-person me-1 text-primary"></i> Panduan Ukuran Pria
+                            </span>
+                            <span class="badge bg-light text-secondary border px-2 py-1" style="font-size: 11px;">
+                                Standar Ukuran Tubuh (cm)
+                            </span>
+                        </div>
+
+                        <div class="table-responsive kw-guide-table-wrapper">
+                            <table class="table kw-guide-table align-middle text-center mb-0">
+                                <thead>
+                                    <tr>
+                                        <th scope="col" style="width: 20%;">Size</th>
+                                        <th scope="col" style="width: 26%;">Lingkar Dada</th>
+                                        <th scope="col" style="width: 27%;">Lingkar Pinggang</th>
+                                        <th scope="col" style="width: 27%;">Lingkar Pinggul</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td class="fw-bold text-dark">XS</td>
+                                        <td>84–88 cm</td>
+                                        <td>68–72 cm</td>
+                                        <td>84–88 cm</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="fw-bold text-dark">S</td>
+                                        <td>88–92 cm</td>
+                                        <td>72–76 cm</td>
+                                        <td>88–92 cm</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="fw-bold text-dark">M</td>
+                                        <td>92–96 cm</td>
+                                        <td>76–80 cm</td>
+                                        <td>92–96 cm</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="fw-bold text-dark">L</td>
+                                        <td>96–102 cm</td>
+                                        <td>80–86 cm</td>
+                                        <td>96–102 cm</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="fw-bold text-dark">XL</td>
+                                        <td>102–108 cm</td>
+                                        <td>86–92 cm</td>
+                                        <td>102–108 cm</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="fw-bold text-dark">XXL</td>
+                                        <td>108–114 cm</td>
+                                        <td>92–98 cm</td>
+                                        <td>108–114 cm</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- CATATAN PENGUKURAN -->
+                <div class="kw-guide-note mt-3">
+                    <div class="fw-bold text-dark mb-1">
+                        <i class="bi bi-info-circle-fill me-1 text-danger"></i> Catatan Pengukuran
+                    </div>
+                    <div>
+                        Ukur lingkar dada, pinggang, dan pinggul menggunakan meteran baju dalam posisi berdiri tegak.<br>
+                        Angka di atas adalah referensi ukuran tubuh umum KURO WEAR (dalam sentimeter). Ukuran sebenarnya dapat sedikit berbeda tergantung model, bahan kain, dan siluet potongan pakaian.
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- MODAL FOOTER -->
+            <div class="modal-footer kw-modal-footer border-0 pt-0">
+                <button
+                    type="button"
+                    class="btn btn-dark rounded-0 px-4 py-2 fw-semibold"
+                    style="font-size: 12px; letter-spacing: 0.5px;"
+                    data-bs-dismiss="modal"
+                >
+                    TUTUP
+                </button>
+            </div>
+
+        </div>
+    </div>
+</div>

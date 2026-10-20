@@ -1,0 +1,122 @@
+{% extends 'base.html' %}
+
+{% block title %}REGISTER - KURO WEAR{% endblock %}
+
+{% block content %}
+<div class="signin-wrapper">
+    <div class="signin-form-box">
+        
+        <!-- Judul Besar REGISTER -->
+        <h1 class="signin-title">REGISTER</h1>
+
+        <!-- Flash Messages -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }} mb-4 rounded-0 py-3" style="font-size: 14px; font-weight: 500;">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <!-- Form Registrasi -->
+        <form method="POST" action="{{ url_for('auth.register') }}">
+            {{ form.hidden_tag() }}
+
+            <!-- 1. Input USERNAME -->
+            <div class="mb-3">
+                <label class="signin-label">USERNAME</label>
+                {{ form.name(class="signin-input", placeholder="Enter your name", autocomplete="name") }}
+                {% for error in form.name.errors %}
+                    <small class="text-danger d-block mt-1 fw-bold">{{ error }}</small>
+                {% endfor %}
+            </div>
+
+            <!-- 2. Input EMAIL -->
+            <div class="mb-3">
+                <label class="signin-label">EMAIL</label>
+                {{ form.email(class="signin-input", placeholder="Enter your email address", autocomplete="email") }}
+                {% for error in form.email.errors %}
+                    <small class="text-danger d-block mt-1 fw-bold">{{ error }}</small>
+                {% endfor %}
+            </div>
+
+            <!-- 3. Input PASSWORD -->
+            <div class="mb-3">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <label class="signin-label mb-0">PASSWORD</label>
+                    <a href="#" class="link-forgot-password">Forgot password?</a>
+                </div>
+                
+                <div class="signin-input-group">
+                    {{ form.password(id="reg-password", class="signin-input", placeholder="Please enter your password", autocomplete="new-password") }}
+                    <button type="button" id="toggle-reg-password" class="btn-toggle-password" title="Lihat password">
+                        <i class="bi bi-eye" id="eye-icon-pass"></i>
+                    </button>
+                </div>
+                {% for error in form.password.errors %}
+                    <small class="text-danger d-block mt-1 fw-bold">{{ error }}</small>
+                {% endfor %}
+            </div>
+
+            <!-- 4. Input CONFIRM PASSWORD -->
+            <div class="mb-3">
+                <label class="signin-label">CONFIRM PASSWORD</label>
+                <div class="signin-input-group">
+                    {{ form.confirm_password(id="reg-confirm", class="signin-input", placeholder="Please enter your password", autocomplete="new-password") }}
+                    <button type="button" id="toggle-reg-confirm" class="btn-toggle-password" title="Lihat password">
+                        <i class="bi bi-eye" id="eye-icon-confirm"></i>
+                    </button>
+                </div>
+                {% for error in form.confirm_password.errors %}
+                    <small class="text-danger d-block mt-1 fw-bold">{{ error }}</small>
+                {% endfor %}
+            </div>
+
+            <!-- 5. Input GENDER -->
+            <div class="mb-4">
+                <label class="signin-label">GENDER</label>
+                {{ form.gender(class="signin-select") }}
+                {% for error in form.gender.errors %}
+                    <small class="text-danger d-block mt-1 fw-bold">{{ error }}</small>
+                {% endfor %}
+            </div>
+
+            <!-- Tombol REGISTER -->
+            <button type="submit" class="btn-signin-submit">
+                <span>REGISTER</span>
+                <i class="bi bi-arrow-right fs-5"></i>
+            </button>
+        </form>
+
+        <!-- Link ke Sign In -->
+        <div class="signin-footer-text">
+            Already have an account? 
+            <a href="{{ url_for('auth.login') }}" class="link-register-maroon ms-1">Sign In</a>
+        </div>
+
+    </div>
+</div>
+
+<!-- JavaScript Toggle Password Visibility untuk Password & Confirm Password -->
+<script>
+    function setupPasswordToggle(inputId, buttonId, iconId) {
+        const input = document.getElementById(inputId);
+        const button = document.getElementById(buttonId);
+        const icon = document.getElementById(iconId);
+
+        if (button && input) {
+            button.addEventListener('click', function () {
+                const isPassword = input.getAttribute('type') === 'password';
+                input.setAttribute('type', isPassword ? 'text' : 'password');
+                icon.classList.toggle('bi-eye');
+                icon.classList.toggle('bi-eye-slash');
+            });
+        }
+    }
+
+    setupPasswordToggle('reg-password', 'toggle-reg-password', 'eye-icon-pass');
+    setupPasswordToggle('reg-confirm', 'toggle-reg-confirm', 'eye-icon-confirm');
+</script>
+{% endblock %}

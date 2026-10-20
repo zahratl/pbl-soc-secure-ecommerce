@@ -1,0 +1,213 @@
+{% extends 'admin/admin_base.html' %}
+{% block title %}Dashboard - Admin KURO WEAR{% endblock %}
+
+{% block extra_css %}
+<style>
+.ad-dashboard{color:#202126}
+.ad-page-head{display:flex;align-items:flex-start;justify-content:space-between;gap:20px;flex-wrap:wrap;margin-bottom:26px}
+.ad-page-head h1{font-size:25px;font-weight:700;letter-spacing:-.5px;margin:0 0 7px}
+.ad-page-head p{margin:0;color:#777A82;font-size:12px}
+.ad-page-actions{display:flex;gap:9px;flex-wrap:wrap}
+.ad-metrics{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px;margin-bottom:30px}
+.ad-metric{background:#fff;border:1px solid #E6E5E2;border-radius:7px;padding:20px;min-height:145px}
+.ad-metric-label{font-size:11px;color:#777A82;font-weight:600}
+.ad-metric-value{font-size:26px;line-height:1.3;font-weight:700;letter-spacing:-.6px;margin:16px 0 7px;overflow-wrap:anywhere}
+.ad-metric-desc{font-size:11px;line-height:1.6;color:#85878D}
+.ad-metric.is-warning .ad-metric-value{color:#A30B14}
+.ad-section-header{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:14px}
+.ad-section-header h2{font-size:15px;font-weight:700;margin:0}
+.ad-section-header a{color:#4F5158;font-size:11px;text-decoration:none;font-weight:600}
+.ad-section-header a:hover{color:#A30B14}
+.ad-main-grid{display:grid;grid-template-columns:minmax(0,1.8fr) minmax(285px,.85fr);gap:20px;align-items:start}
+.ad-panel{background:#fff;border:1px solid #E6E5E2;border-radius:7px;overflow:hidden}
+.ad-table-wrap{overflow-x:auto}
+.ad-table{width:100%;border-collapse:collapse;min-width:620px}
+.ad-table th{padding:14px 17px;text-align:left;background:#FAFAF9;font-size:10px;text-transform:uppercase;letter-spacing:.4px;color:#85878D;font-weight:600}
+.ad-table td{padding:17px;border-top:1px solid #EEEEEB;font-size:11px;vertical-align:middle}
+.ad-table .ad-number{font-weight:700;font-size:11px;color:#202126;text-decoration:none;overflow-wrap:anywhere}
+.ad-table .ad-number:hover{color:#A30B14}
+.ad-sub{display:block;color:#85878D;font-size:10px;line-height:1.6;margin-top:5px}
+.ad-money{font-weight:700;white-space:nowrap}
+.ad-status{display:inline-flex;align-items:center;gap:6px;padding:6px 9px;border-radius:4px;font-size:10px;font-weight:600;white-space:nowrap}
+.ad-status::before{content:"";width:6px;height:6px;background:currentColor;border-radius:50%}
+.ad-status.success{background:#E4F4EA;color:#176743}
+.ad-status.progress{background:#E9EEF9;color:#385886}
+.ad-status.pending{background:#FDF0D9;color:#96620C}
+.ad-status.warning{background:#F9E8E7;color:#A30B14}
+.ad-link{display:inline-flex;align-items:center;justify-content:center;min-height:30px;padding:6px 10px;border:1px solid #E6E5E2;border-radius:5px;color:#202126;text-decoration:none;font-size:10px;font-weight:600}
+.ad-link:hover{background:#F4F3F1;color:#202126}
+.ad-stock-item{display:flex;justify-content:space-between;gap:10px;padding:15px 17px;border-bottom:1px solid #EEEEEB}
+.ad-stock-item:last-child{border-bottom:0}
+.ad-stock-name{font-size:11px;font-weight:700;margin:0 0 5px}
+.ad-stock-variant{font-size:10px;color:#85878D}
+.ad-stock-amount{text-align:right;white-space:nowrap;font-size:11px;font-weight:700;color:#A30B14}
+.ad-stock-limit{display:block;font-size:10px;font-weight:400;color:#85878D;margin-top:5px}
+.ad-empty{min-height:220px;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:10px;padding:28px}
+.ad-empty i{font-size:25px;color:#999B9F}
+.ad-empty strong{font-size:12px}
+.ad-empty p{font-size:11px;color:#85878D;margin:0}
+.ad-panel-footer{padding:13px 17px;border-top:1px solid #EEEEEB}
+.ad-panel-footer .admin-btn{width:100%}
+.ad-section-meta{color:#85878D;font-size:11px}
+@media(max-width:1150px){.ad-metrics{grid-template-columns:repeat(2,minmax(0,1fr))}.ad-main-grid{grid-template-columns:1fr}}
+@media(max-width:600px){.ad-metrics{gap:10px}.ad-metric{padding:14px;min-height:125px}.ad-metric-value{font-size:22px}.ad-page-head h1{font-size:22px}.ad-page-actions{width:100%}.ad-page-actions .admin-btn{flex:1}}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="ad-dashboard">
+    <div class="ad-page-head">
+        <div>
+            <h1>Ringkasan Operasional</h1>
+            <p>Aktivitas toko, transaksi pelanggan, dan kondisi stok terkini.</p>
+        </div>
+
+        <div class="ad-page-actions">
+            <a class="admin-btn secondary" href="{{ url_for('shop.index') }}" target="_blank" rel="noopener noreferrer">
+                <i class="bi bi-box-arrow-up-right"></i> Lihat Toko
+            </a>
+            <a class="admin-btn" href="{{ url_for('admin.product_create') }}">
+                <i class="bi bi-plus-lg"></i> Tambah Produk
+            </a>
+        </div>
+    </div>
+
+    <div class="ad-metrics">
+        <article class="ad-metric">
+            <div class="ad-metric-label">Pendapatan Bulan Ini</div>
+            <div class="ad-metric-value">{{ dashboard_rupiah(monthly_revenue) }}</div>
+            <div class="ad-metric-desc">Pembayaran lunas pada bulan berjalan</div>
+        </article>
+
+        <article class="ad-metric {{ 'is-warning' if ready_to_process_count else '' }}">
+            <div class="ad-metric-label">Perlu Diproses</div>
+            <div class="ad-metric-value">{{ ready_to_process_count }}</div>
+            <div class="ad-metric-desc">
+                {{ pending_payment_count_dashboard }} menunggu pembayaran
+            </div>
+        </article>
+
+        <article class="ad-metric">
+            <div class="ad-metric-label">Produk Aktif</div>
+            <div class="ad-metric-value">{{ catalog_count }}</div>
+            <div class="ad-metric-desc">
+                {{ catalog_safe }} stok aman · {{ catalog_low }} perlu perhatian
+            </div>
+        </article>
+
+        <article class="ad-metric">
+            <div class="ad-metric-label">Pelanggan Terdaftar</div>
+            <div class="ad-metric-value">{{ customer_count }}</div>
+            <div class="ad-metric-desc">
+                {{ order_count_dashboard }} total pesanan · {{ paid_order_count_dashboard }} lunas
+            </div>
+        </article>
+    </div>
+
+    <div class="ad-main-grid">
+        <section>
+            <div class="ad-section-header">
+                <h2>Pesanan Terbaru</h2>
+                <a href="{{ url_for('admin.orders_index') }}">
+                    Lihat Semua <i class="bi bi-arrow-right"></i>
+                </a>
+            </div>
+
+            <div class="ad-panel">
+                {% if recent_orders %}
+                <div class="ad-table-wrap">
+                    <table class="ad-table">
+                        <thead>
+                            <tr>
+                                <th>Pesanan</th>
+                                <th>Pelanggan / Produk</th>
+                                <th>Total</th>
+                                <th>Status</th>
+                                <th>Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for order in recent_orders %}
+                            {% set status_label, status_style = dashboard_order_status(order) %}
+                            <tr>
+                                <td>
+                                    <a class="ad-number" href="{{ url_for('admin.order_detail', order_number=order.order_number) }}">
+                                        {{ order.order_number }}
+                                    </a>
+                                    <span class="ad-sub">{{ dashboard_date(order.created_at) }}</span>
+                                </td>
+                                <td>
+                                    <strong>{{ order.customer_name }}</strong>
+                                    <span class="ad-sub">
+                                        {% if order.items %}
+                                            {{ order.items[0].product_name }}
+                                            {% if order.items|length > 1 %}+{{ order.items|length - 1 }} produk{% endif %}
+                                        {% else %}
+                                            Tidak ada item
+                                        {% endif %}
+                                    </span>
+                                </td>
+                                <td class="ad-money">{{ dashboard_rupiah(order.total) }}</td>
+                                <td>
+                                    <span class="ad-status {{ status_style }}">{{ status_label }}</span>
+                                </td>
+                                <td>
+                                    <a class="ad-link" href="{{ url_for('admin.order_detail', order_number=order.order_number) }}">
+                                        Rincian
+                                    </a>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div class="ad-empty">
+                    <i class="bi bi-bag"></i>
+                    <strong>Belum Ada Pesanan</strong>
+                    <p>Pesanan baru akan muncul setelah customer melakukan checkout.</p>
+                </div>
+                {% endif %}
+            </div>
+        </section>
+
+        <section>
+            <div class="ad-section-header">
+                <h2>Stok Perlu Perhatian</h2>
+                <span class="ad-section-meta">{{ stock_alert_count }} varian</span>
+            </div>
+
+            <div class="ad-panel">
+                {% if stock_alerts %}
+                    {% for variant, product in stock_alerts %}
+                    <div class="ad-stock-item">
+                        <div>
+                            <p class="ad-stock-name">{{ product.name }}</p>
+                            <span class="ad-stock-variant">
+                                {{ variant.color_name }} · Size {{ variant.size }}
+                            </span>
+                        </div>
+                        <div class="ad-stock-amount">
+                            {{ variant.stock }} pcs
+                            <span class="ad-stock-limit">Minimum {{ variant.minimum_stock }}</span>
+                        </div>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <div class="ad-empty">
+                        <i class="bi bi-box-seam"></i>
+                        <strong>Stok Dalam Kondisi Aman</strong>
+                        <p>Belum ada varian yang mencapai batas minimum.</p>
+                    </div>
+                {% endif %}
+
+                <div class="ad-panel-footer">
+                    <a class="admin-btn secondary" href="{{ url_for('admin.products') }}">
+                        <i class="bi bi-boxes"></i> Kelola Produk &amp; Stok
+                    </a>
+                </div>
+            </div>
+        </section>
+    </div>
+</div>
+{% endblock %}

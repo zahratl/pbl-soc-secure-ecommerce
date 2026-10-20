@@ -1,0 +1,424 @@
+<!-- menampilkan semua informasi pesanan, alamat pelanggan, daftar barang, pembayaran, dan form pengiriman -->
+{% extends 'admin/admin_base.html' %}
+{% block title %}Rincian Pesanan - Admin KURO WEAR{% endblock %}
+
+{% block extra_css %}
+<style>
+.order-detail { color:#1A1B22; font-family:inherit; }
+.order-detail * { box-sizing:border-box; }
+.order-back { display:inline-flex; align-items:center; gap:8px; margin-bottom:22px; color:#575E70; font-size:12px; font-weight:600; text-decoration:none; }
+.order-back:hover { color:#A30B14; }
+
+.order-heading { display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:18px; margin-bottom:26px; }
+.order-heading h1 { margin:0 0 8px; font-size:27px; font-weight:700; }
+.order-heading p { margin:0; color:#858585; font-size:12px; }
+
+.order-badges { display:grid; grid-template-columns:repeat(2,172px); align-items:center; gap:10px; flex-shrink:0; }
+.order-badge { display:inline-flex; align-items:center; justify-content:center; gap:7px; width:100%; height:42px; padding:0 12px; border-radius:7px; font-size:12px; font-weight:700; line-height:1; white-space:nowrap; }
+.order-badge i { font-size:14px; line-height:1; }
+.order-badge.success { background:#DFF7E9; color:#087344; }
+.order-badge.pending { background:#FFF4DF; color:#9B6500; }
+.order-badge.progress { background:#E8EDFF; color:#405CA8; }
+.order-badge.neutral { background:#F1F0EE; color:#575E70; }
+
+.order-layout { display:grid; grid-template-columns:minmax(0,1.5fr) minmax(300px,1fr); gap:20px; align-items:start; }
+.order-column { display:grid; gap:20px; min-width:0; }
+.order-card { min-width:0; padding:24px; background:#fff; border:1px solid #E8E7F1; border-radius:7px; }
+.order-card h2 { margin:0 0 20px; font-size:15px; font-weight:700; }
+.order-card h2 i { margin-right:8px; color:#575E70; }
+
+.order-item { display:flex; gap:15px; padding:16px 0; border-bottom:1px solid #F1F0EE; }
+.order-item:first-of-type { padding-top:0; }
+.order-item:last-of-type { border-bottom:0; }
+.order-item img { width:78px; height:104px; flex-shrink:0; object-fit:cover; border-radius:6px; background:#F4F2ED; }
+.order-photo-empty { display:grid; place-items:center; flex-shrink:0; width:78px; height:104px; border-radius:6px; background:#F4F2ED; color:#858585; }
+.order-item-content { flex:1; min-width:0; }
+.order-item-name { margin-bottom:6px; font-size:13px; font-weight:700; }
+.order-muted { color:#858585; font-size:11px; line-height:1.8; }
+.order-item-bottom { display:flex; justify-content:space-between; gap:12px; margin-top:12px; font-size:12px; }
+.order-item-bottom strong { white-space:nowrap; }
+
+.order-price-row { display:flex; justify-content:space-between; gap:12px; padding:9px 0; font-size:12px; }
+.order-price-row.total { margin-top:10px; padding-top:16px; border-top:1px solid #E8E7F1; font-size:15px; font-weight:700; }
+
+.order-info { display:grid; gap:14px; }
+.order-info-line { display:flex; align-items:flex-start; justify-content:space-between; gap:18px; font-size:12px; line-height:1.7; }
+.order-info-line span { color:#858585; }
+.order-info-line strong { text-align:right; overflow-wrap:anywhere; }
+.order-address { font-size:12px; line-height:1.9; white-space:pre-wrap; overflow-wrap:anywhere; }
+
+.order-form { display:grid; gap:15px; }
+.order-field { display:grid; gap:7px; }
+.order-field label { color:#575E70; font-size:11px; font-weight:700; }
+.order-field input,.order-field textarea { width:100%; padding:12px; border:1px solid #DEDCD7; border-radius:6px; background:#fff; color:#1A1B22; font:inherit; font-size:12px; }
+.order-field input:focus,.order-field textarea:focus { outline:2px solid #C9B6A7; outline-offset:1px; }
+
+.order-button { display:inline-flex; align-items:center; justify-content:center; gap:8px; width:100%; min-height:42px; padding:12px; border:0; border-radius:6px; background:#202126; color:#fff; font-size:12px; font-weight:600; cursor:pointer; }
+.order-button:hover { background:#373840; }
+.order-button.secondary { background:#fff; border:1px solid #202126; color:#202126; }
+.order-button.secondary:hover { background:#F5F2EB; }
+
+.order-notice { padding:14px; border:1px solid #E5E0D5; border-left:3px solid #202126; border-radius:6px; background:#F7F5EF; color:#575E70; font-size:12px; line-height:1.8; }
+.order-notice.success { background:#E8F7ED; border-color:#A5D9B5; border-left-color:#087344; }
+.order-notice.warning { background:#FFF8E9; border-color:#F0D6A8; border-left-color:#B07800; }
+
+.order-timeline { display:grid; gap:16px; }
+.order-timeline-item { display:flex; gap:12px; font-size:12px; }
+.order-timeline-dot { width:12px; height:12px; margin-top:3px; flex-shrink:0; border-radius:50%; background:#E5E0D5; }
+.order-timeline-dot.active { background:#087344; }
+.order-timeline-item strong { display:block; margin-bottom:4px; }
+.order-timeline-item small { color:#858585; font-size:11px; }
+
+.order-payment-entry { padding:12px 0; border-bottom:1px solid #F1F0EE; font-size:12px; }
+.order-payment-entry:last-child { border-bottom:0; }
+.order-payment-entry strong { display:block; margin-bottom:6px; overflow-wrap:anywhere; }
+.order-payment-entry small { display:block; color:#858585; line-height:1.8; }
+
+@media(max-width:1000px) {
+    .order-layout { grid-template-columns:1fr; }
+}
+@media(max-width:650px) {
+    .order-heading { flex-direction:column; align-items:stretch; }
+    .order-heading h1 { font-size:21px; overflow-wrap:anywhere; }
+    .order-badges { width:100%; grid-template-columns:repeat(2,minmax(0,1fr)); }
+    .order-badge { padding:0 8px; font-size:11px; }
+    .order-card { padding:17px; }
+    .order-item img,.order-photo-empty { width:62px; height:84px; }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="order-detail">
+    <a href="{{ url_for('admin.orders_index', view='orders') }}" class="order-back">
+        <i class="bi bi-arrow-left"></i> Kembali ke Daftar Pesanan
+    </a>
+
+    <div class="order-heading">
+        <div>
+            <h1>Rincian Pesanan</h1>
+            <p>{{ order.order_number }} · {{ format_date(order.created_at) }}</p>
+        </div>
+
+        <div class="order-badges">
+            <span class="order-badge {{ 'success' if order.payment_status == 'paid' else 'pending' }}">
+                <i class="bi bi-credit-card"></i>
+                {{ 'Lunas' if order.payment_status == 'paid' else order.payment_status|replace('_', ' ')|title }}
+            </span>
+            <span class="order-badge {{ 'success' if order.fulfillment_status == 'completed' else 'progress' }}">
+                <i class="bi bi-box-seam"></i> {{ fulfillment_label }}
+            </span>
+        </div>
+    </div>
+
+    <div class="order-layout">
+        <div class="order-column">
+            <section class="order-card">
+                <h2><i class="bi bi-bag"></i> Produk yang Dibeli</h2>
+
+                {% for item in order.items %}
+                <div class="order-item">
+                    {% set photo = item.image_path or '' %}
+
+                    {% if photo.startswith('https://') or photo.startswith('http://') %}
+                    <img src="{{ photo }}" alt="{{ item.product_name }}" loading="lazy">
+                    {% elif photo %}
+                    <img src="{{ url_for('static', filename=photo) }}" alt="{{ item.product_name }}" loading="lazy">
+                    {% else %}
+                    <div class="order-photo-empty"><i class="bi bi-image"></i></div>
+                    {% endif %}
+
+                    <div class="order-item-content">
+                        <div class="order-item-name">{{ item.product_name }}</div>
+                        <div class="order-muted">SKU: {{ item.sku }}</div>
+                        <div class="order-muted">Warna: {{ item.color_name }} · Ukuran: {{ item.size }}</div>
+                        <div class="order-item-bottom">
+                            <span>{{ item.quantity }} pcs × {{ rupiah(item.unit_price) }}</span>
+                            <strong>{{ rupiah(item.line_total) }}</strong>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+
+                <div class="order-price-row">
+                    <span>Subtotal Produk</span><strong>{{ rupiah(order.subtotal) }}</strong>
+                </div>
+                <div class="order-price-row">
+                    <span>Ongkos Kirim</span><strong>{{ rupiah(order.shipping_cost) }}</strong>
+                </div>
+                <div class="order-price-row total">
+                    <span>Total Pembayaran</span><strong>{{ rupiah(order.total) }}</strong>
+                </div>
+            </section>
+
+            <section class="order-card">
+                <h2><i class="bi bi-truck"></i> Pengelolaan Pengiriman</h2>
+                <div class="order-notice mb-3">
+                    Status saat ini: <strong>{{ fulfillment_label }}</strong>
+                </div>
+
+                {% if order.payment_status != 'paid' %}
+                <div class="order-notice warning">
+                    Pesanan belum lunas. Admin belum bisa memproses pengiriman.
+                </div>
+
+                {% elif not order.stock_deducted_at or order.fulfillment_status == 'stock_issue' %}
+                <div class="order-notice warning">
+                    Stok belum tersinkronkan atau perlu diperiksa. Jangan memproses pengiriman sebelum masalah stok selesai.
+                </div>
+
+                {% elif order.fulfillment_status == 'unfulfilled' %}
+                <p class="order-muted">
+                    Pembayaran dan sinkronisasi stok sudah selesai. Mulai proses pengemasan produk.
+                </p>
+
+                <form class="order-form" method="POST" action="{{ url_for('admin.order_update', order_number=order.order_number) }}">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <input type="hidden" name="action" value="processing">
+                    <button class="order-button" type="submit">
+                        <i class="bi bi-box-seam"></i> MULAI PROSES PENGEMASAN
+                    </button>
+                </form>
+
+                {% elif order.fulfillment_status == 'processing' %}
+                <p class="order-muted">
+                    Pastikan produk, warna, ukuran, dan jumlah sudah sesuai sebelum melanjutkan proses pengiriman.
+                </p>
+
+                <div class="order-info mb-3">
+                    <div class="order-info-line">
+                        <span>Kurir dari Checkout</span>
+                        <strong>{{ shipment.courier if shipment and shipment.courier else jne_courier }}</strong>
+                    </div>
+                    <div class="order-info-line">
+                        <span>Kode Pengiriman</span>
+                        <strong>Dibuat otomatis oleh KURO WEAR</strong>
+                    </div>
+                </div>
+
+                <div class="order-notice warning mb-3">
+                    <strong>Mode pengujian PBL</strong>
+                    <div>
+                        Kode pengiriman yang dibuat adalah kode simulasi internal, bukan resi JNE resmi dan tidak dapat dilacak melalui JNE.
+                        Status Dikirim akan diperbarui secara manual oleh Admin.
+                    </div>
+                </div>
+
+                <form class="order-form" method="POST" action="{{ url_for('admin.order_update', order_number=order.order_number) }}" onsubmit="return confirm('Buat kode simulasi pengiriman dan tandai pesanan Dikirim?')">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <input type="hidden" name="action" value="shipped">
+
+                    <div class="order-field">
+                        <label for="notes">CATATAN PENGIRIMAN (OPSIONAL)</label>
+                        <textarea id="notes" name="notes" maxlength="500" rows="3" placeholder="Catatan internal untuk proses pengiriman"></textarea>
+                    </div>
+
+                    <button class="order-button" type="submit">
+                        <i class="bi bi-truck"></i> BUAT KODE PENGIRIMAN &amp; TANDAI DIKIRIM
+                    </button>
+                </form>
+
+                {% elif order.fulfillment_status == 'shipped' %}
+                {% set is_simulation = shipment and shipment.tracking_number and shipment.tracking_number.startswith('KW-INT-') %}
+
+                <div class="order-info mb-4">
+                    <div class="order-info-line">
+                        <span>Kurir</span>
+                        <strong>{{ shipment.courier if shipment and shipment.courier else jne_courier }}</strong>
+                    </div>
+                    <div class="order-info-line">
+                        <span>{{ 'Kode Simulasi Pengiriman' if is_simulation else 'Nomor Pengiriman' }}</span>
+                        <strong>{{ shipment.tracking_number if shipment and shipment.tracking_number else 'Belum tersedia' }}</strong>
+                    </div>
+                    <div class="order-info-line">
+                        <span>Tanggal Dikirim</span>
+                        <strong>{{ format_date(shipment.shipped_at) if shipment else '-' }}</strong>
+                    </div>
+                    {% if shipment and shipment.notes %}
+                    <div class="order-info-line">
+                        <span>Catatan</span><strong>{{ shipment.notes }}</strong>
+                    </div>
+                    {% endif %}
+                </div>
+
+                {% if is_simulation %}
+                <div class="order-notice warning mb-3">
+                    Ini adalah pengiriman simulasi PBL. Kode di atas bukan resi resmi JNE dan belum dapat digunakan untuk pelacakan paket.
+                </div>
+                {% endif %}
+
+                <form method="POST" action="{{ url_for('admin.order_update', order_number=order.order_number) }}" onsubmit="return confirm('Pastikan pesanan telah dinyatakan diterima pada skenario pengujian. Tandai sebagai Selesai?')">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <input type="hidden" name="action" value="completed">
+                    <button class="order-button" type="submit">
+                        <i class="bi bi-check-circle"></i> TANDAI PESANAN SELESAI
+                    </button>
+                </form>
+
+                {% elif order.fulfillment_status == 'completed' %}
+                {% set is_simulation = shipment and shipment.tracking_number and shipment.tracking_number.startswith('KW-INT-') %}
+
+                <div class="order-notice success">
+                    <i class="bi bi-check-circle me-1"></i> Pesanan telah ditandai selesai oleh Admin.
+                </div>
+
+                <div class="order-info mt-3">
+                    <div class="order-info-line">
+                        <span>Kurir</span>
+                        <strong>{{ shipment.courier if shipment and shipment.courier else jne_courier }}</strong>
+                    </div>
+                    <div class="order-info-line">
+                        <span>{{ 'Kode Simulasi Pengiriman' if is_simulation else 'Nomor Pengiriman' }}</span>
+                        <strong>{{ shipment.tracking_number if shipment and shipment.tracking_number else '-' }}</strong>
+                    </div>
+                    <div class="order-info-line">
+                        <span>Tanggal Dikirim</span>
+                        <strong>{{ format_date(shipment.shipped_at) if shipment else '-' }}</strong>
+                    </div>
+                    <div class="order-info-line">
+                        <span>Diselesaikan</span>
+                        <strong>{{ format_date(shipment.completed_at) if shipment else '-' }}</strong>
+                    </div>
+                </div>
+
+                {% if is_simulation %}
+                <div class="order-notice warning mt-3">
+                    Pengiriman ini adalah simulasi KURO WEAR untuk pengujian PBL, bukan transaksi layanan JNE resmi.
+                </div>
+                {% endif %}
+                {% endif %}
+            </section>
+
+            <section class="order-card">
+                <h2><i class="bi bi-clock-history"></i> Riwayat Proses Pesanan</h2>
+
+                <div class="order-timeline">
+                    <div class="order-timeline-item">
+                        <div class="order-timeline-dot active"></div>
+                        <div>
+                            <strong>Pesanan Dibuat</strong>
+                            <small>{{ format_date(order.created_at) }}</small>
+                        </div>
+                    </div>
+
+                    <div class="order-timeline-item">
+                        <div class="order-timeline-dot {{ 'active' if order.paid_at else '' }}"></div>
+                        <div>
+                            <strong>Pembayaran Berhasil</strong>
+                            <small>{{ format_date(order.paid_at) }}</small>
+                        </div>
+                    </div>
+
+                    <div class="order-timeline-item">
+                        <div class="order-timeline-dot {{ 'active' if order.stock_deducted_at else '' }}"></div>
+                        <div>
+                            <strong>Stok Disinkronkan</strong>
+                            <small>{{ format_date(order.stock_deducted_at) }}</small>
+                        </div>
+                    </div>
+
+                    <div class="order-timeline-item">
+                        <div class="order-timeline-dot {{ 'active' if shipment and shipment.processing_at else '' }}"></div>
+                        <div>
+                            <strong>Pengemasan Dimulai</strong>
+                            <small>{{ format_date(shipment.processing_at) if shipment else '-' }}</small>
+                        </div>
+                    </div>
+
+                    <div class="order-timeline-item">
+                        <div class="order-timeline-dot {{ 'active' if shipment and shipment.shipped_at else '' }}"></div>
+                        <div>
+                            <strong>Pesanan Dikirim</strong>
+                            <small>{{ format_date(shipment.shipped_at) if shipment else '-' }}</small>
+                        </div>
+                    </div>
+
+                    <div class="order-timeline-item">
+                        <div class="order-timeline-dot {{ 'active' if shipment and shipment.completed_at else '' }}"></div>
+                        <div>
+                            <strong>Pesanan Selesai</strong>
+                            <small>{{ format_date(shipment.completed_at) if shipment else '-' }}</small>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+
+        <div class="order-column">
+            <section class="order-card">
+                <h2><i class="bi bi-person"></i> Informasi Pelanggan</h2>
+
+                <div class="order-info">
+                    <div class="order-info-line">
+                        <span>Nama</span><strong>{{ private_field(order, 'customer_name') }}</strong>
+                    </div>
+                    <div class="order-info-line">
+                        <span>Email</span><strong>{{ private_field(order, 'customer_email') }}</strong>
+                    </div>
+                    <div class="order-info-line">
+                        <span>Customer ID</span><strong>#{{ order.user_id }}</strong>
+                    </div>
+                </div>
+            </section>
+
+            <section class="order-card">
+                <h2><i class="bi bi-geo-alt"></i> Alamat Pengiriman</h2>
+
+                <div class="order-info">
+                    <div class="order-info-line">
+                        <span>Penerima</span><strong>{{ private_field(order, 'recipient_name') }}</strong>
+                    </div>
+                    <div class="order-info-line">
+                        <span>Telepon</span><strong>{{ private_field(order, 'phone') }}</strong>
+                    </div>
+                    <div class="order-info-line">
+                        <span>Kota</span><strong>{{ order.city }}</strong>
+                    </div>
+                </div>
+
+                <hr>
+                <div class="order-address">{{ private_field(order, 'full_address') }}</div>
+            </section>
+
+            <section class="order-card">
+                <h2><i class="bi bi-credit-card"></i> Informasi Pembayaran</h2>
+
+                <div class="order-info">
+                    <div class="order-info-line">
+                        <span>Status</span>
+                        <strong>{{ order.payment_status|replace('_', ' ')|title }}</strong>
+                    </div>
+                    <div class="order-info-line">
+                        <span>Total</span><strong>{{ rupiah(order.total) }}</strong>
+                    </div>
+                    <div class="order-info-line">
+                        <span>Waktu Lunas</span><strong>{{ format_date(order.paid_at) }}</strong>
+                    </div>
+                </div>
+
+                {% for payment in payments %}
+                <div class="order-payment-entry">
+                    <strong>Transaksi #{{ payment.id }}</strong>
+                    <small>Status Midtrans: {{ payment.transaction_status }}</small>
+                    <small>
+                        Metode: {{ payment.payment_type or payment.selected_channel or '-' }}
+                        {{ '(' ~ payment.bank|upper ~ ')' if payment.bank else '' }}
+                    </small>
+                    <small>ID Midtrans: {{ payment.midtrans_transaction_id or '-' }}</small>
+                    <small>Nominal: {{ rupiah(payment.gross_amount) }}</small>
+                    <small>Verifikasi: {{ format_date(payment.verified_at) }}</small>
+                </div>
+                {% endfor %}
+            </section>
+
+            <div class="order-notice">
+                <strong>KURO WEAR — Admin</strong>
+                <div>
+                    Status pengiriman diperbarui tanpa mengubah pembayaran atau mengurangi stok kembali.
+                    Kode KW-INT merupakan simulasi dan bukan resi JNE resmi.
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

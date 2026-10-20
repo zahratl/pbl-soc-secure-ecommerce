@@ -1,0 +1,602 @@
+
+{% extends 'base.html' %}
+{% block title %}{{ product.name }} - KURO WEAR{% endblock %}
+{% block content %}
+
+{% set product_reviews = reviews|default([], true) %}
+{% set review_count = product_reviews|length %}
+{% set rating_total = namespace(value=0) %}
+{% for review in product_reviews %}
+    {% set rating_total.value = rating_total.value + (review.rating|int) %}
+{% endfor %}
+{% set average_rating = (rating_total.value / review_count) if review_count else 0 %}
+
+<style>
+.kpd{background:#EDEBDD;color:#1A1B22;min-height:65vh}
+.kpd *{box-sizing:border-box}
+.kpd-container{max-width:1180px;width:100%;margin:auto}
+.kpd-breadcrumb-area{background:#fff;padding:19px 20px}
+.kpd-breadcrumb{display:flex;align-items:center;gap:10px;flex-wrap:wrap;font-size:11px;font-weight:600;letter-spacing:.4px;color:#687184}
+.kpd-breadcrumb a{color:inherit;text-decoration:none}
+.kpd-breadcrumb a:hover{color:#B7000C}
+.kpd-breadcrumb strong{color:#1A1B22}
+.kpd-main{padding:35px 20px 65px}
+.kpd-layout{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,.85fr);gap:28px;align-items:start}
+.kpd-gallery,.kpd-info{min-width:0}
+.kpd-photo{position:relative;aspect-ratio:3/4;overflow:hidden;background:#E8E5DC}
+.kpd-photo>img{width:100%;height:100%;object-fit:cover;display:block}
+.kpd-no-photo{display:flex;align-items:center;justify-content:center;height:100%;font-size:43px;color:#9CA3AF}
+.kpd-labels{position:absolute;left:15px;top:15px;z-index:2;display:flex;flex-direction:column;align-items:flex-start;gap:7px}
+.kpd-label{padding:7px 12px;background:#2F3038;color:#fff;font-size:10px;font-weight:700;letter-spacing:.4px}
+.kpd-label-red{background:#E60012}
+.kpd-thumbnails{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin-top:14px}
+.kpd-thumbnail{aspect-ratio:3/4;padding:2px;background:#F4F2FD;border:2px solid transparent;opacity:.75;cursor:pointer}
+.kpd-thumbnail.active{border-color:#2F3038;opacity:1}
+.kpd-thumbnail img{width:100%;height:100%;object-fit:cover;display:block}
+.kpd-info{padding:24px;background:#fff}
+.kpd-meta{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-bottom:12px}
+.kpd-sku{font-size:11px;color:#575E70;overflow-wrap:anywhere}
+.kpd-collection{padding:6px 9px;background:#E3E3E3;font-size:10px;font-weight:700}
+.kpd-title{font-size:25px;line-height:1.3;letter-spacing:-.5px;font-weight:750;margin:0 0 15px}
+.kpd-rating{display:flex;align-items:center;gap:9px;flex-wrap:wrap;padding:11px 13px;margin-bottom:20px;background:#E3E3E3;font-size:11px;color:#575E70}
+.kpd-rating a{color:#B7000C;font-weight:700;text-decoration:none}
+.kpd-rating a:hover{text-decoration:underline}
+.kpd-stars{color:#E60012;letter-spacing:2px}
+.kpd-price{font-size:clamp(28px,2.5vw,36px);line-height:1.2;font-weight:750;letter-spacing:-.5px;margin-bottom:24px}
+.kpd-field{margin-bottom:22px}
+.kpd-field-heading{display:flex;align-items:center;justify-content:space-between;gap:9px;flex-wrap:wrap;margin-bottom:12px}
+.kpd-field-title{font-size:11px;font-weight:700}
+.kpd-muted{font-size:11px;color:#687184}
+.kpd-colors{display:flex;flex-wrap:wrap;gap:10px}
+.kpd-swatch{width:39px;height:39px;border:3px solid #DDD;border-radius:50%;padding:0;box-shadow:inset 0 0 0 2px #fff;cursor:pointer}
+.kpd-swatch[aria-pressed=true]{border-color:#2F3038}
+.kpd-sizes{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:7px}
+.kpd-size{height:42px;min-width:0;background:#E3E3E3;border:1px solid transparent;font-size:12px;font-weight:700;color:#1A1B22;cursor:pointer}
+.kpd-size.selected{background:#2F3038;color:#fff}
+.kpd-size:disabled{opacity:.35;cursor:not-allowed}
+.kpd-size-guide{padding:0;border:0;background:transparent;color:#B7000C;font-size:11px;font-weight:700;cursor:pointer}
+.kpd-size-guide:hover{text-decoration:underline}
+.kpd-stock-box{padding:15px;margin-bottom:17px;background:#E3E3E3}
+.kpd-stock-line{display:flex;align-items:center;gap:9px;font-size:11px;font-weight:700;margin-bottom:10px}
+.kpd-stock-dot{width:8px;height:8px;border-radius:50%;background:#E60012}
+.kpd-stock-track{height:5px;background:#fff;width:100%}
+.kpd-stock-fill{height:100%;width:0;background:#E60012;transition:width .2s}
+.kpd-actions{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:17px}
+.kpd-quantity{display:flex;align-items:center;justify-content:space-between;width:126px;height:43px;background:#E3E3E3}
+.kpd-quantity button{height:100%;width:36px;border:0;background:transparent;font-size:19px;cursor:pointer;color:#1A1B22}
+.kpd-quantity span{font-size:13px;font-weight:700}
+.kpd-actions-right{display:flex;gap:9px}
+.kpd-icon-btn{display:flex;align-items:center;justify-content:center;width:43px;height:43px;border:0;background:#E3E3E3;color:#1A1B22;cursor:pointer}
+.kpd-icon-btn i{font-size:18px}
+.kpd-buy-actions{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px}
+.kpd-add-btn,.kpd-buy-btn{display:flex;align-items:center;justify-content:center;gap:7px;min-height:46px;min-width:0;width:100%;padding:10px 7px;border:0;color:#fff;font-size:10px;font-weight:750;cursor:pointer;text-align:center}
+.kpd-add-btn{background:#2F3038}
+.kpd-add-btn:hover{background:#16171B}
+.kpd-buy-btn{background:#E60012}
+.kpd-add-btn:disabled,.kpd-buy-btn:disabled{opacity:.55;cursor:not-allowed}
+.kpd-help{font-size:10px;line-height:1.6;color:#687184;margin:0 0 23px}
+.kpd-care{display:flex;align-items:flex-start;gap:11px;padding:14px;margin-bottom:22px;background:#E3E3E3}
+.kpd-care>i{font-size:17px;color:#575E70}
+.kpd-care strong{display:block;margin-bottom:4px;font-size:12px}
+.kpd-care p{margin:0;color:#575E70;font-size:11px;line-height:1.65;white-space:pre-line}
+.kpd-desc-title{display:inline-block;border-bottom:2px solid #E60012;padding-bottom:8px;margin-bottom:12px;font-size:11px;font-weight:700}
+.kpd-description{margin:0;color:#575E70;font-size:12px;line-height:1.8;white-space:pre-line}
+.kpd-reviews{margin-top:38px;scroll-margin-top:95px}
+.kpd-reviews-heading{font-size:22px;font-weight:750;margin:0 0 20px}
+.kpd-review-summary{display:flex;align-items:center;gap:20px;background:#fff;padding:22px;margin-bottom:18px}
+.kpd-review-score{padding:20px 28px;background:#E3E3E3;text-align:center}
+.kpd-review-score strong{display:block;font-size:40px;line-height:1.1}
+.kpd-review-card{background:#fff;padding:22px;margin-bottom:14px}
+.kpd-review-card p{font-size:12px;color:#575E70;line-height:1.8;white-space:pre-line}
+.kpd-empty-review{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:9px;min-height:175px;padding:30px;background:#fff;text-align:center}
+.kpd-empty-review i{font-size:28px;color:#9CA3AF}
+.kpd-empty-review strong{font-size:15px}
+.kpd-empty-review p{margin:0;color:#687184;font-size:11px}
+.kpd-guide-dialog{position:fixed;inset:0;z-index:1055;margin:auto;width:min(740px,calc(100vw - 28px));max-width:740px;max-height:calc(100vh - 48px);overflow-y:auto;padding:0;border:1px solid #E3E3E3;border-radius:8px;background:#fff;color:#1A1B22;box-shadow:0 15px 45px #0003}
+.kpd-guide-dialog::backdrop{background:#0008}
+.kpd-guide-inner{padding:27px 30px 30px}
+.kpd-guide-header{display:flex;align-items:flex-start;justify-content:space-between;gap:15px;margin-bottom:20px}
+.kpd-guide-title{font-size:23px;font-weight:750;margin:0 0 7px}
+.kpd-guide-description{margin:0;color:#687184;font-size:12px;line-height:1.7}
+.kpd-guide-close{flex-shrink:0;width:35px;height:35px;border:0;background:transparent;color:#666;font-size:24px;cursor:pointer}
+.kpd-guide-tabs{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:22px}
+.kpd-guide-tab{min-height:43px;border:1px solid #DDD;background:#F3F2EF;color:#575E70;font-size:12px;font-weight:700;cursor:pointer}
+.kpd-guide-tab.active,.kpd-guide-tab[aria-selected=true]{background:#2F3038;border-color:#2F3038;color:#fff}
+.kpd-guide-panel[hidden]{display:none!important}
+.kpd-guide-panel-title{font-size:15px;font-weight:700;margin:0 0 13px}
+.kpd-guide-table-wrapper{width:100%;overflow-x:auto}
+.kpd-guide-table{width:100%;border-collapse:collapse;text-align:center;font-size:12px}
+.kpd-guide-table th,.kpd-guide-table td{padding:12px 9px;border:1px solid #E3E3E3;white-space:nowrap}
+.kpd-guide-table th{background:#F0EFEB;color:#1A1B22;font-weight:700}
+.kpd-guide-table td{color:#575E70}
+.kpd-guide-table td:first-child{color:#1A1B22;font-weight:700}
+.kpd-guide-table tbody tr:hover{background:#F8F7F4}
+.kpd-guide-note{margin-top:20px;padding:15px;background:#F3F2EF;border-left:3px solid #B7000C;color:#575E70;font-size:11px;line-height:1.8}
+.kpd-guide-note strong{display:block;color:#1A1B22}
+@media(max-width:991px){.kpd-container{max-width:750px}.kpd-layout{grid-template-columns:1fr;gap:20px}.kpd-info{padding:22px}}
+@media(max-width:575px){.kpd-main{padding:19px 12px 40px}.kpd-breadcrumb-area{padding:15px 12px}.kpd-thumbnails{gap:7px}.kpd-info{padding:17px}.kpd-title{font-size:22px}.kpd-price{font-size:28px}.kpd-sizes{gap:5px}.kpd-size{height:39px}.kpd-add-btn,.kpd-buy-btn{font-size:9px}.kpd-reviews-heading{font-size:19px}.kpd-guide-inner{padding:20px 15px}.kpd-guide-title{font-size:20px}.kpd-guide-table{font-size:11px}.kpd-guide-table th,.kpd-guide-table td{padding:10px 7px}}
+</style>
+
+<div class="kpd">
+    <div class="kpd-breadcrumb-area">
+        <div class="kpd-container">
+            <nav class="kpd-breadcrumb" aria-label="Breadcrumb">
+                <a href="{{ url_for('shop.index') }}">HOME</a>
+                <span>/</span>
+                {% if product.gender == 'women' %}
+                <a href="{{ url_for('shop.women') }}">WOMEN</a>
+                {% elif product.gender == 'men' %}
+                <a href="{{ url_for('shop.man') }}">MAN</a>
+                {% else %}
+                <a href="{{ url_for('shop.catalog_all') }}">ALL</a>
+                {% endif %}
+                <span>/</span>
+                <span>{{ product.category_badge }}</span>
+                <span>/</span>
+                <strong>{{ product.name }}</strong>
+            </nav>
+        </div>
+    </div>
+
+    <main class="kpd-main">
+        <div class="kpd-container">
+            <div class="kpd-layout">
+                <section class="kpd-gallery" aria-label="Galeri produk">
+                    <div class="kpd-photo">
+                        <div class="kpd-labels">
+                            <span class="kpd-label">{{ product.category_badge }}</span>
+                            {% if product.collection_label %}
+                            <span class="kpd-label kpd-label-red">{{ product.collection_label }}</span>
+                            {% endif %}
+                        </div>
+                        {% if product.image %}
+                        <img id="kpdMainImage" src="{{ product.image }}" alt="{{ product.name }}">
+                        {% else %}
+                        <div class="kpd-no-photo"><i class="bi bi-image"></i></div>
+                        {% endif %}
+                    </div>
+
+                    {% if product.images %}
+                    <div class="kpd-thumbnails">
+                        {% for image in product.images %}
+                        <button type="button" class="kpd-thumbnail {{ 'active' if loop.first else '' }}" data-image="{{ image }}" aria-label="Lihat foto {{ loop.index }}">
+                            <img src="{{ image }}" alt="{{ product.name }} - foto {{ loop.index }}" loading="lazy">
+                        </button>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+                </section>
+
+                <section class="kpd-info" aria-label="Informasi produk">
+                    <div class="kpd-meta">
+                        <span class="kpd-sku">SKU: {{ product.sku }}</span>
+                        {% if product.collection_label %}
+                        <span class="kpd-collection">{{ product.collection_label }}</span>
+                        {% endif %}
+                    </div>
+
+                    <h1 class="kpd-title">{{ product.name }}</h1>
+
+                    <div class="kpd-rating">
+                        {% if review_count %}
+                        <span class="kpd-stars" aria-label="Rating {{ '%.1f'|format(average_rating) }} dari 5">
+                            {% for n in range(1, 6) %}
+                            {{ '★' if n <= average_rating|round|int else '☆' }}
+                            {% endfor %}
+                        </span>
+                        <strong>{{ '%.1f'|format(average_rating) }}</strong>
+                        <a href="#kpdReviews">{{ review_count }} Ulasan</a>
+                        {% else %}
+                        <i class="bi bi-chat-square-text"></i>
+                        <a href="#kpdReviews">Belum ada ulasan pelanggan</a>
+                        {% endif %}
+                    </div>
+
+                    <div class="kpd-price">{{ product.price_formatted }}</div>
+
+                    <form id="kpdCartForm" action="{{ url_for('cart.add_item') }}" method="POST">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                        <input type="hidden" name="product_id" value="{{ product.id }}">
+                        <input type="hidden" name="color_name" id="kpdCartColor">
+                        <input type="hidden" name="size" id="kpdCartSize">
+                        <input type="hidden" name="quantity" id="kpdCartQuantity" value="1">
+
+                        <div class="kpd-field">
+                            <div class="kpd-field-heading">
+                                <span class="kpd-field-title">
+                                    WARNA:
+                                    <span id="kpdSelectedColor">{{ product.primary_color_name or 'Belum tersedia' }}</span>
+                                </span>
+                                <span class="kpd-muted">{{ product.colors|length }} Pilihan Warna</span>
+                            </div>
+                            <div class="kpd-colors">
+                                {% for color in product.colors %}
+                                <button type="button" class="kpd-swatch" data-color="{{ color.name }}" data-hex="{{ color.hex }}" aria-label="Pilih warna {{ color.name }}" aria-pressed="{{ 'true' if loop.first else 'false' }}"></button>
+                                {% endfor %}
+                            </div>
+                        </div>
+
+                        <div class="kpd-field">
+                            <div class="kpd-field-heading">
+                                <span class="kpd-field-title">
+                                    PILIHAN UKURAN:
+                                    <span id="kpdSelectedSize">Belum dipilih</span>
+                                </span>
+                                <button type="button" class="kpd-size-guide" id="kpdOpenGuide">
+                                    <i class="bi bi-rulers"></i> Size Guide
+                                </button>
+                            </div>
+                            <div class="kpd-sizes">
+                                {% for size in product.sizes %}
+                                <button type="button" class="kpd-size" data-size="{{ size }}" aria-pressed="false">{{ size }}</button>
+                                {% else %}
+                                <span class="kpd-muted">Ukuran belum tersedia.</span>
+                                {% endfor %}
+                            </div>
+                        </div>
+
+                        <div class="kpd-stock-box">
+                            <div class="kpd-stock-line">
+                                <span class="kpd-stock-dot"></span>
+                                <span id="kpdStockText">Pilih ukuran untuk melihat stok.</span>
+                            </div>
+                            <div class="kpd-stock-track">
+                                <div class="kpd-stock-fill" id="kpdStockFill"></div>
+                            </div>
+                        </div>
+
+                        <div class="kpd-actions">
+                            <div class="kpd-quantity">
+                                <button type="button" id="kpdQtyMinus" aria-label="Kurangi jumlah">&minus;</button>
+                                <span id="kpdQtyValue">1</span>
+                                <button type="button" id="kpdQtyPlus" aria-label="Tambah jumlah">&plus;</button>
+                            </div>
+                            <div class="kpd-actions-right">
+                                <button type="button"
+                                        class="kpd-icon-btn"
+                                        data-wishlist-product="{{ product.id }}"
+                                        data-wishlist-url="{{ url_for('shop.wishlist_toggle', product_id=product.id) }}"
+                                        data-csrf="{{ csrf_token() }}"
+                                        data-login-url="{{ url_for('auth.login', next=request.path) }}"
+                                        aria-pressed="{{ 'true' if product.wishlisted else 'false' }}"
+                                        aria-label="Tambah atau hapus Wishlist">
+                                    <i class="bi {{ 'bi-heart-fill text-danger' if product.wishlisted else 'bi-heart text-dark' }}"></i>
+                                </button>
+                                <button type="button" class="kpd-icon-btn" id="kpdShare" aria-label="Bagikan produk">
+                                    <i class="bi bi-share-fill"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="kpd-buy-actions">
+                            <button type="submit" class="kpd-add-btn" id="kpdAddCart" {% if product.stock_qty|int <= 0 %}disabled{% endif %}>
+                                <i class="bi bi-handbag"></i> TAMBAH KE KERANJANG
+                            </button>
+                            <button type="button" class="kpd-buy-btn" disabled title="Checkout langsung belum tersedia">
+                                <i class="bi bi-lightning-charge"></i> BELI SEKARANG
+                            </button>
+                        </div>
+
+                        <p class="kpd-help">Pilih warna dan ukuran sesuai stok sebelum menambahkan produk ke keranjang.</p>
+                    </form>
+
+                    <div class="kpd-care">
+                        <i class="bi bi-water"></i>
+                        <div>
+                            <strong>{{ product.care_title or 'Perawatan Produk' }}</strong>
+                            <p>{{ product.care_text or 'Belum ada instruksi perawatan produk.' }}</p>
+                        </div>
+                    </div>
+
+                    <div>
+                        <span class="kpd-desc-title">DESKRIPSI PRODUK</span>
+                        <p class="kpd-description">{{ product.desc or 'Belum ada deskripsi produk.' }}</p>
+                    </div>
+                </section>
+            </div>
+
+            {% include 'shop/_reviews.html' %}
+        </div>
+    </main>
+</div>
+
+<dialog id="kpdSizeGuide"
+        class="kpd-guide-dialog"
+        data-product-gender="{{ product.gender|default('unisex', true) }}"
+        aria-labelledby="kpdGuideTitle">
+
+    <div class="kpd-guide-inner">
+        <div class="kpd-guide-header">
+            <div>
+                <h2 id="kpdGuideTitle" class="kpd-guide-title">Size Guide</h2>
+                <p class="kpd-guide-description">Panduan ukuran tubuh Pria dan Wanita dalam sentimeter (cm).</p>
+            </div>
+            <button type="button" class="kpd-guide-close" id="kpdCloseGuide" aria-label="Tutup Size Guide">&times;</button>
+        </div>
+
+        <div class="kpd-guide-tabs" role="tablist" aria-label="Kategori ukuran">
+            <button type="button" id="kpdTabWomen" class="kpd-guide-tab" role="tab"
+                    data-size-gender="women" aria-controls="kpdPanelWomen"
+                    aria-selected="false">WANITA</button>
+            <button type="button" id="kpdTabMen" class="kpd-guide-tab" role="tab"
+                    data-size-gender="men" aria-controls="kpdPanelMen"
+                    aria-selected="false">PRIA</button>
+        </div>
+
+        <section id="kpdPanelWomen" class="kpd-guide-panel" role="tabpanel" aria-labelledby="kpdTabWomen" hidden>
+            <h3 class="kpd-guide-panel-title">Panduan Ukuran Wanita</h3>
+            <div class="kpd-guide-table-wrapper">
+                <table class="kpd-guide-table">
+                    <thead>
+                        <tr>
+                            <th>Size</th>
+                            <th>Lingkar Dada</th>
+                            <th>Lingkar Pinggang</th>
+                            <th>Lingkar Pinggul</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr><td>XS</td><td>76–80</td><td>60–64</td><td>84–88</td></tr>
+                        <tr><td>S</td><td>80–84</td><td>64–68</td><td>88–92</td></tr>
+                        <tr><td>M</td><td>84–88</td><td>68–72</td><td>92–96</td></tr>
+                        <tr><td>L</td><td>88–94</td><td>72–78</td><td>96–102</td></tr>
+                        <tr><td>XL</td><td>94–100</td><td>78–84</td><td>102–108</td></tr>
+                        <tr><td>XXL</td><td>100–106</td><td>84–90</td><td>108–114</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <section id="kpdPanelMen" class="kpd-guide-panel" role="tabpanel" aria-labelledby="kpdTabMen" hidden>
+            <h3 class="kpd-guide-panel-title">Panduan Ukuran Pria</h3>
+            <div class="kpd-guide-table-wrapper">
+                <table class="kpd-guide-table">
+                    <thead>
+                        <tr>
+                            <th>Size</th>
+                            <th>Lingkar Dada</th>
+                            <th>Lingkar Pinggang</th>
+                            <th>Lingkar Pinggul</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr><td>XS</td><td>84–88</td><td>68–72</td><td>84–88</td></tr>
+                        <tr><td>S</td><td>88–92</td><td>72–76</td><td>88–92</td></tr>
+                        <tr><td>M</td><td>92–96</td><td>76–80</td><td>92–96</td></tr>
+                        <tr><td>L</td><td>96–102</td><td>80–86</td><td>96–102</td></tr>
+                        <tr><td>XL</td><td>102–108</td><td>86–92</td><td>102–108</td></tr>
+                        <tr><td>XXL</td><td>108–114</td><td>92–98</td><td>108–114</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <div class="kpd-guide-note">
+            <strong>Catatan Pengukuran</strong>
+            Ukur lingkar dada, pinggang, dan pinggul menggunakan meteran dalam posisi berdiri.
+            Angka di atas adalah referensi ukuran tubuh umum, bukan ukuran resmi KURO WEAR.
+            Ukuran sebenarnya dapat berbeda menurut model, bahan, dan potongan pakaian.
+        </div>
+    </div>
+</dialog>
+
+<script type="application/json" id="kpdVariantData">{{ product.variants|tojson }}</script>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const form = document.getElementById('kpdCartForm');
+    if (!form) return;
+
+    const variants = JSON.parse(document.getElementById('kpdVariantData').textContent);
+    const colors = [...document.querySelectorAll('.kpd-swatch')];
+    const sizes = [...document.querySelectorAll('.kpd-size')];
+    const thumbnails = [...document.querySelectorAll('.kpd-thumbnail')];
+    const colorLabel = document.getElementById('kpdSelectedColor');
+    const sizeLabel = document.getElementById('kpdSelectedSize');
+    const stockText = document.getElementById('kpdStockText');
+    const stockFill = document.getElementById('kpdStockFill');
+    const qtyText = document.getElementById('kpdQtyValue');
+    const cartButton = document.getElementById('kpdAddCart');
+
+    const totalStock = variants.reduce(
+        (sum, variant) => sum + Math.max(0, Number(variant.stock) || 0), 0
+    );
+
+    const normalize = value => String(value || '').trim().toLowerCase();
+    const firstAvailable = variants.find(variant => Number(variant.stock) > 0);
+
+    let selectedColor = firstAvailable?.color_name || colors[0]?.dataset.color || '';
+    let selectedSize = '';
+
+    function getVariant(color, size) {
+        return variants.find(variant =>
+            normalize(variant.color_name) === normalize(color) &&
+            normalize(variant.size) === normalize(size)
+        );
+    }
+
+    function refreshSelection() {
+        colors.forEach(button => {
+            const active = normalize(button.dataset.color) === normalize(selectedColor);
+            button.setAttribute('aria-pressed', String(active));
+        });
+
+        colorLabel.textContent = selectedColor || 'Belum tersedia';
+
+        sizes.forEach(button => {
+            const variant = getVariant(selectedColor, button.dataset.size);
+            button.disabled = !variant || Number(variant.stock) <= 0;
+
+            if (button.disabled && normalize(selectedSize) === normalize(button.dataset.size)) {
+                selectedSize = '';
+            }
+        });
+
+        sizes.forEach(button => {
+            const active = normalize(button.dataset.size) === normalize(selectedSize);
+            button.classList.toggle('selected', active);
+            button.setAttribute('aria-pressed', String(active));
+        });
+
+        sizeLabel.textContent = selectedSize || 'Belum dipilih';
+
+        const variant = getVariant(selectedColor, selectedSize);
+        const stock = variant ? Math.max(0, Number(variant.stock) || 0) : 0;
+
+        stockText.textContent = variant
+            ? `Stok Tersisa: ${stock} pcs`
+            : totalStock
+                ? 'Pilih ukuran untuk melihat stok.'
+                : 'Stok produk habis.';
+
+        stockFill.style.width = `${
+            variant && totalStock ? Math.min(100, stock / totalStock * 100) : 0
+        }%`;
+
+        if (!variant || Number(qtyText.textContent) > stock) {
+            qtyText.textContent = '1';
+        }
+
+        cartButton.disabled = totalStock <= 0;
+    }
+
+    colors.forEach(button => {
+        button.style.backgroundColor = button.dataset.hex;
+
+        button.addEventListener('click', () => {
+            selectedColor = button.dataset.color;
+            selectedSize = '';
+            qtyText.textContent = '1';
+            refreshSelection();
+        });
+    });
+
+    sizes.forEach(button => {
+        button.addEventListener('click', () => {
+            if (button.disabled) return;
+
+            selectedSize = button.dataset.size;
+            qtyText.textContent = '1';
+            refreshSelection();
+        });
+    });
+
+    function changeQuantity(delta) {
+        const variant = getVariant(selectedColor, selectedSize);
+        if (!variant) return;
+
+        const maximum = Math.min(100, Number(variant.stock) || 0);
+        if (maximum < 1) return;
+
+        qtyText.textContent = String(
+            Math.max(1, Math.min(maximum, Number(qtyText.textContent) + delta))
+        );
+    }
+
+    document.getElementById('kpdQtyMinus').addEventListener('click', () => changeQuantity(-1));
+    document.getElementById('kpdQtyPlus').addEventListener('click', () => changeQuantity(1));
+
+    form.addEventListener('submit', event => {
+        const variant = getVariant(selectedColor, selectedSize);
+        const quantity = Number(qtyText.textContent);
+
+        if (
+            !variant ||
+            Number(variant.stock) < 1 ||
+            !Number.isInteger(quantity) ||
+            quantity < 1 ||
+            quantity > 100 ||
+            quantity > Number(variant.stock)
+        ) {
+            event.preventDefault();
+            alert('Pilih warna, ukuran, dan jumlah sesuai stok yang tersedia.');
+            return;
+        }
+
+        document.getElementById('kpdCartColor').value = variant.color_name;
+        document.getElementById('kpdCartSize').value = variant.size;
+        document.getElementById('kpdCartQuantity').value = String(quantity);
+    });
+
+    thumbnails.forEach(button => {
+        button.addEventListener('click', () => {
+            const image = document.getElementById('kpdMainImage');
+            if (image) image.src = button.dataset.image;
+
+            thumbnails.forEach(item => {
+                item.classList.toggle('active', item === button);
+            });
+        });
+    });
+
+    document.getElementById('kpdShare').addEventListener('click', async () => {
+        try {
+            if (navigator.share) {
+                await navigator.share({
+                    title: document.title,
+                    url: window.location.href
+                });
+            } else if (navigator.clipboard) {
+                await navigator.clipboard.writeText(window.location.href);
+                alert('Link produk berhasil disalin.');
+            }
+        } catch (error) {
+            if (error.name !== 'AbortError') {
+                alert('Link belum berhasil dibagikan.');
+            }
+        }
+    });
+
+    const dialog = document.getElementById('kpdSizeGuide');
+    const tabs = [...dialog.querySelectorAll('[data-size-gender]')];
+
+    const panels = {
+        women: document.getElementById('kpdPanelWomen'),
+        men: document.getElementById('kpdPanelMen')
+    };
+
+    const defaultGender = dialog.dataset.productGender === 'women' ? 'women' : 'men';
+
+    function activateGuideTab(gender) {
+        tabs.forEach(tab => {
+            const active = tab.dataset.sizeGender === gender;
+            tab.classList.toggle('active', active);
+            tab.setAttribute('aria-selected', String(active));
+            tab.tabIndex = active ? 0 : -1;
+        });
+
+        panels.women.hidden = gender !== 'women';
+        panels.men.hidden = gender !== 'men';
+    }
+
+    tabs.forEach(tab => {
+        tab.addEventListener('click', () => activateGuideTab(tab.dataset.sizeGender));
+
+        tab.addEventListener('keydown', event => {
+            if (!['ArrowLeft', 'ArrowRight'].includes(event.key)) return;
+
+            event.preventDefault();
+
+            const gender = tab.dataset.sizeGender === 'women' ? 'men' : 'women';
+            activateGuideTab(gender);
+
+            tabs.find(item => item.dataset.sizeGender === gender)?.focus();
+        });
+    });
+
+    document.getElementById('kpdOpenGuide').addEventListener('click', () => {
+        activateGuideTab(defaultGender);
+        if (!dialog.open) dialog.showModal();
+    });
+
+    document.getElementById('kpdCloseGuide').addEventListener('click', () => dialog.close());
+
+    dialog.addEventListener('click', event => {
+        if (event.target === dialog) dialog.close();
+    });
+
+    activateGuideTab(defaultGender);
+    refreshSelection();
+});
+</script>
+{% endblock %}
