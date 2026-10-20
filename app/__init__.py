@@ -102,7 +102,8 @@ def create_app(config_mode=None):
             abort(403)
 
     with app.app_context():
-        db.create_all()
+        if os.environ.get("KURO_SKIP_CREATE_ALL") != "1":
+            db.create_all()
 
     @app.after_request
     def set_security_headers(response):

@@ -1,4 +1,5 @@
 import os
+from pathlib import Path
 from datetime import timedelta
 from dotenv import load_dotenv
 
@@ -9,6 +10,34 @@ class Config:
     SECRET_KEY = os.environ.get('SECRET_KEY')
     SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL', 'sqlite:///ecommerce_local.db')
     SQLALCHEMY_TRACK_MODIFICATIONS = False
+
+    # Koneksi aman ke MySQL VM
+    SQLALCHEMY_ENGINE_OPTIONS = {}
+
+    if SQLALCHEMY_DATABASE_URI.startswith("mysql+pymysql://"):
+        MYSQL_CA = (
+            Path.home()
+            / ".kurowear"
+            / "certs"
+            / "mysql-ca.pem"
+        )
+
+        if not MYSQL_CA.is_file():
+            raise RuntimeError(
+                f"Sertifikat CA MySQL tidak ditemukan: {MYSQL_CA}"
+            )
+
+        SQLALCHEMY_ENGINE_OPTIONS = {
+            "pool_pre_ping": True,
+            "pool_recycle": 1800,
+            "connect_args": {
+                "ssl_ca": str(MYSQL_CA),
+                "ssl_verify_cert": True,
+                "ssl_verify_identity": True,
+                "connect_timeout": 30
+            }
+        }
+
     
     # Keamanan Cookie & Sesi
     SESSION_COOKIE_HTTPONLY = True
@@ -42,4 +71,5 @@ class ProductionConfig(Config):
 class TestingConfig(Config):
     TESTING = True
     SQLALCHEMY_DATABASE_URI = 'sqlite:///:memory:'
+    SQLALCHEMY_ENGINE_OPTIONS = {}
     WTF_CSRF_ENABLED = False
