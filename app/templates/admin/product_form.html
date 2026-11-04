@@ -1,5 +1,7 @@
+
 {% extends 'admin/admin_base.html' %}
 {% block title %}{{ 'Edit Produk' if product else 'Tambah Produk' }} - KURO WEAR{% endblock %}
+
 {% block extra_css %}
 <style>
     .product-form-page { font-family: 'Plus Jakarta Sans', sans-serif; color: #161616; }
@@ -37,6 +39,12 @@
     .photo-preview { display: flex; flex-wrap: wrap; gap: 12px; margin-bottom: 15px; }
     .photo-item { display: flex; flex-direction: column; gap: 7px; font-size: 11px; }
     .photo-item img { width: 94px; height: 120px; object-fit: cover; border: 1px solid #eee; border-radius: 3px; }
+    .photo-item select { width: 150px; max-width: 100%; padding: 7px; border: 1px solid #dcd6cb; background: #faf9f6; font-size: 11px; }
+    .photo-item label { display: flex; align-items: center; gap: 5px; }
+    .color-photo-area { margin-top: 16px; padding: 14px; border: 1px dashed #cfc9c0; background: #faf9f6; }
+    .color-photo-area label { display: block; font-size: 11px; font-weight: 700; margin-bottom: 8px; }
+    .color-photo-area input[type="file"] { max-width: 100%; width: 100%; font-size: 11px; }
+    .color-photo-hint { color: #777; margin: 7px 0 0; font-size: 11px; line-height: 1.6; }
     .upload-area { border: 1px dashed #cfc9c0; padding: 20px 12px; text-align: center; background: #faf9f6; }
     .upload-area i { font-size: 25px; color: #777; }
     .upload-area input { display: block; max-width: 100%; margin: 12px auto; font-size: 12px; }
@@ -45,6 +53,7 @@
     @media (max-width: 650px) { .fields-grid { grid-template-columns: 1fr; } .form-header h1 { font-size: 23px; } .form-card { padding: 16px; } }
 </style>
 {% endblock %}
+
 {% block content %}
 <div class="product-form-page">
     <div class="form-header">
@@ -56,27 +65,41 @@
         <a href="{{ url_for('admin.products') }}" class="form-btn"><i class="bi bi-arrow-left"></i> KEMBALI KE KATALOG</a>
     </div>
 
-    <form id="productForm" method="POST" enctype="multipart/form-data" data-sizes='{{ sizes | tojson }}' data-colors='{{ colors | tojson }}'>
+    <form id="productForm" method="POST" enctype="multipart/form-data"
+          data-sizes='{{ sizes | tojson }}'
+          data-colors='{{ colors | tojson }}'>
         {{ form.hidden_tag() }}
+        <input type="hidden" name="color_photo_manifest" id="colorPhotoManifest" value="[]">
+
         {% if form.errors %}
         <div class="alert alert-danger" role="alert">
             <strong>Periksa kembali data produk:</strong>
             <ul class="mb-0 mt-2">
                 {% for field_name, errors in form.errors.items() %}
-                    {% for error in errors %}<li>{{ form[field_name].label.text }}: {{ error }}</li>{% endfor %}
+                    {% for error in errors %}
+                    <li>{{ form[field_name].label.text }}: {{ error }}</li>
+                    {% endfor %}
                 {% endfor %}
             </ul>
         </div>
         {% endif %}
+
         <div class="form-layout">
             <div class="form-main">
                 <section class="form-card">
                     <h2>01 / BREADCRUMB & HIRARKI KATEGORI</h2>
                     <div class="fields-grid">
-                        <div class="field-group">{{ form.category.label }}{{ form.category() }}</div>
-                        <div class="field-group">{{ form.subcategory.label }}{{ form.subcategory() }}</div>
+                        <div class="field-group">
+                            {{ form.category.label }}
+                            {{ form.category() }}
+                        </div>
+                        <div class="field-group">
+                            {{ form.subcategory.label }}
+                            {{ form.subcategory() }}
+                        </div>
                         <div class="field-group full">
-                            {{ form.collection_label.label }}{{ form.collection_label(placeholder='Contoh: FALL COLLECTIONS') }}
+                            {{ form.collection_label.label }}
+                            {{ form.collection_label(placeholder='Contoh: FALL COLLECTIONS') }}
                             <p class="field-note">Label koleksi atau edisi produk.</p>
                         </div>
                     </div>
@@ -85,32 +108,50 @@
                 <section class="form-card">
                     <h2>02 / IDENTITAS PRODUK, SKU & HARGA JUAL</h2>
                     <div class="fields-grid">
-                        <div class="field-group">{{ form.name.label }}{{ form.name(placeholder='Contoh: Vintage Leather Jacket') }}</div>
-                        <div class="field-group">{{ form.sku.label }}{{ form.sku(placeholder='KURO-JK-001-2026') }}</div>
                         <div class="field-group">
-                            {{ form.price.label }}{{ form.price(min=0, placeholder='799000') }}
-                            <p class="field-note">Harga jual yang tampil pada toko.</p>
+                            {{ form.name.label }}
+                            {{ form.name(placeholder='Contoh: Vintage Leather Jacket') }}
                         </div>
                         <div class="field-group">
-                            {{ form.cost.label }}{{ form.cost(min=0, placeholder='500000') }}
-                            <p class="field-note">Harga modal hanya untuk admin. Isi 0 bila belum diketahui.</p>
+                            {{ form.sku.label }}
+                            {{ form.sku(placeholder='KURO-JK-001-2026') }}
+                        </div>
+                        <div class="field-group">
+                            {{ form.price.label }}
+                            {{ form.price(min=0, placeholder='799000') }}
+                            <p class="field-note">Harga jual yang tampil pada toko.</p>
                         </div>
                     </div>
                 </section>
 
                 <section class="form-card">
                     <h2>03 / VARIAN WARNA, UKURAN & STOK</h2>
-                    <p class="field-note mb-3">Tambahkan warna, centang ukuran yang tersedia, lalu isi stok dan batas minimum untuk setiap ukuran.</p>
+                    <p class="field-note mb-3">
+                        Tambahkan warna, centang ukuran yang tersedia, isi stok,
+                        lalu unggah foto khusus warna tersebut. Minimal satu ukuran
+                        harus aktif untuk setiap warna yang memiliki foto.
+                    </p>
                     <div id="colorContainers"></div>
-                    <button type="button" class="add-color-btn" id="addColor"><i class="bi bi-plus-circle"></i> TAMBAH VARIAN WARNA</button>
+                    <button type="button" class="add-color-btn" id="addColor">
+                        <i class="bi bi-plus-circle"></i> TAMBAH VARIAN WARNA
+                    </button>
                 </section>
 
                 <section class="form-card">
                     <h2>04 / DESKRIPSI & PERAWATAN PRODUK</h2>
                     <div class="fields-grid">
-                        <div class="field-group full">{{ form.description.label }}{{ form.description(rows=5, placeholder='Jelaskan bahan, detail, dan keunggulan produk...') }}</div>
-                        <div class="field-group full">{{ form.care_title.label }}{{ form.care_title(placeholder='Contoh: Instruksi Perawatan') }}</div>
-                        <div class="field-group full">{{ form.care_text.label }}{{ form.care_text(rows=4, placeholder='Contoh: Cuci dengan air dingin...') }}</div>
+                        <div class="field-group full">
+                            {{ form.description.label }}
+                            {{ form.description(rows=5, placeholder='Jelaskan bahan dan detail produk...') }}
+                        </div>
+                        <div class="field-group full">
+                            {{ form.care_title.label }}
+                            {{ form.care_title(placeholder='Contoh: Instruksi Perawatan') }}
+                        </div>
+                        <div class="field-group full">
+                            {{ form.care_text.label }}
+                            {{ form.care_text(rows=4, placeholder='Contoh: Cuci dengan air dingin...') }}
+                        </div>
                     </div>
                 </section>
             </div>
@@ -118,138 +159,463 @@
             <aside>
                 <section class="form-card">
                     <h2>GALERI FOTO PRODUK</h2>
+                    <p class="field-note">
+                        Maksimal 5 foto per produk, gabungan foto umum dan
+                        seluruh warna. Maksimal 4 MB per foto.
+                    </p>
+
                     {% if product and product.images %}
                     <div class="photo-preview">
                         {% for image in product.images %}
-                        <label class="photo-item">
-                            <img src="{{ url_for('static', filename=image) }}" alt="Foto produk">
-                            <span><input type="checkbox" name="remove_image" value="{{ image }}"> Hapus foto</span>
-                        </label>
+                        <div class="photo-item">
+                            <img src="{{ url_for('static', filename=image) }}"
+                                 alt="Foto produk {{ loop.index }}">
+                            <label>
+                                <input type="checkbox" name="remove_image" value="{{ image }}">
+                                Hapus foto
+                            </label>
+                            <label for="photoColor{{ loop.index0 }}">Warna foto</label>
+                            <select id="photoColor{{ loop.index0 }}"
+                                    name="photo_color_{{ loop.index0 }}"
+                                    class="existing-photo-color"
+                                    data-saved-color="{{ photo_color_assignments.get(image, '') }}"
+                                    aria-label="Warna untuk foto {{ loop.index }}">
+                                <option value="">Foto umum</option>
+                            </select>
+                        </div>
                         {% endfor %}
                     </div>
                     {% endif %}
+
                     <div class="upload-area">
                         <i class="bi bi-cloud-arrow-up"></i>
-                        <p class="mt-2 mb-1"><strong>Upload Foto Produk</strong></p>
+                        <p class="mt-2 mb-1">
+                            <strong>Upload Foto Umum (Opsional)</strong>
+                        </p>
                         {{ form.photos(accept='image/jpeg,image/png,image/webp', multiple=true) }}
-                        <p class="field-note">JPG, PNG, atau WebP. Maksimal 5 foto, 4 MB per foto.</p>
+                        <p class="field-note">
+                            Foto umum digunakan sebagai cadangan.
+                            Untuk foto yang mengikuti warna, gunakan upload
+                            pada kartu varian warna.
+                        </p>
                     </div>
+
                     {% if product %}
-                    <label class="field-note mt-3"><input type="checkbox" name="replace_main" value="1"> Jadikan foto baru sebagai foto utama.</label>
+                    <label class="field-note mt-3">
+                        <input type="checkbox" name="replace_main" value="1">
+                        Jadikan foto umum baru sebagai foto utama.
+                    </label>
                     {% endif %}
                 </section>
 
                 <section class="form-card">
                     <h2>VISIBILITAS TOKO ONLINE</h2>
-                    <label class="d-flex align-items-center gap-2 mb-3" style="font-size:12px;">{{ form.featured() }} Tampilkan sebagai Featured Product</label>
-                    <p class="visibility-info">Draft hanya terlihat di admin. Produk yang diterbitkan akan muncul di katalog customer setelah disimpan.</p>
-                    <button type="submit" name="intent" value="draft" class="form-btn draft w-100 mb-2"><i class="bi bi-file-earmark"></i> SIMPAN SEBAGAI DRAFT</button>
-                    <button type="submit" name="intent" value="published" class="form-btn publish w-100"><i class="bi bi-check-circle"></i> TERBITKAN KE TOKO</button>
+                    <label class="d-flex align-items-center gap-2 mb-3" style="font-size:12px;">
+                        {{ form.featured() }} Tampilkan sebagai Featured Product
+                    </label>
+                    <p class="visibility-info">
+                        Draft hanya terlihat di admin. Produk yang diterbitkan
+                        akan muncul di katalog customer setelah disimpan.
+                    </p>
+                    <button type="submit" name="intent" value="draft"
+                            class="form-btn draft w-100 mb-2">
+                        <i class="bi bi-file-earmark"></i> SIMPAN SEBAGAI DRAFT
+                    </button>
+                    <button type="submit" name="intent" value="published"
+                            class="form-btn publish w-100">
+                        <i class="bi bi-check-circle"></i> TERBITKAN KE TOKO
+                    </button>
                 </section>
             </aside>
         </div>
     </form>
 </div>
 {% endblock %}
+
 {% block extra_js %}
 <script>
 document.addEventListener('DOMContentLoaded', () => {
     const form = document.getElementById('productForm');
-    const sizes = JSON.parse(form.dataset.sizes);
-    const initialColors = JSON.parse(form.dataset.colors);
+    if (!form) return;
+
+    const sizes = JSON.parse(form.dataset.sizes || '[]');
+    const initialColors = JSON.parse(form.dataset.colors || '[]');
     const container = document.getElementById('colorContainers');
     const hiddenInput = document.getElementById('variants_payload');
     const photoInput = document.getElementById('photos');
+    const manifestInput = document.getElementById('colorPhotoManifest');
+    const existingPhotoSelects = [...form.querySelectorAll('.existing-photo-color')];
+    const normalize = value => String(value || '').trim().toLocaleLowerCase();
+    let nextColorId = 0;
+
+    function currentColors() {
+        const found = new Set();
+        const names = [];
+
+        container.querySelectorAll('.color-card').forEach(panel => {
+            const name = panel.querySelector('.color-name').value.trim();
+            const hasSize = [...panel.querySelectorAll('.size-active')]
+                .some(input => input.checked);
+
+            if (name && hasSize && !found.has(normalize(name))) {
+                found.add(normalize(name));
+                names.push(name);
+            }
+        });
+
+        return names;
+    }
+
+    function refreshPhotoColorOptions() {
+        const names = currentColors();
+
+        existingPhotoSelects.forEach(select => {
+            const selected = select.value || select.dataset.savedColor || '';
+
+            select.replaceChildren(
+                new Option('Foto umum (tanpa warna)', '')
+            );
+
+            names.forEach(name => {
+                select.add(new Option(name, name));
+            });
+
+            const match = names.find(
+                name => normalize(name) === normalize(selected)
+            );
+
+            select.value = match || '';
+            select.dataset.savedColor = select.value;
+        });
+    }
 
     function addColor(data = {}) {
+        const id = nextColorId++;
         const panel = document.createElement('div');
         panel.className = 'color-card';
+
         panel.innerHTML = `
-            <div class="color-header"><strong>VARIAN WARNA</strong><button type="button" class="remove-color" aria-label="Hapus warna"><i class="bi bi-trash3"></i></button></div>
-            <div class="fields-grid">
-                <div class="field-group"><label>Nama Warna</label><input type="text" class="color-name" maxlength="60" placeholder="Contoh: Dark Brown"></div>
-                <div class="field-group"><label>Kode / Pilihan Warna</label><input type="color" class="color-hex" style="height:41px; padding:4px;"></div>
+            <div class="color-header">
+                <strong>VARIAN WARNA</strong>
+                <button type="button" class="remove-color" aria-label="Hapus warna">
+                    <i class="bi bi-trash3"></i>
+                </button>
             </div>
-            <div style="overflow-x:auto;"><table class="variant-table"><thead><tr><th>Aktif</th><th>Ukuran</th><th>Stok</th><th>Stok Minimum</th></tr></thead><tbody></tbody></table></div>`;
+
+            <div class="fields-grid">
+                <div class="field-group">
+                    <label for="colorName${id}">Nama Warna</label>
+                    <input type="text" class="color-name"
+                           id="colorName${id}" maxlength="60"
+                           placeholder="Contoh: Beige">
+                </div>
+                <div class="field-group">
+                    <label for="colorHex${id}">Kode / Pilihan Warna</label>
+                    <input type="color" class="color-hex"
+                           id="colorHex${id}"
+                           style="height:41px;padding:4px;">
+                </div>
+            </div>
+
+            <div style="overflow-x:auto;">
+                <table class="variant-table">
+                    <thead>
+                        <tr>
+                            <th>Aktif</th>
+                            <th>Ukuran</th>
+                            <th>Stok</th>
+                            <th>Stok Minimum</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+
+            <div class="color-photo-area">
+                <label for="colorPhotos${id}">
+                    FOTO KHUSUS WARNA INI (OPSIONAL)
+                </label>
+                <input type="file"
+                       id="colorPhotos${id}"
+                       class="color-photo-input"
+                       name="color_photos_${id}"
+                       accept="image/jpeg,image/png,image/webp"
+                       multiple>
+                <p class="color-photo-hint">
+                    Pilih foto sesuai warna di atas.
+                    Total maksimal 5 foto untuk seluruh produk.
+                </p>
+            </div>
+        `;
+
         panel.querySelector('.color-name').value = data.name || '';
         panel.querySelector('.color-hex').value = data.hex || '#403230';
 
         const body = panel.querySelector('tbody');
+
         sizes.forEach(size => {
-            const current = (data.sizes || []).find(item => item.size === size);
+            const current = (data.sizes || []).find(
+                item => item.size === size
+            );
+
             const row = document.createElement('tr');
             row.dataset.size = size;
-            row.innerHTML = `<td><input type="checkbox" class="size-active" aria-label="Aktifkan ukuran ${size}"></td><td><strong>${size}</strong></td><td><input type="number" class="size-stock" min="0" max="999999" value="0"></td><td><input type="number" class="size-min" min="0" max="999999" value="5"></td>`;
+
+            row.innerHTML = `
+                <td>
+                    <input type="checkbox" class="size-active"
+                           aria-label="Aktifkan ukuran ${size}">
+                </td>
+                <td><strong>${size}</strong></td>
+                <td>
+                    <input type="number" class="size-stock"
+                           min="0" max="999999" value="0">
+                </td>
+                <td>
+                    <input type="number" class="size-min"
+                           min="0" max="999999" value="5">
+                </td>
+            `;
+
             row.querySelector('.size-active').checked = Boolean(current);
             row.querySelector('.size-stock').value = current?.stock ?? 0;
             row.querySelector('.size-min').value = current?.minimum_stock ?? 5;
+
+            row.querySelector('.size-active').addEventListener(
+                'change', refreshPhotoColorOptions
+            );
+
             body.appendChild(row);
         });
-        panel.querySelector('.remove-color').addEventListener('click', () => panel.remove());
+
+        panel.querySelector('.color-name').addEventListener(
+            'input', refreshPhotoColorOptions
+        );
+
+        panel.querySelector('.remove-color').addEventListener('click', () => {
+            panel.remove();
+            refreshPhotoColorOptions();
+        });
+
         container.appendChild(panel);
     }
 
     function showErrors(messages) {
         document.getElementById('productSubmitErrors')?.remove();
         if (!messages.length) return;
+
         const alert = document.createElement('div');
         alert.id = 'productSubmitErrors';
         alert.className = 'alert alert-danger';
         alert.setAttribute('role', 'alert');
+
         const heading = document.createElement('strong');
         heading.textContent = 'Produk belum bisa disimpan:';
+
         const list = document.createElement('ul');
         list.className = 'mb-0 mt-2';
+
         [...new Set(messages)].forEach(message => {
             const entry = document.createElement('li');
             entry.textContent = message;
             list.appendChild(entry);
         });
+
         alert.append(heading, list);
         form.prepend(alert);
-        alert.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        alert.scrollIntoView({
+            behavior: 'smooth',
+            block: 'center'
+        });
     }
 
     function collectVariants() {
-        const variants = [], errors = [], used = new Set();
+        const variants = [];
+        const errors = [];
+        const used = new Set();
+
         container.querySelectorAll('.color-card').forEach(panel => {
             const colorName = panel.querySelector('.color-name').value.trim();
             const colorHex = panel.querySelector('.color-hex').value;
+
             panel.querySelectorAll('tbody tr').forEach(row => {
                 if (!row.querySelector('.size-active').checked) return;
+
                 const stock = row.querySelector('.size-stock').value;
                 const minimum = row.querySelector('.size-min').value;
-                const key = `${colorName.toLowerCase()}|${row.dataset.size}`;
-                if (!colorName) errors.push('Nama warna wajib diisi pada ukuran yang dipilih.');
-                if (used.has(key)) errors.push(`Varian warna ${colorName} ukuran ${row.dataset.size} terduplikasi.`);
-                if ([stock, minimum].some(value => value === '' || !/^\d+$/.test(value) || Number(value) > 999999)) errors.push('Stok dan stok minimum harus angka bulat antara 0 sampai 999999.');
+                const key = `${normalize(colorName)}|${row.dataset.size}`;
+
+                if (!colorName) {
+                    errors.push('Nama warna wajib diisi.');
+                }
+
+                if (used.has(key)) {
+                    errors.push(
+                        `Varian ${colorName} ukuran ${row.dataset.size} terduplikasi.`
+                    );
+                }
+
+                if ([stock, minimum].some(value =>
+                    value === '' ||
+                    !/^\d+$/.test(value) ||
+                    Number(value) > 999999
+                )) {
+                    errors.push(
+                        'Stok dan minimum harus angka 0 sampai 999999.'
+                    );
+                }
+
                 used.add(key);
-                variants.push({ color_name: colorName, color_hex: colorHex, size: row.dataset.size, stock, minimum_stock: minimum });
+
+                variants.push({
+                    color_name: colorName,
+                    color_hex: colorHex,
+                    size: row.dataset.size,
+                    stock,
+                    minimum_stock: minimum
+                });
             });
         });
+
         hiddenInput.value = JSON.stringify(variants);
         return { variants, errors };
     }
 
-    if (initialColors.length) initialColors.forEach(addColor);
-    else addColor();
-    document.getElementById('addColor').addEventListener('click', () => addColor());
+    function collectColorPhotoUploads(variants, errors) {
+        const validColors = new Set(
+            variants.map(variant => normalize(variant.color_name))
+        );
+
+        const manifest = [];
+        const files = [];
+
+        container.querySelectorAll('.color-card').forEach(panel => {
+            const input = panel.querySelector('.color-photo-input');
+            const chosen = [...(input.files || [])];
+
+            if (!chosen.length) return;
+
+            const color = panel.querySelector('.color-name').value.trim();
+
+            if (!color || !validColors.has(normalize(color))) {
+                errors.push(
+                    'Foto per warna memerlukan nama warna dan minimal satu ukuran aktif.'
+                );
+                return;
+            }
+
+            manifest.push({
+                color,
+                input: input.name
+            });
+
+            files.push(...chosen);
+        });
+
+        manifestInput.value = JSON.stringify(manifest);
+        return files;
+    }
+
+    if (initialColors.length) {
+        initialColors.forEach(addColor);
+    } else {
+        addColor();
+    }
+
+    refreshPhotoColorOptions();
+
+    existingPhotoSelects.forEach(select => {
+        select.addEventListener('change', () => {
+            select.dataset.savedColor = select.value;
+        });
+    });
+
+    document.getElementById('addColor').addEventListener('click', () => {
+        addColor();
+        refreshPhotoColorOptions();
+    });
 
     form.addEventListener('submit', event => {
         const { variants, errors } = collectVariants();
+        const colorPhotos = collectColorPhotoUploads(variants, errors);
         const isPublish = event.submitter?.value === 'published';
-        if (isPublish && !variants.length) errors.push('Pilih minimal satu ukuran agar produk bisa diterbitkan.');
-        if (isPublish && Number(form.querySelector('#price').value) <= 0) errors.push('Harga jual harus lebih dari Rp 0.');
 
-        const oldPhotos = [...form.querySelectorAll('input[name="remove_image"]')];
-        const remainingPhotos = oldPhotos.filter(input => !input.checked).length;
-        const newPhotos = [...(photoInput.files || [])];
-        if (remainingPhotos + newPhotos.length > 5) errors.push('Total foto produk maksimal lima.');
-        if (isPublish && remainingPhotos + newPhotos.length === 0) errors.push('Upload minimal satu foto sebelum menerbitkan produk.');
-        if (newPhotos.some(file => file.size > 4 * 1024 * 1024)) errors.push('Setiap foto maksimal 4 MB.');
-        if (newPhotos.some(file => !['image/jpeg', 'image/png', 'image/webp'].includes(file.type))) errors.push('Foto harus berformat JPG, PNG, atau WebP.');
-        if (errors.length) { event.preventDefault(); showErrors(errors); }
-        else showErrors([]);
+        if (isPublish && !variants.length) {
+            errors.push(
+                'Pilih minimal satu ukuran untuk menerbitkan produk.'
+            );
+        }
+
+        if (isPublish && Number(form.querySelector('#price').value) <= 0) {
+            errors.push('Harga jual harus lebih dari Rp 0.');
+        }
+
+        const oldPhotos = [
+            ...form.querySelectorAll('input[name="remove_image"]')
+        ];
+
+        const remainingPhotos = oldPhotos.filter(
+            input => !input.checked
+        ).length;
+
+        const newPhotos = [
+            ...(photoInput.files || []),
+            ...colorPhotos
+        ];
+
+        const totalPhotos = remainingPhotos + newPhotos.length;
+
+        if (totalPhotos > 5) {
+            errors.push('Total semua foto produk maksimal lima.');
+        }
+
+        if (isPublish && totalPhotos === 0) {
+            errors.push(
+                'Upload minimal satu foto sebelum menerbitkan produk.'
+            );
+        }
+
+        if (newPhotos.some(file => file.size > 4 * 1024 * 1024)) {
+            errors.push('Setiap foto maksimal 4 MB.');
+        }
+
+        const allowedTypes = [
+            'image/jpeg',
+            'image/png',
+            'image/webp'
+        ];
+
+        if (newPhotos.some(file => !allowedTypes.includes(file.type))) {
+            errors.push(
+                'Foto harus berformat JPG, PNG, atau WebP.'
+            );
+        }
+
+        const validColors = new Set(
+            variants.map(variant => normalize(variant.color_name))
+        );
+
+        existingPhotoSelects.forEach(select => {
+            const removal = select.closest('.photo-item')
+                ?.querySelector('input[name="remove_image"]');
+
+            if (
+                !removal?.checked &&
+                select.value &&
+                !validColors.has(normalize(select.value))
+            ) {
+                errors.push(
+                    'Foto lama dipilih untuk warna tanpa varian aktif.'
+                );
+            }
+        });
+
+        if (errors.length) {
+            event.preventDefault();
+            showErrors(errors);
+        } else {
+            showErrors([]);
+        }
     });
 });
 </script>

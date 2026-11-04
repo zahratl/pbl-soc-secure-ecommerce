@@ -50,7 +50,7 @@
 
                     {% if current_user.is_authenticated %}
                     <div class="dropdown">
-                        <div class="user-profile-pill dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+                        <div class="user-profile-pill" data-bs-toggle="dropdown" aria-expanded="false">
                             {% set navbar_profile = current_user.customer_profile %}
                             {% if navbar_profile and navbar_profile.avatar_filename %}
                             <img src="{{ url_for('static', filename='uploads/avatars/' ~ navbar_profile.avatar_filename) }}" alt="Foto profil {{ current_user.name }}" class="kw-navbar-avatar">
@@ -97,52 +97,8 @@
     {% block content %}{% endblock %}
 
     <footer class="footer-figma">
-        <div class="container-fluid px-lg-4">
-            <div class="row g-4">
-                <div class="col-6 col-lg-3">
-                    <h6 class="footer-heading-figma">KATEGORI PILIHAN</h6>
-                    <ul class="footer-list-figma">
-                        <li><a href="#">Koleksi Linen Pria</a></li>
-                        <li><a href="#">Supima Cotton Wanita</a></li>
-                        <li><a href="#">Koleksi Essentials Minimalis</a></li>
-                        <li><a href="#">Sale & Penawaran Terbatas</a></li>
-                        <li><a href="#">Pakaian Anak Nyaman</a></li>
-                    </ul>
-                </div>
-                <div class="col-6 col-lg-3">
-                    <h6 class="footer-heading-figma">BANTUAN & LAYANAN</h6>
-                    <ul class="footer-list-figma">
-                        <li><a href="#">Status Pengiriman</a></li>
-                        <li><a href="#">Konfirmasi & Bukti Pembayaran</a></li>
-                        <li><a href="#">Panduan Ukuran (Size Guide)</a></li>
-                        <li><a href="#">Kebijakan Garansi 14 Hari</a></li>
-                        <li><a href="#">Hubungi Layanan Konsumen</a></li>
-                    </ul>
-                </div>
-                <div class="col-12 col-lg-3">
-                    <h6 class="footer-heading-figma">TENTANG KURO WEAR</h6>
-                    <p class="mb-2" style="font-size: 12px; line-height: 20px; color: var(--figma-text-secondary);">Terinspirasi dari filosofi desain minimalis Jepang, mengedepankan siluet esensial, material alami berkualitas, dan kejujuran fungsi tanpa ornamen berlebih.</p>
-                    <p class="fw-bold mb-0" style="font-size: 12px; color: var(--figma-dark);">EST. 2026 &nbsp;&bull;&nbsp; JAKARTA, INDONESIA</p>
-                </div>
-                <div class="col-12 col-lg-3">
-                    <h6 class="footer-heading-figma">METODE PEMBAYARAN & KEAMANAN</h6>
-                    <p class="mb-2" style="font-size: 12px; line-height: 18px; color: var(--figma-text-secondary);">Transaksi aman terenkripsi didukung oleh Payment Gateway resmi.</p>
-                    <div class="d-flex flex-wrap gap-1">
-                        <span class="badge-payment-figma">MIDTRANS SANDBOX</span>
-                        <span class="badge-payment-figma">BCA VA</span>
-                        <span class="badge-payment-figma">MANDIRI</span>
-                        <span class="badge-payment-figma">QRIS</span>
-                        <span class="badge-payment-figma">GOPAY</span>
-                    </div>
-                </div>
-            </div>
-            <div class="footer-bottom-figma">
-                <span>&copy; 2026 All rights reserved.</span>
-                <div class="d-flex gap-3">
-                    <a href="#">Kebijakan Privasi</a>
-                    <a href="#">Syarat & Ketentuan</a>
-                </div>
-            </div>
+        <div class="footer-bottom-figma justify-content-center text-center">
+            <span>&copy; 2026 KURO WEAR. All rights reserved.</span>
         </div>
     </footer>
 

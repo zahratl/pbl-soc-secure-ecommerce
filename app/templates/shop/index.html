@@ -1,296 +1,110 @@
+
 {% extends 'base.html' %}
-
 {% block title %}NEW COLLECTION 2026 - KURO WEAR{% endblock %}
-
 {% block content %}
 
-<!-- 1. HERO SHOWCASE -->
 <section class="hero-showcase">
     <div class="container-fluid px-lg-5">
         <div class="row align-items-center gy-5">
-
             <div class="col-lg-6 ps-lg-4">
-                <div class="badge-fall-collections mb-3">
-                    <div class="dot"></div>
-                    <span>FALL COLLECTIONS</span>
-                </div>
-
-                <h1 class="heading-new-collection">
-                    NEW COLLECTION 2026
-                </h1>
-
-                <p class="text-sub-default1">
-                    Discover your everyday essentials.
-                </p>
-                <p class="text-sub-default2">
-                    Modern silhouettes, effortless style.
-                </p>
-
+                <div class="badge-fall-collections mb-3"><div class="dot"></div><span>FALL COLLECTIONS</span></div>
+                <h1 class="heading-new-collection">NEW COLLECTION 2026</h1>
+                <p class="text-sub-default1">Discover your everyday essentials.</p>
+                <p class="text-sub-default2">Modern silhouettes, effortless style.</p>
                 <div class="d-flex align-items-center gap-3 mb-5">
-                    <a href="#fall-collection" class="btn btn-shop-figma">
-                        SHOP
-                    </a>
-
-                    <a href="{{ url_for('shop.catalog_all') }}"
-                        class="btn btn-size-guide-figma d-flex align-items-center gap-2">
-                        <i class="bi bi-arrow-right"></i>
-                        ALL COLLECTION
-                    </a>
+                    <a href="#fall-collection" class="btn btn-shop-figma">SHOP</a>
+                    <a href="{{ url_for('shop.catalog_all') }}" class="btn btn-size-guide-figma d-flex align-items-center gap-2"><i class="bi bi-arrow-right"></i> ALL COLLECTION</a>
                 </div>
-
                 <div class="d-flex align-items-center gap-4">
-                    <div class="feature-item-figma">
-                        <i class="bi bi-check-circle-fill"></i>
-                        <span>100% COTTON SUPIMA</span>
-                    </div>
-
-                    <div class="feature-item-figma">
-                        <i class="bi bi-wind"></i>
-                        <span>BREATHABLE AIR-TECH</span>
-                    </div>
+                    <div class="feature-item-figma"><i class="bi bi-check-circle-fill"></i><span>100% COTTON SUPIMA</span></div>
+                    <div class="feature-item-figma"><i class="bi bi-wind"></i><span>BREATHABLE AIR-TECH</span></div>
                 </div>
             </div>
-
             <div class="col-lg-6 text-center pe-lg-4">
                 <div class="hero-model-card">
-                    <img
-                        src="{{ url_for('static', filename='img/dashboard user.jpg') }}"
-                        alt="Women Collection"
-                        class="hero-model-img"
-                    >
-
+                    <img src="{{ url_for('static', filename='img/dashboard user.jpg') }}" alt="Women Collection" class="hero-model-img">
                     <div class="hero-model-overlay">
                         <div class="text-start">
-                            <div style="font-weight:600;font-size:12px;letter-spacing:.72px;text-transform:uppercase;color:#1A1B22;">
-                                WOMEN COLLECTION
-                            </div>
-
-                            <div style="font-size:12px;color:#575E70;">
-                                Seri 01 — Fall Edition
-                            </div>
+                            <div style="font-weight:600;font-size:12px;letter-spacing:.72px;text-transform:uppercase;color:#1A1B22;">WOMEN COLLECTION</div>
+                            <div style="font-size:12px;color:#575E70;">Seri 01 — Fall Edition</div>
                         </div>
-
-                        <span class="badge-est-2026">
-                            EST. 2026
-                        </span>
+                        <span class="badge-est-2026">EST. 2026</span>
                     </div>
                 </div>
             </div>
-
         </div>
     </div>
 </section>
 
-
-<!-- 2. ALL COLLECTION CATEGORY -->
 <section class="section-all-collection">
     <div class="container-fluid px-lg-5">
-
-        <h2 class="heading-all-collection">
-            ALL COLLECTION
-        </h2>
-
+        <h2 class="heading-all-collection">ALL COLLECTION</h2>
         <div class="row row-cols-2 row-cols-md-5 g-4 justify-content-center text-center">
-
+            {% for category, filename in [('Outer', 'dashboard_outer.png'), ('Skirts', 'dashboard_skirt.png'), ('T-Shirts', 'dashboard_t-shirt.png'), ('Pants', 'dashboard_pants.png'), ('Shirts', 'dashboard_shirt.png')] %}
             <div class="col">
-                <a href="{{ url_for('shop.catalog_all') }}"
-                   class="category-item-card text-decoration-none text-dark d-block">
-                    <img
-                        src="{{ url_for('static', filename='img/dashboard_outer.png') }}"
-                        alt="Outer"
-                        class="img-fluid"
-                    >
-                    <p>Outer</p>
+                <a href="{{ url_for('shop.catalog_all') }}" class="category-item-card text-decoration-none text-dark d-block">
+                    <img src="{{ url_for('static', filename='img/' ~ filename) }}" alt="{{ category }}" class="img-fluid">
+                    <p>{{ category }}</p>
                 </a>
             </div>
-
-            <div class="col">
-                <a href="{{ url_for('shop.catalog_all') }}"
-                   class="category-item-card text-decoration-none text-dark d-block">
-                    <img
-                        src="{{ url_for('static', filename='img/dashboard_skirt.png') }}"
-                        alt="Skirts"
-                        class="img-fluid"
-                    >
-                    <p>Skirts</p>
-                </a>
-            </div>
-
-            <div class="col">
-                <a href="{{ url_for('shop.catalog_all') }}"
-                   class="category-item-card text-decoration-none text-dark d-block">
-                    <img
-                        src="{{ url_for('static', filename='img/dashboard_t-shirt.png') }}"
-                        alt="T-Shirts"
-                        class="img-fluid"
-                    >
-                    <p>T-Shirts</p>
-                </a>
-            </div>
-
-            <div class="col">
-                <a href="{{ url_for('shop.catalog_all') }}"
-                   class="category-item-card text-decoration-none text-dark d-block">
-                    <img
-                        src="{{ url_for('static', filename='img/dashboard_pants.png') }}"
-                        alt="Pants"
-                        class="img-fluid"
-                    >
-                    <p>Pants</p>
-                </a>
-            </div>
-
-            <div class="col">
-                <a href="{{ url_for('shop.catalog_all') }}"
-                   class="category-item-card text-decoration-none text-dark d-block">
-                    <img
-                        src="{{ url_for('static', filename='img/dashboard_shirt.png') }}"
-                        alt="Shirts"
-                        class="img-fluid"
-                    >
-                    <p>Shirts</p>
-                </a>
-            </div>
-
+            {% endfor %}
         </div>
     </div>
 </section>
 
-
-<!-- 3. FALL COLLECTION -->
 <section id="fall-collection" class="section-fall-2026">
     <div class="container-fluid px-lg-5">
-
-        <h2 class="heading-fall-2026">
-            FALL COLLECTION - 2026
-        </h2>
-
-        <p class="sub-fall-2026">
-            SEPTEMBER - DECEMBER
-        </p>
-
+        <h2 class="heading-fall-2026">FALL COLLECTION - 2026</h2>
+        <p class="sub-fall-2026">SEPTEMBER - DECEMBER</p>
         <div class="row row-cols-1 row-cols-md-2 row-cols-xl-4 g-4 justify-content-center">
-
             {% for p in products %}
-
             <div class="col">
                 <div class="article-card-figma">
-
                     <div class="card-image-box">
-                        <a href="{{ url_for('shop.product_detail', product_id=p.id) }}">
-                            <img src="{{ p.image }}"
-                                 alt="{{ p.name }}"
-                                 loading="lazy">
-                        </a>
-
-                        <span class="card-tag-pill">
-                            {{ p.category_badge }}
-                        </span>
-
-                        <!-- Wishlist dari database -->
-                        <button
-                            type="button"
-                            class="card-wishlist-btn-figma"
-                            data-wishlist-product="{{ p.id }}"
-                            data-wishlist-url="{{ url_for('shop.wishlist_toggle', product_id=p.id) }}"
-                            data-csrf="{{ csrf_token() }}"
-                            data-login-url="{{ url_for('auth.login', next=request.path) }}"
-                            aria-label="Tambah atau hapus Wishlist"
-                            aria-pressed="{{ 'true' if p.wishlisted else 'false' }}"
-                            title="{{ 'Hapus dari Wishlist' if p.wishlisted else 'Tambah ke Wishlist' }}"
-                        >
-                            
-                        <i
-                            class="bi {{ 'bi-heart-fill text-danger' if p.wishlisted else 'bi-heart text-dark' }}"
-                            style="font-size: 15px;"
-                        ></i>
+                        <a href="{{ url_for('shop.product_detail', product_id=p.id) }}"><img src="{{ p.image }}" alt="{{ p.name }}" loading="lazy"></a>
+                        <span class="card-tag-pill">{{ p.category_badge }}</span>
+                        <button type="button" class="card-wishlist-btn-figma" data-wishlist-product="{{ p.id }}" data-wishlist-url="{{ url_for('shop.wishlist_toggle', product_id=p.id) }}" data-csrf="{{ csrf_token() }}" data-login-url="{{ url_for('auth.login', next=request.path) }}" aria-label="Tambah atau hapus Wishlist" aria-pressed="{{ 'true' if p.wishlisted else 'false' }}" title="{{ 'Hapus dari Wishlist' if p.wishlisted else 'Tambah ke Wishlist' }}">
+                            <i class="bi {{ 'bi-heart-fill text-danger' if p.wishlisted else 'bi-heart text-dark' }}" style="font-size:15px;"></i>
                         </button>
                     </div>
-
                     <div class="p-3 d-flex flex-column justify-content-between flex-grow-1">
-
                         <div>
                             <div class="swatch-group">
                                 {% for color in p.colors %}
-                                <span
-                                    class="color-dot"
-                                    data-color="{{ color.hex }}"
-                                    title="{{ color.name }}"
-                                ></span>
+                                <span class="color-dot" data-color="{{ color.hex }}" title="{{ color.name }}"></span>
                                 {% endfor %}
                             </div>
-
-                            <a href="{{ url_for('shop.product_detail', product_id=p.id) }}"
-                               class="text-decoration-none text-dark">
-                                <div class="card-title-figma">
-                                    {{ p.name }}
-                                </div>
-                            </a>
-
-                            <div class="card-desc-figma">
-                                {{ p.desc }}
-                            </div>
+                            <a href="{{ url_for('shop.product_detail', product_id=p.id) }}" class="text-decoration-none text-dark"><div class="card-title-figma">{{ p.name }}</div></a>
+                            <div class="card-desc-figma">{{ p.desc }}</div>
                         </div>
-
                         <div>
-                            <div class="card-price-figma mb-2">
-                                {{ p.price_formatted }}
-                            </div>
-
+                            <div class="card-price-figma mb-2">{{ p.price_formatted }}</div>
                             <div class="d-flex justify-content-between align-items-center pt-2 border-top">
-                                <span style="font-size:11px;color:#575E70;">
-                                    Belum ada ulasan
-                                </span>
-
-                                <span class="card-status-badge">
-                                    {{ p.stock }}
-                                </span>
+                                <span style="font-size:11px;color:#575E70;">{% if p.reviews > 0 %}★ {{ '%.1f'|format(p.rating) }} ({{ p.reviews }} Ulasan){% else %}Belum ada ulasan{% endif %}</span>
+                                <span class="card-status-badge">{{ p.stock }}</span>
                             </div>
-
-                            <a href="{{ url_for('shop.product_detail', product_id=p.id) }}"
-                               class="btn btn-dark w-100 mt-2 py-1"
-                               style="font-size:11px;font-weight:700;border-radius:0;">
-                                LIHAT PRODUK
-                            </a>
+                            <a href="{{ url_for('shop.product_detail', product_id=p.id) }}" class="btn btn-dark w-100 mt-2 py-1" style="font-size:11px;font-weight:700;border-radius:0;">LIHAT PRODUK</a>
                         </div>
-
                     </div>
                 </div>
             </div>
-
             {% else %}
-
             <div class="col-12">
                 <div class="text-center bg-white p-5 border">
-
-                    <i class="bi bi-bag"
-                       style="font-size:40px;color:#999;"></i>
-
-                    <h4 class="fw-bold mt-3">
-                        Koleksi Segera Hadir
-                    </h4>
-
-                    <p class="text-muted small mb-0">
-                        Belum ada produk yang dipublikasikan.
-                        Nantikan koleksi terbaru KURO WEAR.
-                    </p>
-
+                    <i class="bi bi-bag" style="font-size:40px;color:#999;"></i>
+                    <h4 class="fw-bold mt-3">Koleksi Segera Hadir</h4>
+                    <p class="text-muted small mb-0">Belum ada produk yang dipublikasikan. Nantikan koleksi terbaru KURO WEAR.</p>
                 </div>
             </div>
-
             {% endfor %}
-
         </div>
     </div>
 </section>
 
 <script>
-document.querySelectorAll(".swatch-group .color-dot[data-color]")
-    .forEach(dot => {
-        dot.style.backgroundColor = dot.dataset.color;
-    });
+document.querySelectorAll('.swatch-group .color-dot[data-color]').forEach(dot => {
+    dot.style.backgroundColor = dot.dataset.color;
+});
 </script>
-
 <script src="{{ url_for('static', filename='js/wishlist.js') }}"></script>
-
 {% endblock %}

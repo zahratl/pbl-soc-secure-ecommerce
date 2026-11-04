@@ -1,8 +1,8 @@
-#File ini menyediakan route detail pesanan serta aksi Admin untuk mengemas, mengirim, memperbarui resi, dan menyelesaikan pesanan.
 import secrets
 from datetime import datetime, timedelta, timezone
 
 from flask import abort, current_app, flash, redirect, render_template, request, url_for
+from flask_login import current_user
 from flask_wtf import FlaskForm
 from sqlalchemy import update
 from sqlalchemy.exc import SQLAlchemyError
@@ -10,6 +10,7 @@ from sqlalchemy.exc import SQLAlchemyError
 from app.extensions import db
 from app.models.order import Order
 from app.models.shipment import OrderShipment
+from app.services.audit_logger import log_security_event
 from .routes import admin_bp, admin_only
 
 
@@ -80,7 +81,11 @@ def order_update(order_number):
     order = Order.query.filter_by(order_number=order_number).first_or_404()
     action = (request.form.get('action') or '').strip()
     target = url_for('admin.order_detail', order_number=order.order_number)
-    transitions = {'processing': 'unfulfilled', 'shipped': 'processing', 'completed': 'shipped'}
+    transitions = {
+        'processing': 'unfulfilled',
+        'shipped': 'processing',
+        'completed': 'shipped'
+    }
 
     if action not in transitions:
         abort(400)
@@ -89,8 +94,10 @@ def order_update(order_number):
         flash('Pesanan harus lunas dan stok harus tersinkronkan sebelum diproses.', 'warning')
         return redirect(target)
 
+    previous_status = order.fulfillment_status
     expected_status = transitions[action]
-    if order.fulfillment_status != expected_status:
+
+    if previous_status != expected_status:
         flash('Urutan status tidak sesuai. Refresh halaman dan periksa kembali pesanan.', 'warning')
         return redirect(target)
 
@@ -141,15 +148,36 @@ def order_update(order_number):
 
     except SQLAlchemyError:
         db.session.rollback()
-        current_app.logger.exception('Gagal memperbarui status pesanan %s', order.order_number)
+        current_app.logger.exception(
+            'Gagal memperbarui status pesanan %s',
+            order.order_number
+        )
         flash('Gagal menyimpan status pengiriman. Silakan coba lagi.', 'danger')
         return redirect(target)
+
+    log_security_event(
+        action='ORDER_STATUS_CHANGED',
+        status='SUCCESS',
+        user_id=current_user.id,
+        username=current_user.email,
+        details=(
+            f'Order {order.order_number}: fulfillment_status '
+            f'{previous_status} -> {action}'
+        )
+    )
 
     messages = {
         'processing': 'Pesanan berhasil masuk ke proses pengemasan.',
         'shipped': 'Pengiriman simulasi JNE dicatat dan kode internal otomatis berhasil dibuat.',
         'completed': 'Pesanan simulasi berhasil ditandai Selesai.'
     }
-    current_app.logger.info('Order %s fulfillment changed to %s', order.order_number, action)
+
+    current_app.logger.info(
+        'Order %s fulfillment changed from %s to %s',
+        order.order_number,
+        previous_status,
+        action
+    )
+
     flash(messages[action], 'success')
     return redirect(target)

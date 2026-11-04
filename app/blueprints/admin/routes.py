@@ -1,18 +1,23 @@
 import csv
 import io
 import json
+import re
 import uuid
 from datetime import date, timedelta, timezone
 from functools import wraps
 from pathlib import Path
 
 from PIL import Image, ImageOps, UnidentifiedImageError
-from flask import Blueprint, abort, current_app, flash, make_response, redirect, render_template, request, url_for
+from flask import (
+    Blueprint, abort, current_app, flash, make_response,
+    redirect, render_template, request, url_for
+)
 from flask_login import current_user, login_required
 from flask_wtf import FlaskForm
-from sqlalchemy.exc import IntegrityError
+from sqlalchemy.exc import SQLAlchemyError
 
 from app.extensions import db
+from app.models.customer_address import CustomerAddress
 from app.models.customer_profile import CustomerProfile
 from app.models.order import Order
 from app.models.payment import PaymentTransaction
@@ -21,25 +26,38 @@ from app.models.user import User
 from app.services.audit_logger import log_security_event
 from app.services.customer_encryption_reader import read_customer_private
 from .forms import ProductForm, SIZES, parse_variants
-from app.models.customer_address import CustomerAddress
+
 
 admin_bp = Blueprint('admin', __name__, url_prefix='/admin')
+
 
 @admin_bp.route('/dashboard')
 @login_required
 def dashboard():
     if current_user.role != 'admin':
-        log_security_event(action='UNAUTHORIZED_ADMIN_DASHBOARD_ACCESS', status='FAILURE', user_id=current_user.id, username=current_user.email, details='Customer attempted to view admin dashboard directly.')
+        log_security_event(
+            action='UNAUTHORIZED_ADMIN_DASHBOARD_ACCESS',
+            status='FAILURE',
+            user_id=current_user.id,
+            username=current_user.email,
+            details='Customer attempted to view admin dashboard directly.'
+        )
         flash('Akses ditolak. Anda tidak memiliki hak akses administrator.', 'danger')
         return redirect(url_for('shop.index'))
 
     customer_count = User.query.filter_by(role='customer').count()
     published_products = Product.query.filter_by(status='published').all()
     catalog_count = len(published_products)
-    catalog_safe = sum(bool(product.variants) and not product.low_stock_variants for product in published_products)
-    catalog_low = sum(bool(product.low_stock_variants) for product in published_products)
+    catalog_safe = sum(bool(p.variants) and not p.low_stock_variants for p in published_products)
+    catalog_low = sum(bool(p.low_stock_variants) for p in published_products)
 
-    return render_template('admin/dashboard.html', customer_count=customer_count, catalog_count=catalog_count, catalog_safe=catalog_safe, catalog_low=catalog_low)
+    return render_template(
+        'admin/dashboard.html',
+        customer_count=customer_count,
+        catalog_count=catalog_count,
+        catalog_safe=catalog_safe,
+        catalog_low=catalog_low
+    )
 
 
 def admin_only(view):
@@ -49,7 +67,6 @@ def admin_only(view):
         if current_user.role != 'admin':
             abort(403)
         return view(*args, **kwargs)
-
     return secured
 
 
@@ -57,10 +74,8 @@ def admin_only(view):
 @admin_only
 def store_preview():
     page = request.args.get('page', 'home')
-
     if page not in ('home', 'all'):
         abort(400)
-
     endpoint = 'shop.catalog_all' if page == 'all' else 'shop.index'
     return redirect(url_for(endpoint))
 
@@ -72,10 +87,8 @@ def _rupiah(amount):
 def _order_date(value):
     if value is None:
         return '-'
-
     if value.tzinfo is None:
         value = value.replace(tzinfo=timezone.utc)
-
     return value.astimezone(timezone(timedelta(hours=7))).strftime('%d/%m/%Y %H:%M WIB')
 
 
@@ -92,29 +105,20 @@ def _order_payment_view(order):
         'refunded': ('Refund', 'neutral'),
         'partial_refund': ('Refund Sebagian', 'neutral')
     }
-
     return states.get(order.payment_status, (order.payment_status or 'Tidak Diketahui', 'neutral'))
 
 
 def _order_fulfillment_view(order):
     if order.fulfillment_status == 'processing':
         return 'Sedang Dikemas', 'progress'
-
     if order.fulfillment_status == 'shipped':
         return 'Dikirim', 'progress'
-
     if order.fulfillment_status == 'completed':
         return 'Selesai', 'success'
-
     if order.fulfillment_status == 'stock_issue':
         return 'Perlu Cek Stok', 'failed'
-
     if order.payment_status == 'paid':
-        if order.stock_deducted_at is not None:
-            return 'Perlu Diproses', 'progress'
-
-        return 'Menunggu Sinkronisasi Stok', 'pending'
-
+        return ('Perlu Diproses', 'progress') if order.stock_deducted_at is not None else ('Menunggu Sinkronisasi Stok', 'pending')
     return 'Belum Diproses', 'neutral'
 
 
@@ -128,16 +132,16 @@ def _payment_method_view(payment):
         'bni_va': 'BNI Virtual Account',
         'bri_va': 'BRI Virtual Account'
     }
-
-    method = names.get(payment.payment_type, payment.payment_type or names.get(payment.selected_channel, payment.selected_channel or 'Belum Dipilih'))
-
+    method = names.get(
+        payment.payment_type,
+        payment.payment_type or names.get(payment.selected_channel, payment.selected_channel or 'Belum Dipilih')
+    )
     return f'{method} ({payment.bank.upper()})' if payment.bank else method
 
 
 def _payment_transaction_view(payment):
     if payment.transaction_status == 'capture' and payment.fraud_status not in (None, '', 'accept'):
         return 'Capture (Perlu Verifikasi)', 'pending'
-
     statuses = {
         'initiating': ('Membuat Pembayaran', 'pending'),
         'pending': ('Pending', 'pending'),
@@ -152,7 +156,6 @@ def _payment_transaction_view(payment):
         'refund': ('Refund', 'neutral'),
         'partial_refund': ('Refund Sebagian', 'neutral')
     }
-
     return statuses.get(payment.transaction_status, (payment.transaction_status or 'Tidak Diketahui', 'neutral'))
 
 
@@ -212,7 +215,12 @@ def orders_index():
         },
         {
             'label': 'Perlu Diproses',
-            'value': sum(order.payment_status == 'paid' and order.stock_deducted_at is not None and order.fulfillment_status == 'unfulfilled' for order in all_orders),
+            'value': sum(
+                order.payment_status == 'paid'
+                and order.stock_deducted_at is not None
+                and order.fulfillment_status == 'unfulfilled'
+                for order in all_orders
+            ),
             'icon': 'bi-box-seam',
             'description': 'Pesanan siap disiapkan',
             'important': False
@@ -227,21 +235,22 @@ def orders_index():
     ]
 
     orders = []
-
     for order in all_orders:
         if status == 'pending_payment' and order.payment_status not in ('initiating', 'pending'):
             continue
-
-        if status == 'processing' and not (order.payment_status == 'paid' and order.stock_deducted_at is not None and order.fulfillment_status == 'unfulfilled'):
+        if status == 'processing' and not (
+            order.payment_status == 'paid'
+            and order.stock_deducted_at is not None
+            and order.fulfillment_status == 'unfulfilled'
+        ):
             continue
-
         if status in ('shipped', 'completed') and order.fulfillment_status != status:
             continue
-
         if status == 'cancelled' and order.payment_status not in ('canceled', 'cancelled', 'expired', 'failed'):
             continue
-
-        if status == 'stock_issue' and order.fulfillment_status != 'stock_issue' and not (order.payment_status == 'paid' and order.stock_deducted_at is None):
+        if status == 'stock_issue' and order.fulfillment_status != 'stock_issue' and not (
+            order.payment_status == 'paid' and order.stock_deducted_at is None
+        ):
             continue
 
         order_name = read_customer_private(order, 'customer_name') or ''
@@ -251,7 +260,6 @@ def orders_index():
 
         payment_label, payment_style = _order_payment_view(order)
         fulfillment_label, fulfillment_style = _order_fulfillment_view(order)
-
         orders.append({
             'number': order.order_number,
             'created_at_text': _order_date(order.created_at),
@@ -266,19 +274,15 @@ def orders_index():
         })
 
     transactions = []
-
     for payment in all_transactions:
         order = payment.order
-
         if status and payment.transaction_status != status:
             continue
-
         order_email = read_customer_private(order, 'customer_email') or ''
         if search.casefold() not in f'{payment.midtrans_transaction_id or ""} {order.order_number} {order_email}'.casefold():
             continue
 
         status_label, status_style = _payment_transaction_view(payment)
-
         transactions.append({
             'transaction_id': payment.midtrans_transaction_id or f'LOCAL-{payment.id}',
             'order_number': order.order_number,
@@ -306,26 +310,24 @@ def orders_index():
 def _product_colors(product):
     if not product:
         return []
-
     groups = {}
-
     for variant in product.variants:
         key = (variant.color_name, variant.color_hex)
         groups.setdefault(key, {'name': variant.color_name, 'hex': variant.color_hex, 'sizes': []})
-        groups[key]['sizes'].append({'size': variant.size, 'stock': variant.stock, 'minimum_stock': variant.minimum_stock})
-
+        groups[key]['sizes'].append({
+            'size': variant.size,
+            'stock': variant.stock,
+            'minimum_stock': variant.minimum_stock
+        })
     return list(groups.values())
 
 
 def _remove_photos(paths):
     folder = (Path(current_app.static_folder) / 'uploads' / 'products').resolve()
-
     for path in paths:
         if not path.startswith('uploads/products/'):
             continue
-
         target = (folder / Path(path).name).resolve()
-
         if target.parent == folder:
             target.unlink(missing_ok=True)
 
@@ -339,19 +341,15 @@ def _store_photos(files):
         for file in files:
             if not file or not file.filename:
                 continue
-
             data = file.read(4 * 1024 * 1024 + 1)
-
             if not data or len(data) > 4 * 1024 * 1024:
                 raise ValueError('Setiap foto maksimal 4 MB.')
 
             with Image.open(io.BytesIO(data)) as source:
                 if source.format not in ('JPEG', 'PNG', 'WEBP'):
                     raise ValueError('Hanya foto JPG, PNG atau WebP yang diterima.')
-
                 if source.width * source.height > 20_000_000:
                     raise ValueError('Resolusi foto terlalu besar.')
-
                 image = ImageOps.exif_transpose(source).convert('RGB')
                 filename = f'{uuid.uuid4().hex}.webp'
                 image.save(folder / filename, 'WEBP', quality=85)
@@ -364,23 +362,87 @@ def _store_photos(files):
     return paths
 
 
+
+def _normalized_color(name):
+    return str(name or '').strip().casefold()
+
+
+def _photo_color_assignments(product, submitted=False):
+    """Map existing photos to colors; a blank value means unassigned/general."""
+    photos = list(product.images or []) if product else []
+    saved = product.color_images if product and isinstance(product.color_images, dict) else {}
+    mapping = {}
+    for color, paths in saved.items():
+        if isinstance(paths, list):
+            for path in paths:
+                if path in photos and path not in mapping:
+                    mapping[path] = color
+    if submitted:
+        for index, path in enumerate(photos):
+            field = f'photo_color_{index}'
+            if field in request.form:
+                mapping[path] = request.form.get(field, '').strip()
+    return mapping
+
+
+def _parse_color_uploads(available_colors):
+    """Read dynamic upload fields declared by the admin product form."""
+    raw = request.form.get('color_photo_manifest', '[]')
+    try:
+        manifest = json.loads(raw)
+    except (TypeError, ValueError) as exc:
+        raise ValueError('Data upload foto warna tidak valid.') from exc
+
+    if not isinstance(manifest, list) or len(manifest) > 60:
+        raise ValueError('Data upload foto warna tidak valid.')
+
+    seen_fields = set()
+    uploads = []
+    for entry in manifest:
+        if not isinstance(entry, dict):
+            raise ValueError('Data upload foto warna tidak valid.')
+        color = _normalized_color(entry.get('color'))
+        field = entry.get('input', '')
+        if not isinstance(field, str) or not re.fullmatch(r'color_photos_[0-9]{1,3}', field):
+            raise ValueError('Nama field upload foto tidak valid.')
+        if field in seen_fields:
+            raise ValueError('Form upload foto warna terduplikasi.')
+        seen_fields.add(field)
+        files = [file for file in request.files.getlist(field) if file and file.filename]
+        if not files:
+            continue
+        if color not in available_colors:
+            raise ValueError('Warna foto harus memiliki varian ukuran aktif.')
+        uploads.append((color, files))
+
+    return uploads
+
+
+def _build_color_photo_map(retained, assignments, colors, new_by_color):
+    """Build mapping only from retained/newly uploaded photos of this product."""
+    mapping = {name: [] for name in colors}
+    for path in retained:
+        name = _normalized_color(assignments.get(path))
+        if name in mapping:
+            mapping[name].append(path)
+    for name, paths in new_by_color.items():
+        if name in mapping:
+            mapping[name].extend(paths)
+    return {name: paths for name, paths in mapping.items() if paths}
+
 def _product_form_page(form, product=None, status=200):
     try:
         raw = json.loads(form.variants_payload.data or '[]')
-
         if not isinstance(raw, list):
             raw = []
-
     except (ValueError, TypeError):
         raw = []
 
     if raw:
         groups = {}
-
         for variant in raw:
             if not isinstance(variant, dict):
                 continue
-
             key = (variant.get('color_name', ''), variant.get('color_hex', '#333333'))
             groups.setdefault(key, {'name': key[0], 'hex': key[1], 'sizes': []})
             groups[key]['sizes'].append({
@@ -388,12 +450,18 @@ def _product_form_page(form, product=None, status=200):
                 'stock': variant.get('stock', 0),
                 'minimum_stock': variant.get('minimum_stock', 5)
             })
-
         colors = list(groups.values())
     else:
         colors = _product_colors(product)
 
-    return render_template('admin/product_form.html', form=form, product=product, colors=colors, sizes=SIZES), status
+    return render_template(
+        'admin/product_form.html',
+        form=form,
+        product=product,
+        colors=colors,
+        sizes=SIZES,
+        photo_color_assignments=_photo_color_assignments(product, submitted=request.method == 'POST')
+    ), status
 
 
 @admin_bp.route('/products')
@@ -410,7 +478,6 @@ def products():
         and (not category or product.category == category)
         and (not status or product.status == status)
     ]
-
     critical = [(product, variant) for product in all_products for variant in product.low_stock_variants]
 
     return render_template(
@@ -433,13 +500,10 @@ def products():
 @admin_only
 def product_create():
     form = ProductForm()
-
     if form.validate_on_submit():
         return _save_product(form)
-
     if request.method == 'POST':
         flash('Periksa kembali data produk dan token keamanan form.', 'danger')
-
     return _product_form_page(form)
 
 
@@ -448,81 +512,103 @@ def product_create():
 def product_edit(product_id):
     product = db.get_or_404(Product, product_id)
     form = ProductForm(obj=product)
-
     if form.validate_on_submit():
         return _save_product(form, product)
-
     if request.method == 'POST':
         flash('Data produk belum valid.', 'danger')
-
     return _product_form_page(form, product)
 
 
 def _save_product(form, product=None):
+    is_new = product is None
     variants, error = parse_variants(form.variants_payload.data)
     intent = request.form.get('intent', 'draft')
 
     if intent not in ('draft', 'published'):
         abort(400)
-
     if error:
         flash(error, 'danger')
         return _product_form_page(form, product, 400)
-
     if intent == 'published' and not variants:
         flash('Tambahkan minimal satu varian ukuran sebelum publish.', 'danger')
         return _product_form_page(form, product, 400)
 
     sku = form.sku.data.strip().upper()
     duplicate = Product.query.filter_by(sku=sku).first()
-
     if duplicate and (product is None or duplicate.id != product.id):
         flash('SKU sudah dipakai produk lain.', 'danger')
         return _product_form_page(form, product, 400)
 
+    color_names = {}
+    for variant in variants:
+        key = _normalized_color(variant['color_name'])
+        color_names[key] = variant['color_name']
+
     old_photos = list(product.images or []) if product else []
     selected_for_delete = set(request.form.getlist('remove_image')) & set(old_photos)
     retained = [photo for photo in old_photos if photo not in selected_for_delete]
-    files = [file for file in request.files.getlist('photos') if file and file.filename]
-
-    if len(retained) + len(files) > 5:
-        flash('Total foto produk maksimal lima.', 'danger')
-        return _product_form_page(form, product, 400)
-
-    new_photos = []
+    general_files = [file for file in request.files.getlist('photos') if file and file.filename]
 
     try:
-        new_photos = _store_photos(files)
+        color_uploads = _parse_color_uploads(color_names)
+    except ValueError as exc:
+        flash(str(exc), 'danger')
+        return _product_form_page(form, product, 400)
+
+    photo_count = len(retained) + len(general_files) + sum(len(files) for _, files in color_uploads)
+    if photo_count > 5:
+        flash('Total foto produk maksimal lima, termasuk foto tiap warna.', 'danger')
+        return _product_form_page(form, product, 400)
+
+    assignments = _photo_color_assignments(product, submitted=True)
+    for photo in retained:
+        assigned = _normalized_color(assignments.get(photo))
+        if assigned and assigned not in color_names:
+            flash('Warna foto yang dipilih tidak tersedia dalam varian aktif.', 'danger')
+            return _product_form_page(form, product, 400)
+
+    new_photos = []
+    new_general = []
+    new_by_color = {}
+    try:
+        new_general = _store_photos(general_files)
+        new_photos.extend(new_general)
+        for color, files in color_uploads:
+            stored = _store_photos(files)
+            new_photos.extend(stored)
+            new_by_color.setdefault(color, []).extend(stored)
     except (OSError, ValueError, UnidentifiedImageError, Image.DecompressionBombError) as exc:
+        _remove_photos(new_photos)
         flash(f'Gagal mengunggah foto: {exc}', 'danger')
         return _product_form_page(form, product, 400)
 
-    photos = retained + new_photos
-
-    if request.form.get('replace_main') and new_photos:
-        photos = new_photos + retained
+    photos = retained + new_general + [path for paths in new_by_color.values() for path in paths]
+    if request.form.get('replace_main') and new_general:
+        photos = new_general + retained + [path for paths in new_by_color.values() for path in paths]
 
     if intent == 'published' and (not photos or form.price.data <= 0):
         _remove_photos(new_photos)
         flash('Produk live harus memiliki foto dan harga jual lebih dari nol.', 'danger')
         return _product_form_page(form, product, 400)
 
+    color_map = _build_color_photo_map(retained, assignments, color_names, new_by_color)
+
     if product is None:
         product = Product()
         db.session.add(product)
 
-    for key in ('name', 'category', 'subcategory', 'collection_label', 'price', 'cost', 'description', 'care_title', 'care_text', 'featured'):
+    for key in ('name', 'category', 'subcategory', 'collection_label', 'price', 'description', 'care_title', 'care_text', 'featured'):
         setattr(product, key, getattr(form, key).data)
 
     product.sku = sku
     product.status = intent
     product.images = photos
-    existing = {(variant.color_name.casefold(), variant.size): variant for variant in product.variants}
+    product.color_images = color_map
 
+    existing = {(variant.color_name.casefold(), variant.size): variant for variant in product.variants}
     for item in variants:
         key = (item['color_name'].casefold(), item['size'])
         variant = existing.pop(key, None)
-
         if variant is None:
             product.variants.append(ProductVariant(**item))
         else:
@@ -534,15 +620,22 @@ def _save_product(form, product=None):
 
     try:
         db.session.commit()
-    except IntegrityError:
+    except SQLAlchemyError:
         db.session.rollback()
         _remove_photos(new_photos)
-        flash('Produk gagal disimpan. Periksa SKU atau varian ganda.', 'danger')
+        flash('Produk gagal disimpan. Periksa SKU, data varian, dan database.', 'danger')
         return _product_form_page(form, product, 400)
+
+    log_security_event(
+        action='PRODUCT_CREATED' if is_new else 'PRODUCT_UPDATED',
+        status='SUCCESS',
+        user_id=current_user.id,
+        username=current_user.email,
+        details=f'Product ID {product.id}, SKU {product.sku}, status={product.status}, variants={len(product.variants)}'
+    )
 
     _remove_photos(selected_for_delete)
     flash('Produk berhasil disimpan.', 'success')
-
     return redirect(url_for('admin.products'))
 
 
@@ -557,25 +650,30 @@ def product_stock(product_id):
             flash('Token keamanan tidak valid.', 'danger')
         else:
             amounts = {}
-
             for variant in product.variants:
                 raw = request.form.get(f'add_{variant.id}', '0')
-
                 if not raw.isdigit() or len(raw) > 6:
                     flash('Jumlah restock harus angka 0 sampai 999999.', 'danger')
                     break
-
                 amounts[variant.id] = int(raw)
             else:
-                if sum(amounts.values()) == 0:
+                total_added = sum(amounts.values())
+                updated_variants = sum(value > 0 for value in amounts.values())
+                if total_added == 0:
                     flash('Isi minimal satu jumlah restock.', 'warning')
                 else:
                     for variant in product.variants:
                         variant.stock += amounts[variant.id]
-
                     db.session.commit()
-                    flash('Stok berhasil ditambahkan.', 'success')
 
+                    log_security_event(
+                        action='PRODUCT_STOCK_UPDATED',
+                        status='SUCCESS',
+                        user_id=current_user.id,
+                        username=current_user.email,
+                        details=f'Product ID {product.id}, SKU {product.sku}, added_units={total_added}, variants_updated={updated_variants}'
+                    )
+                    flash('Stok berhasil ditambahkan.', 'success')
                     return redirect(url_for('admin.products'))
 
     return render_template('admin/product_stock.html', product=product, csrf_form=csrf_form)
@@ -588,14 +686,21 @@ def product_delete(product_id):
         abort(400)
 
     product = db.get_or_404(Product, product_id)
+    product_sku = product.sku
     photos = list(product.images or [])
-
     db.session.delete(product)
     db.session.commit()
+
+    log_security_event(
+        action='PRODUCT_DELETED',
+        status='SUCCESS',
+        user_id=current_user.id,
+        username=current_user.email,
+        details=f'Product ID {product_id}, SKU {product_sku}'
+    )
+
     _remove_photos(photos)
-
     flash('Produk berhasil dihapus.', 'success')
-
     return redirect(url_for('admin.products'))
 
 
@@ -609,7 +714,6 @@ def _customer_rows():
 
     for user in users:
         profile = db.session.get(CustomerProfile, user.id)
-
         result.append({
             'id': user.id,
             'name': (profile.display_name if profile else None) or user.name or user.email.split('@')[0],
@@ -618,41 +722,55 @@ def _customer_rows():
             'gender': profile.gender if profile else None,
             'birth_date': read_customer_private(profile, 'birth_date') if profile else None,
             'avatar': profile.avatar_filename if profile else None,
-            'verified': _account_verified(user)
+            'verified': _account_verified(user),
+            'active': bool(user.is_active)
         })
-
     return result
+
+
+def _admin_rows():
+    users = User.query.filter_by(role='admin').order_by(User.id.desc()).all()
+    return [
+        {
+            'id': user.id,
+            'name': user.name or user.email,
+            'email': user.email,
+            'active': bool(user.is_active),
+            'created_at': user.created_at.strftime('%d/%m/%Y') if user.created_at else '-',
+            'role': 'admin'
+        }
+        for user in users
+    ]
 
 
 @admin_bp.route('/users')
 @admin_only
 def users_index():
-    all_users = _customer_rows()
-    q = request.args.get('q', '').strip().casefold()
+    tab = request.args.get('tab', 'customer')
+    q = request.args.get('q', '').strip().casefold()[:100]
     status = request.args.get('status', '')
     gender = request.args.get('gender', '')
     sort = request.args.get('sort', 'newest')
 
-    if status not in ('', 'verified', 'unverified') or gender not in ('', 'men', 'women', 'other') or sort not in ('newest', 'oldest', 'name'):
+    if tab not in ('customer', 'admin') or sort not in ('newest', 'oldest', 'name'):
+        abort(400)
+    if status not in ('', 'verified', 'unverified') or gender not in ('', 'men', 'women', 'other'):
         abort(400)
 
+    all_users = _admin_rows() if tab == 'admin' else _customer_rows()
     rows = []
 
     for item in all_users:
-        search_value = ' '.join((item['name'], item['email'], item['phone'] or '')).casefold()
-
-        if q and q not in search_value:
+        searchable = f"{item['name']} {item['email']} {item.get('phone') or ''}".casefold()
+        if q and q not in searchable:
             continue
-
-        if status == 'verified' and item['verified'] is not True:
-            continue
-
-        if status == 'unverified' and item['verified'] is not False:
-            continue
-
-        if gender and item['gender'] != gender:
-            continue
-
+        if tab == 'customer':
+            if status == 'verified' and item['verified'] is not True:
+                continue
+            if status == 'unverified' and item['verified'] is not False:
+                continue
+            if gender and item['gender'] != gender:
+                continue
         rows.append(item)
 
     if sort == 'oldest':
@@ -662,32 +780,51 @@ def users_index():
 
     selected_id = request.args.get('selected', type=int)
     selected = next((item for item in rows if item['id'] == selected_id), None)
-
     if selected is None and rows:
         selected = rows[0]
 
+    transacting_customers = 0
+    saved_addresses = 0
+    if tab == 'customer':
+        transacting_customers = (
+            db.session.query(db.func.count(db.distinct(Order.user_id)))
+            .join(User, Order.user_id == User.id)
+            .filter(User.role == 'customer', Order.payment_status == 'paid')
+            .scalar() or 0
+        )
+        saved_addresses = (
+            db.session.query(db.func.count(CustomerAddress.user_id))
+            .join(User, CustomerAddress.user_id == User.id)
+            .filter(User.role == 'customer')
+            .scalar() or 0
+        )
+
     return render_template(
         'admin/user_list.html',
+        tab=tab,
         rows=rows,
         selected=selected,
-        total_users=len(all_users),
-        verified_users=sum(item['verified'] is True for item in all_users),
+        total_users=len(all_users) if tab == 'customer' else 0,
+        verified_users=sum(item['verified'] is True for item in all_users) if tab == 'customer' else 0,
+        admin_total=len(all_users) if tab == 'admin' else 0,
+        admin_active=sum(item['active'] for item in all_users) if tab == 'admin' else 0,
+        transacting_customers=transacting_customers,
+        saved_addresses=saved_addresses,
         q=q,
         status=status,
         gender=gender,
         sort=sort
     )
 
+
 @admin_bp.route('/users/<int:user_id>/edit', methods=['GET', 'POST'])
 @admin_only
 def user_edit(user_id):
     user = db.get_or_404(User, user_id)
-
     if user.role != 'customer':
         abort(403)
 
     profile = db.session.get(CustomerProfile, user.id)
-
     if request.method == 'POST':
         name = request.form.get('display_name', '').strip()
         phone = request.form.get('phone', '').strip()
@@ -697,11 +834,9 @@ def user_edit(user_id):
         if not 2 <= len(name) <= 100:
             flash('Nama harus terdiri dari 2-100 karakter.', 'danger')
             return redirect(url_for('admin.user_edit', user_id=user.id))
-
         if len(phone) > 25 or any(char not in '0123456789+ -()' for char in phone):
             flash('Nomor WhatsApp tidak valid.', 'danger')
             return redirect(url_for('admin.user_edit', user_id=user.id))
-
         if gender not in ('', 'men', 'women', 'other'):
             abort(400)
 
@@ -726,14 +861,20 @@ def user_edit(user_id):
         user.name = name
         db.session.commit()
 
+        log_security_event(
+            action='ADMIN_CUSTOMER_UPDATED',
+            status='SUCCESS',
+            user_id=current_user.id,
+            username=current_user.email,
+            details=f'Customer ID {user.id} profile updated'
+        )
+
         flash('Data customer berhasil diperbarui.', 'success')
         return redirect(url_for('admin.user_edit', user_id=user.id))
 
     account = next(item for item in _customer_rows() if item['id'] == user.id)
-
     customer_orders = Order.query.filter_by(user_id=user.id).order_by(Order.id.desc()).all()
     paid_orders = [order for order in customer_orders if order.payment_status == 'paid']
-
     order_stats = {
         'total_orders': len(customer_orders),
         'paid_orders': len(paid_orders),
@@ -743,7 +884,6 @@ def user_edit(user_id):
 
     saved = CustomerAddress.query.filter_by(user_id=user.id).first()
     saved_address = None
-
     if saved:
         saved_address = {
             'recipient_name': read_customer_private(saved, 'recipient_name'),
@@ -764,13 +904,36 @@ def user_edit(user_id):
     )
 
 
+@admin_bp.route('/users/<int:user_id>/toggle-status', methods=['POST'])
+@admin_only
+def user_toggle_status(user_id):
+    user = db.get_or_404(User, user_id)
+    if user.role != 'customer':
+        abort(403)
+
+    active = request.form.get('active')
+    if active not in ('0', '1'):
+        abort(400)
+
+    previous_status = bool(user.is_active)
+    user.is_active = active == '1'
+    db.session.commit()
+
+    log_security_event(
+        action='ADMIN_CUSTOMER_STATUS_CHANGE',
+        status='SUCCESS',
+        user_id=current_user.id,
+        username=current_user.email,
+        details=f'Customer ID {user.id}: active {previous_status} -> {user.is_active}'
+    )
+
+    flash('Status akun pelanggan berhasil diperbarui.', 'success')
+    return redirect(url_for('admin.users_index'))
+
+
 def _csv_safe(value):
     text = str(value or '')
-
-    if text.lstrip().startswith(('=', '+', '-', '@', '\t', '\r')):
-        return "'" + text
-
-    return text
+    return "'" + text if text.lstrip().startswith(('=', '+', '-', '@', '\t', '\r')) else text
 
 
 @admin_bp.route('/users/export')
@@ -800,11 +963,9 @@ def users_export():
     response = make_response('\ufeff' + output.getvalue())
     response.headers['Content-Type'] = 'text/csv; charset=utf-8'
     response.headers['Content-Disposition'] = 'attachment; filename=customer_kuro.csv'
-
     return response
 
 
 from . import order_management
 from . import review_management
 from . import dashboard_data
-#Import ini harus berada setelah seluruh definisi route lama, bukan di bagian atas. Ini memungkinkan modul pengelolaan pesanan mendaftarkan route baru pada blueprint Admin sebelum Flask menjalankan app.register_blueprint()

@@ -1,4 +1,4 @@
-<!--File ini berisi tampilan ulasan publik sekaligus form ulasan untuk customer yang sudah menyelesaikan pesanan.-->
+
 <section class="kpd-reviews" id="kpdReviews">
     <h2 class="kpd-reviews-heading">Penilaian &amp; Komentar Pembeli</h2>
 
@@ -6,16 +6,12 @@
     <div class="kpd-review-summary">
         <div class="kpd-review-score">
             <strong>{{ '%.1f'|format(average_rating) }}</strong>
-            <span class="kpd-stars">
-                {% for n in range(1, 6) %}
-                {{ '★' if n <= average_rating|round|int else '☆' }}
-                {% endfor %}
-            </span>
+            <span class="kpd-stars">{% for n in range(1, 6) %}{{ '★' if n <= average_rating|round|int else '☆' }}{% endfor %}</span>
             <div class="kpd-muted">{{ review_count }} ulasan terverifikasi</div>
         </div>
-        <div>
+        <div class="kpd-review-summary-info">
             <strong>Penilaian Pelanggan</strong>
-            <p class="kpd-muted mb-0">Rata-rata dari seluruh rating pembeli yang ulasannya dipublikasikan.</p>
+            <p class="kpd-muted">Rata-rata dari seluruh rating pembeli yang ulasannya dipublikasikan.</p>
         </div>
     </div>
     {% else %}
@@ -30,20 +26,16 @@
     <div class="kwr-form-card">
         <h3>Tulis Ulasanmu</h3>
         <p class="kpd-muted">Hanya pembeli dengan pesanan Lunas dan Selesai yang bisa memberikan ulasan.</p>
-
         <form class="kwr-form" action="{{ url_for('shop.submit_product_review', product_id=product.id) }}" method="POST" enctype="multipart/form-data">
             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
             <input type="hidden" name="rating" value="0">
-
-            <label>
-                Pesanan yang Diulas
+            <label>Pesanan yang Diulas
                 <select name="order_item_id" required>
                     {% for item in reviewable_order_items %}
                     <option value="{{ item.id }}">{{ item.order.order_number }} · {{ item.color_name }} / {{ item.size }}</option>
                     {% endfor %}
                 </select>
             </label>
-
             <div class="kwr-rating">
                 <span class="kwr-label">Rating Produk</span>
                 <div class="kwr-star-group" role="group" aria-label="Pilih rating">
@@ -53,18 +45,13 @@
                     <span class="kwr-star-label">Pilih bintang</span>
                 </div>
             </div>
-
-            <label>
-                Komentar Produk
+            <label>Komentar Produk
                 <textarea name="comment" minlength="10" maxlength="2000" rows="4" required placeholder="Bagaimana kualitas bahan, ukuran, dan kenyamanan produk?"></textarea>
             </label>
-
-            <label>
-                Foto Produk (opsional, maksimal 3)
+            <label>Foto Produk (opsional, maksimal 3)
                 <input name="photos" type="file" accept="image/jpeg,image/png,image/webp" multiple>
                 <small>Setiap foto maksimal 2 MB.</small>
             </label>
-
             <div class="kwr-preview"></div>
             <button class="kwr-primary" type="submit">Kirim Ulasan</button>
         </form>
@@ -76,19 +63,11 @@
         <div class="kwr-head">
             <div>
                 <strong>{{ review.author_name }}</strong>
-                <div class="kwr-verified">
-                    <i class="bi bi-patch-check-fill"></i> Pembelian Terverifikasi
-                </div>
-                <span class="kpd-muted">
-                    {{ review.created_at }}
-                    {% if review.edited %} · Diedit{% endif %}
-                </span>
+                <div class="kwr-verified"><i class="bi bi-patch-check-fill"></i> Pembelian Terverifikasi</div>
+                <span class="kpd-muted">{{ review.created_at }}{% if review.edited %} · Diedit{% endif %}</span>
             </div>
-
             <span class="kpd-stars" aria-label="{{ review.rating }} dari 5">
-                {% for n in range(1, 6) %}
-                {{ '★' if n <= review.rating else '☆' }}
-                {% endfor %}
+                {% for n in range(1, 6) %}{{ '★' if n <= review.rating else '☆' }}{% endfor %}
             </span>
         </div>
 
@@ -107,8 +86,7 @@
         {% if review.reply %}
         <div class="kwr-admin-reply">
             <div class="kwr-admin-head">
-                <i class="bi bi-shop"></i>
-                Tim KURO WEAR
+                <i class="bi bi-shop"></i> Tim KURO WEAR
                 <span class="kwr-admin-badge">Penjual</span>
             </div>
             <p>{{ review.reply.message }}</p>
@@ -119,22 +97,18 @@
             {% if current_user.is_authenticated and current_user.role == 'customer' and not review.own %}
             <form method="POST" action="{{ url_for('shop.toggle_review_like', product_id=product.id, review_id=review.id) }}">
                 <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                <button class="kwr-like {{ 'is-liked' if review.liked else '' }}" type="submit" aria-pressed="{{ 'true' if review.liked else 'false' }}">
+                <button type="submit" class="kwr-like {{ 'is-liked' if review.liked else '' }}" aria-pressed="{{ 'true' if review.liked else 'false' }}">
                     <i class="bi {{ 'bi-hand-thumbs-up-fill' if review.liked else 'bi-hand-thumbs-up' }}"></i>
                     Membantu · {{ review.like_count }}
                 </button>
             </form>
-
             {% elif not current_user.is_authenticated %}
             <a class="kwr-like" href="{{ url_for('auth.login', next=request.path) }}">
-                <i class="bi bi-hand-thumbs-up"></i>
-                Membantu · {{ review.like_count }}
+                <i class="bi bi-hand-thumbs-up"></i> Membantu · {{ review.like_count }}
             </a>
-
             {% else %}
             <span class="kwr-like kwr-like-disabled">
-                <i class="bi bi-hand-thumbs-up"></i>
-                {{ review.like_count }} merasa terbantu
+                <i class="bi bi-hand-thumbs-up"></i> {{ review.like_count }} merasa terbantu
             </span>
             {% endif %}
 
@@ -148,7 +122,6 @@
         {% if review.own %}
         <div class="kwr-edit-panel" id="edit-review-{{ review.id }}" hidden>
             <h3>Edit Ulasan</h3>
-
             <form class="kwr-form" method="POST" enctype="multipart/form-data" action="{{ url_for('shop.edit_product_review', product_id=product.id, review_id=review.id) }}">
                 <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                 <input type="hidden" name="rating" value="{{ review.rating }}">
@@ -163,8 +136,7 @@
                     </div>
                 </div>
 
-                <label>
-                    Ubah Komentar
+                <label>Ubah Komentar
                     <textarea name="comment" minlength="10" maxlength="2000" rows="4" required>{{ review.comment }}</textarea>
                 </label>
 
@@ -179,16 +151,15 @@
                 </div>
                 {% endif %}
 
-                <label>
-                    Ganti Foto (opsional)
+                <label>Ganti Foto (opsional)
                     <input name="photos" type="file" accept="image/jpeg,image/png,image/webp" multiple>
-                    <small>Jika memilih foto baru, seluruh foto lama akan diganti. Maksimal 3 foto, masing-masing 2 MB.</small>
+                    <small>Jika memilih foto baru, seluruh foto lama diganti. Maksimal 3 foto, masing-masing 2 MB.</small>
                 </label>
 
                 {% if review.images %}
                 <label class="kwr-check">
                     <input type="checkbox" name="clear_photos" value="1">
-                    Hapus semua foto lama tanpa mengunggah pengganti
+                    Hapus semua foto lama tanpa pengganti
                 </label>
                 {% endif %}
 
@@ -199,64 +170,101 @@
         {% endif %}
     </article>
     {% endfor %}
-
-    {% if not review_count %}
-    <p class="kpd-muted">Belum ada ulasan yang dipublikasikan.</p>
-    {% endif %}
 </section>
 
 <style>
-.kwr-form-card,.kwr-edit-panel{background:#fff;border:1px solid #E8E5DE;padding:22px;margin:18px 0}
+.kpd-reviews{margin-top:38px;scroll-margin-top:95px;color:#1a1b22}
+.kpd-reviews *{box-sizing:border-box}
+.kpd-reviews-heading{margin:0 0 20px;font-size:22px;line-height:1.3;font-weight:750}
+.kpd-reviews .kpd-muted{font-size:12px;color:#667085;line-height:1.6}
+.kpd-reviews .kpd-stars{color:#e60012;font-size:18px;letter-spacing:5px;white-space:nowrap}
+
+/* Rating */
+.kpd-reviews .kpd-review-summary{display:flex;align-items:center;gap:20px;padding:22px;margin-bottom:18px;background:#fff}
+.kpd-reviews .kpd-review-score{padding:20px 28px;text-align:center;background:#e3e3e3}
+.kpd-reviews .kpd-review-score strong{display:block;font-size:40px;line-height:1.1;font-weight:750}
+.kpd-reviews .kpd-review-score .kpd-stars{display:block;margin:10px 0 4px}
+.kpd-review-summary-info strong{display:block;margin-bottom:6px;font-size:15px}
+.kpd-review-summary-info p{margin:0}
+
+/* Tampilan kosong: ukuran asli */
+#kpdReviews .kpd-empty-review{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:9px;min-height:175px;padding:30px;background:#fff;text-align:center}
+#kpdReviews .kpd-empty-review i{font-size:28px;line-height:1.2;color:#9ca3af}
+#kpdReviews .kpd-empty-review strong{font-size:15px;line-height:1.3;font-weight:750;color:#1a1b22}
+#kpdReviews .kpd-empty-review p{margin:0;font-size:11px;line-height:1.6;color:#687184}
+
+/* Kartu ulasan */
+.kpd-reviews .kpd-review-card{padding:22px;margin-bottom:14px;background:#fff}
+.kwr-head{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;font-size:12px}
+.kwr-verified{margin:5px 0;color:#087344;font-size:10px;font-weight:700}
+.kwr-comment{margin:13px 0;color:#575e70;font-size:12px;line-height:1.8;white-space:pre-line;overflow-wrap:anywhere}
+.kwr-images,.kwr-preview{display:flex;flex-wrap:wrap;gap:10px;margin-top:12px}
+.kwr-images img,.kwr-preview img{width:110px;height:125px;object-fit:cover;border:1px solid #ddd;border-radius:4px}
+
+/* Balasan penjual */
+.kwr-admin-reply{margin-top:18px;padding:15px;background:#f5f2eb;border-left:3px solid #b7000c}
+.kwr-admin-head{display:flex;align-items:center;gap:7px;font-size:12px;font-weight:700}
+.kwr-admin-badge{padding:4px 7px;background:#ede2de;color:#9d0a0f;font-size:10px}
+.kwr-admin-reply p{margin:9px 0 0;color:#575e70;font-size:12px;line-height:1.7;white-space:pre-line;overflow-wrap:anywhere}
+
+/* Tombol interaksi */
+.kwr-actions{display:flex;align-items:center;flex-wrap:wrap;gap:12px;margin-top:18px;padding-top:14px;border-top:1px solid #eeece7}
+.kwr-actions form{margin:0}
+.kwr-like,.kwr-edit-toggle{display:inline-flex;align-items:center;gap:8px;padding:8px 13px;border:1px solid #dad7d0;border-radius:5px;background:#fff;color:#575e70;font-size:11px;font-weight:700;text-decoration:none;cursor:pointer}
+.kwr-like.is-liked{background:#fde8e8;border-color:#b7000c;color:#b7000c}
+.kwr-like-disabled{cursor:default}
+.kwr-edit-toggle{color:#b7000c}
+
+/* Form */
+.kwr-form-card,.kwr-edit-panel{margin:18px 0;padding:22px;border:1px solid #e8e5de;background:#fff}
 .kwr-form-card h3,.kwr-edit-panel h3{margin:0 0 9px;font-size:16px}
 .kwr-form{display:grid;gap:16px}
-.kwr-form label,.kwr-label{display:grid;gap:7px;font-size:11px;font-weight:700;color:#333}
-.kwr-form input[type=file],.kwr-form select,.kwr-form textarea{width:100%;padding:11px;border:1px solid #D5D1C3;border-radius:4px;background:#FAF9F6;font:inherit;color:#1A1B22}
+.kwr-form label,.kwr-label{display:grid;gap:7px;color:#333;font-size:11px;font-weight:700}
+.kwr-form input[type=file],.kwr-form select,.kwr-form textarea{width:100%;padding:11px;border:1px solid #d5d1c3;border-radius:4px;background:#faf9f6;color:#1a1b22;font:inherit}
 .kwr-form textarea{min-height:90px;resize:vertical;font-size:12px;line-height:1.7}
-.kwr-form label small{font-weight:400;color:#667085;line-height:1.7}
+.kwr-form label small{color:#667085;font-weight:400;line-height:1.7}
 .kwr-star-group{display:flex;align-items:center;flex-wrap:wrap;gap:2px}
-.kwr-star-group button{border:0;background:transparent;color:#999;font-size:30px;padding:0 4px;cursor:pointer}
-.kwr-star-group button.active{color:#E4A62D}
-.kwr-star-group button:focus-visible,.kwr-edit-toggle:focus-visible,.kwr-like:focus-visible{outline:2px solid #B7000C}
-.kwr-star-label{margin-left:10px;font-size:11px;color:#667085}
-.kwr-primary{background:#1A1B22;color:#fff;border:0;padding:12px 20px;font-size:12px;font-weight:700;cursor:pointer}
-.kwr-primary:hover{background:#34343D}
-.kwr-head{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;font-size:12px}
-.kwr-verified{font-size:10px;font-weight:700;color:#087344;margin:5px 0}
-.kwr-comment{margin:13px 0;white-space:pre-line;overflow-wrap:anywhere;line-height:1.8}
-.kwr-images,.kwr-preview{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px}
-.kwr-images img,.kwr-preview img{width:110px;height:125px;object-fit:cover;border:1px solid #DDD;border-radius:4px}
-.kwr-admin-reply{margin-top:18px;padding:15px;background:#F5F2EB;border-left:3px solid #B7000C}
-.kwr-admin-head{display:flex;align-items:center;gap:7px;font-size:12px;font-weight:700}
-.kwr-admin-badge{background:#EDE2DE;color:#9D0A0F;padding:4px 7px;font-size:10px}
-.kwr-admin-reply p{margin:9px 0 0;white-space:pre-line;overflow-wrap:anywhere}
-.kwr-actions{display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-top:18px;padding-top:14px;border-top:1px solid #EEECE7}
-.kwr-actions form{margin:0}
-.kwr-like,.kwr-edit-toggle{display:inline-flex;align-items:center;gap:8px;border:1px solid #DAD7D0;border-radius:5px;padding:8px 13px;background:#fff;color:#575E70;font-size:11px;font-weight:700;text-decoration:none;cursor:pointer}
-.kwr-like.is-liked{background:#FDE8E8;border-color:#B7000C;color:#B7000C}
-.kwr-like-disabled{cursor:default}
-.kwr-edit-toggle{color:#B7000C}
+.kwr-star-group button{padding:0 4px;border:0;background:transparent;color:#999;font-size:30px;cursor:pointer}
+.kwr-star-group button.active{color:#e4a62d}
+.kwr-star-label{margin-left:10px;color:#667085;font-size:11px}
+.kwr-primary{padding:12px 20px;border:0;background:#1a1b22;color:#fff;font-size:12px;font-weight:700;cursor:pointer}
+.kwr-primary:hover{background:#34343d}
 .kwr-edit-panel[hidden]{display:none}
 .kwr-check{display:flex!important;align-items:center;gap:9px}
 .kwr-check input{width:auto}
 .kwr-form-card+.kpd-review-card{margin-top:22px}
-@media(max-width:575px){.kwr-form-card,.kwr-edit-panel{padding:15px}.kwr-images img,.kwr-preview img{width:90px;height:100px}}
+.kwr-star-group button:focus-visible,.kwr-edit-toggle:focus-visible,.kwr-like:focus-visible{outline:2px solid #b7000c;outline-offset:2px}
+
+/* Responsif */
+@media(max-width:650px){
+    .kpd-reviews-heading{margin-bottom:18px;font-size:19px}
+    .kpd-reviews .kpd-review-summary{flex-direction:column;align-items:flex-start;gap:16px;padding:18px}
+    .kpd-reviews .kpd-review-score{width:100%;padding:16px}
+    .kpd-reviews .kpd-review-score strong{font-size:36px}
+    .kpd-review-summary-info strong{font-size:15px}
+    .kpd-reviews .kpd-review-card{padding:18px 14px}
+    #kpdReviews .kpd-empty-review{min-height:175px;padding:20px 12px}
+    #kpdReviews .kpd-empty-review strong{font-size:15px}
+    #kpdReviews .kpd-empty-review p{font-size:11px}
+    .kwr-form-card,.kwr-edit-panel{padding:15px}
+    .kwr-images img,.kwr-preview img{width:90px;height:100px}
+}
 </style>
 
 <script>
 document.addEventListener('DOMContentLoaded', () => {
-    document.querySelectorAll('.kwr-form').forEach(form => {
+    document.querySelectorAll('#kpdReviews .kwr-form').forEach(form => {
         const input = form.querySelector('input[name="rating"]');
-        const buttons = [...form.querySelectorAll('[data-star]')];
+        const stars = [...form.querySelectorAll('[data-star]')];
         const label = form.querySelector('.kwr-star-label');
+        const filesInput = form.querySelector('input[name="photos"]');
+        const preview = form.querySelector('.kwr-preview');
+        let previewUrls = [];
 
-        function update(value) {
+        function updateRating(value) {
             input.value = value;
-
-            if (label) {
-                label.textContent = value ? `${value} dari 5 bintang` : 'Pilih bintang';
-            }
-
-            buttons.forEach(button => {
+            if (label) label.textContent = value ? `${value} dari 5 bintang` : 'Pilih bintang';
+            stars.forEach(button => {
                 const n = Number(button.dataset.star);
                 button.classList.toggle('active', n <= value);
                 button.textContent = n <= value ? '★' : '☆';
@@ -264,30 +272,18 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         }
 
-        buttons.forEach(button => {
-            button.addEventListener('click', () => update(Number(button.dataset.star)));
-        });
-
-        update(Number(input.value));
-
-        const filesInput = form.querySelector('input[name="photos"]');
-        const preview = form.querySelector('.kwr-preview');
-        let urls = [];
+        stars.forEach(button => button.addEventListener('click', () => updateRating(Number(button.dataset.star))));
+        updateRating(Number(input.value));
 
         filesInput.addEventListener('change', () => {
-            urls.forEach(URL.revokeObjectURL);
-            urls = [];
+            previewUrls.forEach(url => URL.revokeObjectURL(url));
+            previewUrls = [];
             preview.replaceChildren();
 
             const files = [...filesInput.files];
+            const allowed = ['image/jpeg', 'image/png', 'image/webp'];
 
-            if (
-                files.length > 3 ||
-                files.some(file =>
-                    file.size > 2 * 1024 * 1024 ||
-                    !['image/jpeg', 'image/png', 'image/webp'].includes(file.type)
-                )
-            ) {
+            if (files.length > 3 || files.some(file => file.size > 2 * 1024 * 1024 || !allowed.includes(file.type))) {
                 alert('Maksimal 3 foto JPG/PNG/WEBP, masing-masing 2 MB.');
                 filesInput.value = '';
                 return;
@@ -295,34 +291,27 @@ document.addEventListener('DOMContentLoaded', () => {
 
             files.forEach(file => {
                 const url = URL.createObjectURL(file);
-                urls.push(url);
-
-                const image = document.createElement('img');
-                image.src = url;
-                image.alt = 'Pratinjau foto ulasan';
-                preview.appendChild(image);
+                previewUrls.push(url);
+                const img = document.createElement('img');
+                img.src = url;
+                img.alt = 'Pratinjau foto ulasan';
+                preview.appendChild(img);
             });
         });
 
         form.addEventListener('submit', event => {
-            if (Number(input.value) < 1) {
-                event.preventDefault();
-                alert('Pilih rating bintang terlebih dahulu.');
-            }
+            if (Number(input.value) >= 1) return;
+            event.preventDefault();
+            alert('Pilih rating bintang terlebih dahulu.');
         });
     });
 
-    document.querySelectorAll('[data-edit-toggle]').forEach(button => {
+    document.querySelectorAll('#kpdReviews [data-edit-toggle]').forEach(button => {
         button.addEventListener('click', () => {
             const panel = document.getElementById(button.dataset.editToggle);
+            if (!panel) return;
             panel.hidden = !panel.hidden;
-
-            if (!panel.hidden) {
-                panel.scrollIntoView({
-                    behavior: 'smooth',
-                    block: 'nearest'
-                });
-            }
+            if (!panel.hidden) panel.scrollIntoView({behavior:'smooth',block:'nearest'});
         });
     });
 });

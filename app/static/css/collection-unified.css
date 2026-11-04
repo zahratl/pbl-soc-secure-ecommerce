@@ -1,727 +1,116 @@
-
-/* ==========================================
-   KURO WEAR - UNIFIED COLLECTION
-   ALL / WOMEN / MAN
-   ========================================== */
-
-.kw-collection-page {
-    --kw-ink: #171717;
-    --kw-muted: #657084;
-    --kw-line: #e5dfd5;
-    --kw-white: #ffffff;
-    --kw-red: #a40c16;
-}
-
-.kw-collection-page * {
-    box-sizing: border-box;
-}
-
-/* ===== KATEGORI: SELALU SATU BARIS ===== */
-
-.kw-category-section {
-    margin: 26px 0 30px;
-}
-
-.kw-category-heading {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    gap: 12px;
-    margin-bottom: 16px;
-}
-
-.kw-category-heading strong {
-    font-size: 13px;
-    font-weight: 800;
-    letter-spacing: .5px;
-    color: var(--kw-ink);
-}
-
-.kw-category-heading span {
-    font-size: 12px;
-    color: var(--kw-muted);
-}
-
-.kw-category-grid {
-    display: grid;
-    grid-template-columns: repeat(5, minmax(0, 1fr));
-    gap: 16px;
-    align-items: stretch;
-}
-
-.kw-category-grid.kw-four {
-    grid-template-columns: repeat(4, minmax(0, 1fr));
-}
-
-.kw-category-card {
-    width: 100%;
-    min-width: 0;
-    min-height: 210px;
-    padding: 22px 10px;
-    border: 1px solid #ececec;
-    border-radius: 17px;
-    background: #ffffff;
-    box-shadow: 0 2px 4px rgba(0,0,0,.03);
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 5px;
-    cursor: pointer;
-    text-align: center;
-    transition: border-color .2s, transform .2s;
-}
-
-.kw-category-card:hover,
-.kw-category-card.kw-selected {
-    border-color: #a40c16;
-    transform: translateY(-2px);
-}
-
-.kw-category-img {
-    width: min(128px, 90%);
-    aspect-ratio: 1;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    margin-bottom: 10px;
-    background: #ffffff;
-    border-radius: 9px;
-    overflow: hidden;
-}
-
-.kw-category-img img {
-    width: 100%;
-    height: 100%;
-    object-fit: contain;
-}
-
-.kw-category-name {
-    font-size: clamp(12px, 1vw, 17px);
-    font-weight: 800;
-    letter-spacing: .4px;
-    color: #111;
-    line-height: 1.3;
-    white-space: nowrap;
-}
-
-.kw-category-subtitle {
-    font-size: clamp(10px, .85vw, 14px);
-    color: #637085;
-    line-height: 1.45;
-}
-
-/* ===== FILTER + KONTEN ===== */
-
-.kw-layout {
-    display: grid;
-    grid-template-columns: 292px minmax(0, 1fr);
-    gap: 22px;
-    align-items: start;
-}
-
-.kw-sidebar {
-    min-width: 0;
-    background: white;
-    border: 1px solid var(--kw-line);
-    border-radius: 16px;
-    padding: 23px 24px 24px;
-    position: sticky;
-    top: 95px;
-}
-
-.kw-sidebar-head {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 10px;
-    padding-bottom: 20px;
-    border-bottom: 1px solid var(--kw-line);
-}
-
-.kw-sidebar-heading {
-    display: inline-flex;
-    align-items: center;
-    gap: 9px;
-    font-size: 13px;
-    font-weight: 800;
-    color: var(--kw-ink);
-    white-space: nowrap;
-}
-
-.kw-reset {
-    border: 0;
-    background: transparent;
-    color: #a00000;
-    font-size: 12px;
-    font-weight: 700;
-    cursor: pointer;
-    white-space: nowrap;
-}
-
-.kw-filter-group {
-    border-bottom: 1px solid var(--kw-line);
-    padding: 20px 0;
-}
-
-.kw-filter-group:last-child {
-    border-bottom: 0;
-    padding-bottom: 0;
-}
-
-.kw-filter-title {
-    font-size: 12px;
-    font-weight: 800;
-    color: #111;
-    margin-bottom: 17px;
-    letter-spacing: .3px;
-}
-
-.kw-checkbox-line {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    gap: 8px;
-    margin-bottom: 11px;
-}
-
-.kw-checkbox-line:last-child {
-    margin-bottom: 0;
-}
-
-.kw-checkbox-label {
-    display: flex;
-    align-items: center;
-    gap: 9px;
-    font-size: 13px;
-    color: #111;
-    cursor: pointer;
-    min-width: 0;
-}
-
-.kw-checkbox-label input {
-    width: 17px;
-    height: 17px;
-    margin: 0;
-    flex-shrink: 0;
-    accent-color: #171717;
-}
-
-.kw-category-count {
-    color: #758298;
-    font-size: 12px;
-    flex-shrink: 0;
-}
-
-.kw-size-heading {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 8px;
-    margin-bottom: 13px;
-}
-
-.kw-size-heading .kw-filter-title {
-    margin: 0;
-}
-
-.kw-size-guide {
-    background: none;
-    border: none;
-    color: #a00000;
-    font-size: 11px;
-    font-weight: 800;
-    white-space: nowrap;
-    cursor: pointer;
-}
-
-.kw-size-grid {
-    display: grid;
-    grid-template-columns: repeat(6, minmax(0, 1fr));
-    gap: 5px;
-}
-
-.kw-size-btn {
-    height: 43px;
-    min-width: 0;
-    padding: 0;
-    border: 1px solid var(--kw-line);
-    border-radius: 5px;
-    background: white;
-    color: #111;
-    font-size: 11px;
-    font-weight: 800;
-    cursor: pointer;
-}
-
-.kw-size-btn:hover,
-.kw-size-btn.kw-active {
-    background: #171717;
-    border-color: #171717;
-    color: white;
-}
-
-/* ===== TOOLBAR ===== */
-
-.kw-content {
-    min-width: 0;
-}
-
-.kw-toolbar {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    gap: 12px;
-    margin-bottom: 18px;
-    min-width: 0;
-}
-
-.kw-pills {
-    min-width: 0;
-    display: flex;
-    align-items: center;
-    gap: 9px;
-    flex-wrap: nowrap;
-    overflow-x: auto;
-    scrollbar-width: thin;
-    padding: 2px 0 7px;
-}
-
-.kw-pill {
-    flex: 0 0 auto;
-    border: 1px solid var(--kw-line);
-    background: #ffffff;
-    color: #161616;
-    border-radius: 999px;
-    padding: 10px 16px;
-    min-height: 42px;
-    font-size: 12px;
-    font-weight: 700;
-    cursor: pointer;
-    white-space: nowrap;
-}
-
-.kw-pill:hover {
-    border-color: #171717;
-}
-
-.kw-pill.kw-active {
-    background: #171717;
-    color: white;
-    border-color: #171717;
-}
-
-.kw-sort {
-    display: flex;
-    align-items: center;
-    flex: 0 0 auto;
-    gap: 7px;
-    white-space: nowrap;
-    color: #6b7480;
-    font-size: 12px;
-}
-
-.kw-sort select {
-    background: transparent;
-    border: none;
-    outline: none;
-    color: #111;
-    font-size: 12px;
-    font-weight: 700;
-    cursor: pointer;
-    max-width: 150px;
-}
-
-/* ===== KARTU PRODUK ===== */
-
-.kw-product-grid {
-    display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 18px;
-}
-
-.kw-product-card {
-    display: flex;
-    flex-direction: column;
-    min-width: 0;
-    height: 100%;
-    background: white;
-    border: 1px solid var(--kw-line);
-    overflow: hidden;
-}
-
-.kw-product-image {
-    position: relative;
-    background: #f5f3ef;
-    aspect-ratio: 3 / 4;
-}
-
-.kw-product-image > a {
-    display: block;
-    width: 100%;
-    height: 100%;
-}
-
-.kw-product-image img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-}
-
-.kw-product-tag {
-    position: absolute;
-    top: 13px;
-    left: 13px;
-    background: #181818;
-    color: white;
-    font-size: 10px;
-    font-weight: 700;
-    padding: 6px 10px;
-}
-
-.kw-heart {
-    position: absolute;
-    right: 12px;
-    top: 12px;
-    width: 39px;
-    height: 39px;
-    display: grid;
-    place-items: center;
-    border: 0;
-    border-radius: 50%;
-    background: white;
-    cursor: pointer;
-    z-index: 2;
-}
-
-.kw-heart i {
-    font-size: 17px;
-}
-
-.kw-product-body {
-    padding: 17px;
-    display: flex;
-    flex-direction: column;
-    flex: 1;
-    gap: 9px;
-}
-
-.kw-product-body h3 {
-    margin: 0;
-    font-size: 14px;
-    font-weight: 800;
-    line-height: 1.5;
-    color: #171717;
-}
-
-.kw-product-description {
-    font-size: 12px;
-    color: #677080;
-    line-height: 1.5;
-    margin: 0;
-}
-
-.kw-product-bottom {
-    margin-top: auto;
-    padding-top: 14px;
-}
-
-.kw-product-price {
-    font-size: 17px;
-    font-weight: 800;
-    color: #171717;
-}
-
-.kw-product-stock {
-    color: #607080;
-    font-size: 11px;
-}
-
-.kw-product-link {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 7px;
-    width: 100%;
-    margin-top: 12px;
-    padding: 12px;
-    background: #171717;
-    color: white;
-    text-decoration: none;
-    font-size: 11px;
-    font-weight: 800;
-}
-
-.kw-product-link:hover {
-    color: white;
-    background: #333;
-}
-
-/* ===== EMPTY STATE ===== */
-
-.kw-empty {
-    min-height: 315px;
-    background: #fff;
-    border: 1px solid #d9dee5;
-    border-radius: 11px;
-    padding: 35px 20px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-direction: column;
-    text-align: center;
-}
-
-.kw-empty > i {
-    font-size: 57px;
-    color: #62676a;
-    margin-bottom: 12px;
-}
-
-.kw-empty h3 {
-    font-size: 23px;
-    font-weight: 800;
-    margin: 0 0 8px;
-    color: #10151c;
-}
-
-.kw-empty p {
-    color: #5f7187;
-    font-size: 14px;
-    margin: 0;
-    line-height: 1.6;
-}
-
-.kw-footer {
-    margin-top: 20px;
-    padding: 20px 24px;
-    border: 1px solid var(--kw-line);
-    border-radius: 12px;
-    background: #fff;
-    font-size: 13px;
-    color: #667386;
-}
-
-.kw-collection-page [hidden] {
-    display: none !important;
-}
-
-/* ===== RESPONSIVE ===== */
+/* KURO WEAR | Unified Collection: All / Women / Man */
+.kw-collection-page{--kw-ink:#171717;--kw-muted:#657084;--kw-line:#e5dfd5;--kw-white:#ffffff;--kw-red:#a40c16}
+.kw-collection-page *{box-sizing:border-box}
+.kw-category-section{margin:26px 0 30px}
+.kw-category-heading{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:16px}
+.kw-category-heading strong{font-size:13px;font-weight:800;letter-spacing:.5px;color:var(--kw-ink)}
+.kw-category-heading span{font-size:12px;color:var(--kw-muted)}
+.kw-category-grid{display:grid;grid-template-columns:repeat(5, minmax(0, 1fr));gap:16px;align-items:stretch}
+.kw-category-grid.kw-four{grid-template-columns:repeat(4, minmax(0, 1fr))}
+.kw-category-card{width:100%;min-width:0;min-height:210px;padding:22px 10px;border:1px solid #ececec;border-radius:17px;background:#ffffff;box-shadow:0 2px 4px rgba(0,0,0,.03);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;cursor:pointer;text-align:center;transition:border-color .2s, transform .2s}
+.kw-category-card:hover, .kw-category-card.kw-selected{border-color:#a40c16;transform:translateY(-2px)}
+.kw-category-img{width:min(128px, 90%);aspect-ratio:1;display:flex;justify-content:center;align-items:center;margin-bottom:10px;background:#ffffff;border-radius:9px;overflow:hidden}
+.kw-category-img img{width:100%;height:100%;object-fit:contain}
+.kw-category-name{font-size:clamp(12px, 1vw, 17px);font-weight:800;letter-spacing:.4px;color:#111;line-height:1.3;white-space:nowrap}
+.kw-category-subtitle{font-size:clamp(10px, .85vw, 14px);color:#637085;line-height:1.45}
+.kw-layout{display:grid;grid-template-columns:292px minmax(0, 1fr);gap:22px;align-items:start}
+.kw-sidebar{min-width:0;background:white;border:1px solid var(--kw-line);border-radius:16px;padding:23px 24px 24px;position:sticky;top:95px}
+.kw-sidebar-head{display:flex;align-items:center;justify-content:space-between;gap:10px;padding-bottom:20px;border-bottom:1px solid var(--kw-line)}
+.kw-sidebar-heading{display:inline-flex;align-items:center;gap:9px;font-size:13px;font-weight:800;color:var(--kw-ink);white-space:nowrap}
+.kw-reset{border:0;background:transparent;color:#a00000;font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap}
+.kw-filter-group{border-bottom:1px solid var(--kw-line);padding:20px 0}
+.kw-filter-group:last-child{border-bottom:0;padding-bottom:0}
+.kw-filter-title{font-size:12px;font-weight:800;color:#111;margin-bottom:17px;letter-spacing:.3px}
+.kw-checkbox-line{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:11px}
+.kw-checkbox-line:last-child{margin-bottom:0}
+.kw-checkbox-label{display:flex;align-items:center;gap:9px;font-size:13px;color:#111;cursor:pointer;min-width:0}
+.kw-checkbox-label input{width:17px;height:17px;margin:0;flex-shrink:0;accent-color:#171717}
+.kw-category-count{color:#758298;font-size:12px;flex-shrink:0}
+.kw-size-heading{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:13px}
+.kw-size-heading .kw-filter-title{margin:0}
+.kw-size-guide{background:none;border:none;color:#a00000;font-size:11px;font-weight:800;white-space:nowrap;cursor:pointer}
+.kw-size-grid{display:grid;grid-template-columns:repeat(6, minmax(0, 1fr));gap:5px}
+.kw-size-btn{height:43px;min-width:0;padding:0;border:1px solid var(--kw-line);border-radius:5px;background:white;color:#111;font-size:11px;font-weight:800;cursor:pointer}
+.kw-size-btn:hover, .kw-size-btn.kw-active{background:#171717;border-color:#171717;color:white}
+.kw-content{min-width:0}
+.kw-toolbar{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:18px;min-width:0}
+.kw-pills{min-width:0;display:flex;align-items:center;gap:9px;flex-wrap:nowrap;overflow-x:auto;scrollbar-width:thin;padding:2px 0 7px}
+.kw-pill{flex:0 0 auto;border:1px solid var(--kw-line);background:#ffffff;color:#161616;border-radius:999px;padding:10px 16px;min-height:42px;font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap}
+.kw-pill:hover{border-color:#171717}
+.kw-pill.kw-active{background:#171717;color:white;border-color:#171717}
+.kw-sort{display:flex;align-items:center;flex:0 0 auto;gap:7px;white-space:nowrap;color:#6b7480;font-size:12px}
+.kw-sort select{background:transparent;border:none;outline:none;color:#111;font-size:12px;font-weight:700;cursor:pointer;max-width:150px}
+.kw-product-grid{display:grid;grid-template-columns:repeat(3, minmax(0, 1fr));gap:18px}
+.kw-product-card{display:flex;flex-direction:column;min-width:0;height:100%;background:white;border:1px solid var(--kw-line);overflow:hidden}
+.kw-product-image{position:relative;background:#f5f3ef;aspect-ratio:3 / 4}
+.kw-product-image > a{display:block;width:100%;height:100%}
+.kw-product-image img{width:100%;height:100%;object-fit:cover}
+.kw-product-tag{position:absolute;top:13px;left:13px;background:#181818;color:white;font-size:10px;font-weight:700;padding:6px 10px}
+.kw-heart{position:absolute;right:12px;top:12px;width:39px;height:39px;display:grid;place-items:center;border:0;border-radius:50%;background:white;cursor:pointer;z-index:2}
+.kw-heart i{font-size:17px}
+.kw-product-body{padding:17px;display:flex;flex-direction:column;flex:1;gap:9px}
+.kw-product-body h3{margin:0;font-size:14px;font-weight:800;line-height:1.5;color:#171717}
+.kw-product-description{font-size:12px;color:#677080;line-height:1.5;margin:0}
+.kw-product-bottom{margin-top:auto;padding-top:14px}
+.kw-product-price{font-size:17px;font-weight:800;color:#171717}
+.kw-product-stock{color:#607080;font-size:11px}
+.kw-product-link{display:flex;align-items:center;justify-content:center;gap:7px;width:100%;margin-top:12px;padding:12px;background:#171717;color:white;text-decoration:none;font-size:11px;font-weight:800}
+.kw-product-link:hover{color:white;background:#333}
+.kw-empty{min-height:315px;background:#fff;border:1px solid #d9dee5;border-radius:11px;padding:35px 20px;display:flex;align-items:center;justify-content:center;flex-direction:column;text-align:center}
+.kw-empty > i{font-size:57px;color:#62676a;margin-bottom:12px}
+.kw-empty h3{font-size:23px;font-weight:800;margin:0 0 8px;color:#10151c}
+.kw-empty p{color:#5f7187;font-size:14px;margin:0;line-height:1.6}
+.kw-footer{margin-top:20px;padding:20px 24px;border:1px solid var(--kw-line);border-radius:12px;background:#fff;font-size:13px;color:#667386}
+.kw-collection-page [hidden]{display:none !important}
 
 @media (max-width: 1199px) {
-    .kw-layout {
-        grid-template-columns: 260px minmax(0, 1fr);
-        gap: 16px;
-    }
-
-    .kw-sidebar {
-        padding: 18px 16px;
-    }
-
-    .kw-product-grid {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-    }
+    .kw-layout{grid-template-columns:260px minmax(0, 1fr);gap:16px}
+    .kw-sidebar{padding:18px 16px}
+    .kw-product-grid{grid-template-columns:repeat(2, minmax(0, 1fr))}
 }
-
 @media (max-width: 991px) {
-    /* Di tablet kartu tetap satu baris, bisa digeser */
-    .kw-category-grid,
-    .kw-category-grid.kw-five {
-        display: flex;
-        overflow-x: auto;
-        flex-wrap: nowrap;
-        gap: 12px;
-        padding-bottom: 10px;
-    }
-
-    .kw-category-card {
-        flex: 0 0 188px;
-    }
-
-    .kw-layout {
-        grid-template-columns: minmax(0, 1fr);
-    }
-
-    .kw-sidebar {
-        position: static;
-    }
+    .kw-category-grid, .kw-category-grid.kw-five{display:flex;overflow-x:auto;flex-wrap:nowrap;gap:12px;padding-bottom:10px}
+    .kw-category-card{flex:0 0 188px}
+    .kw-layout{grid-template-columns:minmax(0, 1fr)}
+    .kw-sidebar{position:static}
 }
+@media (max-width: 575px) {
+    .kw-category-card{flex-basis:164px;min-height:182px}
+    .kw-category-img{width:105px}
+    .kw-category-name{font-size:13px}
+    .kw-category-subtitle{font-size:11px}
+    .kw-toolbar{align-items:flex-start;flex-direction:column}
+    .kw-pills{width:100%}
+    .kw-sort{align-self:flex-end}
+    .kw-product-grid{grid-template-columns:repeat(2, minmax(0, 1fr));gap:10px}
+    .kw-product-body{padding:11px}
+    .kw-product-body h3{font-size:12px}
+    .kw-product-price{font-size:14px}
+    .kw-empty h3{font-size:20px}
+}
+
+/* Size Guide Modal */
+.kw-modal-content{border-radius:4px;border:1px solid #E3E3E3;background:#FFFFFF;box-shadow:0 16px 48px rgba(0, 0, 0, 0.12)}
+.kw-modal-header{padding:24px 28px 14px}
+.kw-modal-title{font-size:18px;letter-spacing:0.5px;color:#1A1B22}
+.kw-guide-tabs{display:flex;gap:10px}
+.kw-guide-tab{min-height:42px;border:1px solid #DDD !important;border-radius:3px !important;background:#F3F2EF !important;color:#575E70 !important;font-size:12px;font-weight:700;letter-spacing:0.5px;transition:all 0.2s ease}
+.kw-guide-tab:hover{background:#E8E6E0 !important;color:#1A1B22 !important}
+.kw-guide-tab.active, .kw-guide-tab[aria-selected="true"]{background:#2F3038 !important;border-color:#2F3038 !important;color:#FFFFFF !important}
+.kw-guide-panel-title{font-size:13.5px;font-weight:700;color:#1A1B22;margin:0}
+.kw-guide-table-wrapper{border:1px solid #E3E3E3;border-radius:3px;background:#FFFFFF;overflow-x:auto}
+.kw-guide-table{margin-bottom:0;font-size:12px}
+.kw-guide-table th{background:#F0EFEB !important;color:#1A1B22 !important;font-weight:700;padding:12px 10px;border-bottom:1px solid #DDD;white-space:nowrap}
+.kw-guide-table td{padding:11px 10px;color:#575E70;border-bottom:1px solid #EAEAEA;white-space:nowrap}
+.kw-guide-table tbody tr:last-child td{border-bottom:none}
+.kw-guide-table tbody tr:hover{background:#FAF8F5}
+.kw-guide-note{background:#F8F7F4;border-left:3px solid #B7000C;padding:14px 16px;border-radius:0 3px 3px 0;font-size:11.5px;line-height:1.7;color:#575E70}
+.kw-modal-footer{padding:12px 28px 24px}
 
 @media (max-width: 575px) {
-    .kw-category-card {
-        flex-basis: 164px;
-        min-height: 182px;
-    }
-
-    .kw-category-img {
-        width: 105px;
-    }
-
-    .kw-category-name {
-        font-size: 13px;
-    }
-
-    .kw-category-subtitle {
-        font-size: 11px;
-    }
-
-    .kw-toolbar {
-        align-items: flex-start;
-        flex-direction: column;
-    }
-
-    .kw-pills {
-        width: 100%;
-    }
-
-    .kw-sort {
-        align-self: flex-end;
-    }
-
-    .kw-product-grid {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-        gap: 10px;
-    }
-
-    .kw-product-body {
-        padding: 11px;
-    }
-
-    .kw-product-body h3 {
-        font-size: 12px;
-    }
-
-    .kw-product-price {
-        font-size: 14px;
-    }
-
-    .kw-empty h3 {
-        font-size: 20px;
-    }
-}
-
-/* ==========================================
-   SIZE GUIDE MODAL STYLING (KURO WEAR)
-   ========================================== */
-
-.kw-modal-content {
-    border-radius: 4px;
-    border: 1px solid #E3E3E3;
-    background: #FFFFFF;
-    box-shadow: 0 16px 48px rgba(0, 0, 0, 0.12);
-}
-
-.kw-modal-header {
-    padding: 24px 28px 14px;
-}
-
-.kw-modal-title {
-    font-size: 18px;
-    letter-spacing: 0.5px;
-    color: #1A1B22;
-}
-
-.kw-guide-tabs {
-    display: flex;
-    gap: 10px;
-}
-
-.kw-guide-tab {
-    min-height: 42px;
-    border: 1px solid #DDD !important;
-    border-radius: 3px !important;
-    background: #F3F2EF !important;
-    color: #575E70 !important;
-    font-size: 12px;
-    font-weight: 700;
-    letter-spacing: 0.5px;
-    transition: all 0.2s ease;
-}
-
-.kw-guide-tab:hover {
-    background: #E8E6E0 !important;
-    color: #1A1B22 !important;
-}
-
-.kw-guide-tab.active,
-.kw-guide-tab[aria-selected="true"] {
-    background: #2F3038 !important;
-    border-color: #2F3038 !important;
-    color: #FFFFFF !important;
-}
-
-.kw-guide-panel-title {
-    font-size: 13.5px;
-    font-weight: 700;
-    color: #1A1B22;
-    margin: 0;
-}
-
-.kw-guide-table-wrapper {
-    border: 1px solid #E3E3E3;
-    border-radius: 3px;
-    background: #FFFFFF;
-    overflow-x: auto;
-}
-
-.kw-guide-table {
-    margin-bottom: 0;
-    font-size: 12px;
-}
-
-.kw-guide-table th {
-    background: #F0EFEB !important;
-    color: #1A1B22 !important;
-    font-weight: 700;
-    padding: 12px 10px;
-    border-bottom: 1px solid #DDD;
-    white-space: nowrap;
-}
-
-.kw-guide-table td {
-    padding: 11px 10px;
-    color: #575E70;
-    border-bottom: 1px solid #EAEAEA;
-    white-space: nowrap;
-}
-
-.kw-guide-table tbody tr:last-child td {
-    border-bottom: none;
-}
-
-.kw-guide-table tbody tr:hover {
-    background: #FAF8F5;
-}
-
-.kw-guide-note {
-    background: #F8F7F4;
-    border-left: 3px solid #B7000C;
-    padding: 14px 16px;
-    border-radius: 0 3px 3px 0;
-    font-size: 11.5px;
-    line-height: 1.7;
-    color: #575E70;
-}
-
-.kw-modal-footer {
-    padding: 12px 28px 24px;
-}
-
-@media (max-width: 575px) {
-    .kw-modal-header {
-        padding: 18px 18px 10px;
-    }
-    .kw-modal-title {
-        font-size: 16px;
-    }
-    .kw-guide-table {
-        font-size: 11px;
-    }
-    .kw-guide-table th,
-    .kw-guide-table td {
-        padding: 9px 6px;
-    }
-    .kw-modal-footer {
-        padding: 10px 18px 18px;
-    }
+    .kw-modal-header{padding:18px 18px 10px}
+    .kw-modal-title{font-size:16px}
+    .kw-guide-table{font-size:11px}
+    .kw-guide-table th, .kw-guide-table td{padding:9px 6px}
+    .kw-modal-footer{padding:10px 18px 18px}
 }

@@ -1,5 +1,6 @@
 # Secret dan konfigurasi lokal
 .env
+.env.docker.test
 *.env
 !.env.example
 *.pem
@@ -11,6 +12,9 @@ rclone.conf
 *.sql.gz
 *.dump
 backups/
+
+# Backup lokal sebelum perubahan kode
+*.backup-*
 
 # Python
 __pycache__/
@@ -59,3 +63,6 @@ app/static/profile_photos/
 
 # Upload dinamis aplikasi
 app/static/uploads/
+
+*.tar
+*.tar.gz

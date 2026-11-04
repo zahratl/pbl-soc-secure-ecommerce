@@ -2,129 +2,241 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}Admin Panel - KURO WEAR{% endblock %}</title>
+
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@500;600;700&display=swap" rel="stylesheet">
+
+    <script>
+        try {
+            const saved = localStorage.getItem('kuro-sidebar-hidden');
+            if (saved === '1' || (saved === null && matchMedia('(max-width:650px)').matches)) {
+                document.documentElement.classList.add('sidebar-collapsed');
+            }
+        } catch (_) {}
+    </script>
+
     <style>
-        :root { --admin-bg:#F7F7F6; --admin-sidebar:#F3F0E9; --admin-text:#202126; --admin-muted:#777A82; --admin-border:#E6E5E2; --admin-primary:#202126; --admin-red:#A30B14; --admin-radius:7px; --sidebar-width:256px; }
-        *,*::before,*::after { box-sizing:border-box; }
-        body { margin:0; min-height:100vh; background:var(--admin-bg); color:var(--admin-text); font-family:Inter,sans-serif; font-size:13px; }
-        button,input,select,textarea { font-family:inherit; }
-        .admin-sidebar { position:fixed; inset:0 auto 0 0; z-index:1050; display:flex; flex-direction:column; width:var(--sidebar-width); padding:25px 18px 20px; background:var(--admin-sidebar); border-right:1px solid var(--admin-border); transition:transform .22s ease; }
-        body.sidebar-collapsed .admin-sidebar { transform:translateX(-100%); }
-        .admin-sidebar-top { flex:1; min-height:0; overflow-y:auto; }
-        .admin-brand { display:flex; align-items:center; justify-content:space-between; gap:10px; padding:3px 5px 25px; margin-bottom:20px; border-bottom:1px solid #DDD9D0; }
-        .admin-brand-title { font-size:13px; font-weight:700; letter-spacing:.4px; }
-        .admin-brand-subtitle { margin-top:5px; color:var(--admin-muted); font-size:10px; }
-        .admin-sidebar-close { display:none; width:32px; height:32px; border:0; background:transparent; color:var(--admin-muted); font-size:19px; cursor:pointer; }
-        .admin-profile-box { display:flex; align-items:center; gap:12px; padding:0 5px; margin-bottom:30px; }
-        .admin-avatar { display:grid; place-items:center; flex-shrink:0; width:38px; height:38px; border-radius:50%; background:var(--admin-red); color:#fff; font-size:16px; }
-        .admin-info { min-width:0; }
-        .admin-info h2 { margin:0 0 4px; font-size:12px; font-weight:700; overflow-wrap:anywhere; }
-        .admin-info p { margin:0; color:var(--admin-muted); font-size:10px; }
-        .nav-section-label { padding:0 11px; margin-bottom:13px; color:#92938F; font-size:10px; font-weight:700; letter-spacing:.7px; text-transform:uppercase; }
-        .admin-nav-menu { display:grid; gap:4px; list-style:none; margin:0; padding:0; }
-        .admin-nav-link { display:flex; align-items:center; gap:12px; min-height:43px; padding:10px 13px; border-radius:5px; color:#50515A; font-size:12px; font-weight:500; text-decoration:none; transition:background .15s,color .15s; }
-        .admin-nav-link i { width:18px; font-size:15px; text-align:center; }
-        .admin-nav-link:hover { background:#E9E5DD; color:var(--admin-text); }
-        .admin-nav-link.active { background:var(--admin-primary); color:#fff; font-weight:600; }
-        .btn-admin-logout { display:flex; align-items:center; justify-content:center; gap:9px; width:100%; min-height:43px; margin-top:18px; border:1px solid #E6D8D6; border-radius:5px; background:#F7F0EE; color:var(--admin-red); font-size:12px; font-weight:600; text-decoration:none; }
-        .btn-admin-logout:hover { background:#F0E2DE; color:#850611; }
-        .admin-content-wrapper { min-width:0; min-height:100vh; margin-left:var(--sidebar-width); padding:0 35px 45px; transition:margin-left .22s ease; }
-        body.sidebar-collapsed .admin-content-wrapper { margin-left:0; }
-        .admin-topbar { display:flex; align-items:center; gap:14px; min-height:68px; margin-bottom:29px; border-bottom:1px solid var(--admin-border); }
-        .admin-menu-toggle { display:inline-flex; align-items:center; justify-content:center; flex-shrink:0; width:40px; height:40px; border:1px solid var(--admin-border); border-radius:6px; background:#fff; color:var(--admin-text); font-size:21px; cursor:pointer; }
-        .admin-menu-toggle:hover { background:#F0EFED; }
-        .admin-topbar-name { font-size:12px; font-weight:700; letter-spacing:.35px; }
-        .admin-topbar-caption { margin-top:3px; color:var(--admin-muted); font-size:10px; }
-        .admin-topbar-role { margin-left:auto; color:var(--admin-muted); font-size:11px; }
-        .admin-btn { display:inline-flex; align-items:center; justify-content:center; gap:8px; min-height:40px; padding:10px 15px; border:1px solid var(--admin-primary); border-radius:6px; background:var(--admin-primary); color:#fff; font-size:12px; font-weight:600; text-decoration:none; white-space:nowrap; cursor:pointer; transition:background .15s,border-color .15s; }
-        .admin-btn:hover { background:#373840; border-color:#373840; color:#fff; }
-        .admin-btn.secondary { background:#fff; border-color:#DAD9D5; color:var(--admin-text); }
-        .admin-btn.secondary:hover { background:#F4F4F2; border-color:#C7C7C3; color:var(--admin-text); }
+        * { box-sizing:border-box; font-family:'Inter',sans-serif; }
+        body { display:flex; min-height:100vh; margin:0; background:#FBF8FF; color:#1A1B22; }
+
+        /* Sidebar */
+        .admin-sidebar { position:fixed; inset:0 auto 0 0; z-index:110; display:flex; flex-direction:column; justify-content:space-between; width:256px; padding:32px 20px; overflow-y:auto; background:#F5F2EB; border-right:1px solid #EAE6DF; transition:transform .25s ease; }
+        .sidebar-collapsed .admin-sidebar { transform:translateX(-100%); pointer-events:none; }
+
+        /* Admin Profile */
+        .admin-profile-box { display:flex; align-items:center; gap:10px; margin-bottom:24px; }
+        .admin-avatar { display:flex; align-items:center; justify-content:center; flex-shrink:0; width:40px; height:40px; border-radius:50%; background:#9E0B0F; color:#fff; font-size:18px; }
+        .admin-info { flex:1; min-width:0; }
+        .admin-info h2 { margin:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; font-family:'Plus Jakarta Sans',sans-serif; font-size:15px; font-weight:700; }
+        .admin-info p { margin:0; color:#737373; font-size:12px; }
+
+        /* Sidebar Controls */
+        .sidebar-close, .sidebar-open { display:flex; align-items:center; justify-content:center; flex-shrink:0; width:34px; height:34px; border:1px solid #E5E0D5; border-radius:6px; background:#fff; color:#202126; font-size:19px; cursor:pointer; transition:background .2s ease; }
+        .sidebar-close:hover, .sidebar-open:hover { background:#EAE6DF; }
+        .sidebar-open { display:none; position:fixed; top:17px; left:16px; z-index:120; width:40px; height:40px; box-shadow:0 2px 8px rgba(0,0,0,.05); }
+        .sidebar-collapsed .sidebar-open { display:flex; }
+        .sidebar-close:focus-visible, .sidebar-open:focus-visible, .admin-nav-link:focus-visible, .admin-btn:focus-visible { outline:2px solid #9E0B0F; outline-offset:2px; }
+
+        /* Navigation */
+        .nav-section-label { margin-bottom:12px; padding-left:4px; color:#A3A3A3; font-size:11px; font-weight:600; letter-spacing:.55px; text-transform:uppercase; }
+        .admin-nav-menu { display:flex; flex-direction:column; gap:6px; margin:0; padding:0; list-style:none; }
+        .admin-nav-link { display:flex; align-items:center; gap:12px; padding:10px 14px; border-radius:2px; color:#444; font-family:'Plus Jakarta Sans',sans-serif; font-size:14px; font-weight:500; text-decoration:none; transition:background .2s,color .2s; }
+        .admin-nav-link i { width:20px; font-size:17px; text-align:center; }
+        .admin-nav-link:hover { background:rgba(0,0,0,.04); color:#161616; }
+        .admin-nav-link.active { background:#161616; color:#fff; font-weight:600; }
+
+        /* Logout */
+        .btn-admin-logout { display:flex; align-items:center; justify-content:center; gap:12px; margin-top:25px; padding:12px; border-radius:2px; background:#E3E3E3; color:#BA1A1A; font-size:14px; font-weight:600; letter-spacing:.9px; text-transform:uppercase; text-decoration:none; }
+        .btn-admin-logout:hover { background:#D4D4D4; color:#BA1A1A; }
+
+        /* Main Content */
+        .admin-content-wrapper { flex:1; min-width:0; margin-left:256px; padding:40px 48px; transition:margin-left .25s ease,padding-left .25s ease; }
+        .sidebar-collapsed .admin-content-wrapper { margin-left:0; padding-left:76px; }
+
+        /* Common Buttons */
+        .admin-btn { display:inline-flex; align-items:center; justify-content:center; gap:8px; min-height:40px; padding:10px 16px; border:1px solid #202126; border-radius:6px; background:#202126; color:#fff; font-size:12px; font-weight:600; line-height:1.4; text-align:center; text-decoration:none; cursor:pointer; }
+        .admin-btn:hover { background:#393A40; color:#fff; }
+        .admin-btn.secondary { border-color:#DAD9D5; background:#fff; color:#202126; }
+        .admin-btn.secondary:hover { background:#F5F4F2; color:#202126; }
         .admin-btn:disabled { opacity:.5; cursor:not-allowed; }
-        .admin-content-wrapper :is(.p-btn,.orders-filter-btn,.orders-action,.order-button,.btn-tambah-produk,.btn-lihat-toko,.btn-tambah-stok,.btn-action-rincian,.kr-admin-form button) { min-height:40px; border-radius:6px!important; box-shadow:none!important; font-size:12px!important; font-weight:600!important; letter-spacing:0!important; text-transform:none!important; }
-        .admin-content-wrapper :is(.orders-filter-btn,.btn-tambah-produk,.btn-tambah-stok,.order-button,.kr-admin-form button) { background-color:var(--admin-primary); border-color:var(--admin-primary); color:#fff; }
-        .admin-content-wrapper :is(.orders-action,.btn-lihat-toko,.btn-action-rincian) { background-color:#fff; border-color:#DAD9D5; color:var(--admin-text); }
-        .admin-content-wrapper select:not([multiple]) { appearance:none; padding-right:40px!important; border-radius:6px; background-color:#fff; background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='m1 1 5 5 5-5' fill='none' stroke='%235B5D62' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E")!important; background-repeat:no-repeat!important; background-position:right 17px center!important; background-size:12px 8px!important; }
-        .admin-content-wrapper :is(.p-metric,.p-panel,.metric-card,.ad-metric,.ad-panel,.orders-stat,.orders-panel,.order-card,.kr-admin-card,.ar-card,.ar-filter-panel,.admin-card,.dashboard-card,.summary-card,.content-card,.filter-card,.table-card,.form-card,.info-card) { border-radius:var(--admin-radius)!important; box-shadow:none; }
+
+        /* Notifications */
+        .admin-flashes { display:flex; flex-direction:column; gap:10px; margin-bottom:24px; }
+        .admin-flashes .alert { margin:0; padding:13px 46px 13px 16px; border-radius:6px; font-size:12px; line-height:1.6; }
         .sidebar-backdrop { display:none; }
-        @media(max-width:900px) { .admin-content-wrapper { margin-left:0; padding:0 19px 30px; } .admin-sidebar { transform:translateX(-100%); box-shadow:10px 0 28px #00000010; } body:not(.sidebar-collapsed) .admin-sidebar { transform:translateX(0); } .admin-sidebar-close { display:grid; place-items:center; } body:not(.sidebar-collapsed) .sidebar-backdrop { display:block; position:fixed; inset:0; z-index:1040; background:#00000060; } }
-        @media(max-width:540px) { .admin-content-wrapper { padding:0 12px 25px; } .admin-topbar { min-height:62px; margin-bottom:21px; } .admin-topbar-role { display:none; } }
-        @media(prefers-reduced-motion:reduce) { .admin-sidebar,.admin-content-wrapper { transition:none; } }
+
+        /* Responsive */
+        @media(max-width:992px) {
+            .admin-sidebar { width:220px; padding:25px 14px; }
+            .admin-info h2 { font-size:13px; }
+            .admin-content-wrapper { margin-left:220px; padding:30px 24px; }
+            .admin-nav-link { gap:9px; font-size:12px; }
+            .sidebar-collapsed .admin-content-wrapper { padding-left:70px; }
+        }
+
+        @media(max-width:650px) {
+            body { display:block; }
+            .admin-sidebar { width:min(280px,86vw); padding:25px 18px; box-shadow:4px 0 18px rgba(0,0,0,.08); }
+            .admin-content-wrapper, .sidebar-collapsed .admin-content-wrapper { margin-left:0; padding:75px 15px 25px; }
+            .admin-nav-link { padding:10px 12px; font-size:13px; }
+            .sidebar-open { top:15px; left:15px; }
+            .sidebar-backdrop { position:fixed; inset:0; z-index:100; background:rgba(0,0,0,.35); }
+            :root:not(.sidebar-collapsed) .sidebar-backdrop { display:block; }
+        }
+
+        @media(prefers-reduced-motion:reduce) {
+            .admin-sidebar, .admin-content-wrapper { transition:none; }
+        }
     </style>
+
     {% block extra_css %}{% endblock %}
 </head>
+
 <body>
-    {% set admin_menus = [
-        ('admin.dashboard','bi-grid-1x2','Dashboard',['admin.dashboard']),
-        ('admin.products','bi-box-seam','Produk & Stok',['admin.products','admin.product_create','admin.product_edit','admin.product_stock']),
-        ('admin.orders_index','bi-bag-check','Pesanan & Transaksi',['admin.orders_index','admin.order_detail','admin.order_update']),
-        ('admin.users_index','bi-people','Akun Pelanggan',['admin.users_index','admin.user_edit','admin.users_export']),
-        ('admin.manage_product_reviews','bi-chat-left-text','Manajemen Ulasan',['admin.manage_product_reviews','admin.reply_product_review'])
-    ] %}
-    <aside class="admin-sidebar" id="adminSidebar" aria-label="Navigasi Admin">
-        <div class="admin-sidebar-top">
-            <div class="admin-brand">
-                <div><div class="admin-brand-title">KURO WEAR</div><div class="admin-brand-subtitle">ADMINISTRATION</div></div>
-                <button type="button" class="admin-sidebar-close" id="adminCloseSidebar" aria-label="Tutup sidebar"><i class="bi bi-x-lg"></i></button>
-            </div>
+
+    <!-- Sidebar Open Button -->
+    <button type="button" id="sidebarOpen" class="sidebar-open" aria-label="Tampilkan sidebar" aria-controls="adminSidebar" title="Tampilkan Sidebar">
+        <i class="bi bi-list"></i>
+    </button>
+
+    <div class="sidebar-backdrop" id="sidebarBackdrop"></div>
+
+    <!-- Sidebar -->
+    <aside class="admin-sidebar" id="adminSidebar">
+        <div>
+            <!-- Admin Profile -->
             <div class="admin-profile-box">
                 <div class="admin-avatar"><i class="bi bi-person-fill"></i></div>
-                <div class="admin-info"><h2>{{ current_user.name if current_user.is_authenticated else 'Administrator' }}</h2><p>Administrator Utama</p></div>
+                <div class="admin-info">
+                    <h2 title="{{ current_user.name if current_user.is_authenticated else 'Admin Kuro' }}">{{ current_user.name if current_user.is_authenticated else 'Admin Kuro' }}</h2>
+                    <p>Administrator Utama</p>
+                </div>
+                <button type="button" id="sidebarClose" class="sidebar-close" aria-label="Sembunyikan sidebar" aria-controls="adminSidebar" title="Sembunyikan Sidebar">
+                    <i class="bi bi-chevron-left"></i>
+                </button>
             </div>
-            <div class="nav-section-label">MENU UTAMA</div>
-            <ul class="admin-nav-menu">
-                {% for endpoint, icon, label, active_routes in admin_menus %}
-                <li><a href="{{ url_for(endpoint) }}" class="admin-nav-link {{ 'active' if request.endpoint in active_routes else '' }}" {% if request.endpoint in active_routes %}aria-current="page"{% endif %}><i class="bi {{ icon }}"></i><span>{{ label }}</span></a></li>
-                {% endfor %}
-            </ul>
+
+            <div class="nav-section-label">Katalog &amp; Kendali</div>
+
+            <!-- Admin Navigation -->
+            <nav aria-label="Navigasi Admin">
+                <ul class="admin-nav-menu">
+
+                    <!-- Dashboard -->
+                    <li>
+                        <a href="{{ url_for('admin.dashboard') }}" class="admin-nav-link {{ 'active' if request.endpoint == 'admin.dashboard' else '' }}">
+                            <i class="bi bi-grid-1x2"></i> Dashboard
+                        </a>
+                    </li>
+
+                    <!-- Produk & Stok -->
+                    <li>
+                        <a href="{{ url_for('admin.products') }}" class="admin-nav-link {{ 'active' if (request.endpoint or '').startswith('admin.product') else '' }}">
+                            <i class="bi bi-box-seam"></i> Produk &amp; Stok
+                        </a>
+                    </li>
+
+                    <!-- Manajemen Ulasan -->
+                    <li>
+                        <a href="{{ url_for('admin.manage_product_reviews') }}" class="admin-nav-link {{ 'active' if request.endpoint in ('admin.manage_product_reviews', 'admin.reply_product_review') else '' }}">
+                            <i class="bi bi-chat-square-text"></i> Manajemen Ulasan
+                        </a>
+                    </li>
+
+                    <!-- Pesanan & Transaksi -->
+                    <li>
+                        <a href="{{ url_for('admin.orders_index') }}" class="admin-nav-link {{ 'active' if (request.endpoint or '').startswith('admin.order') else '' }}">
+                            <i class="bi bi-bag-check"></i> Pesanan &amp; Transaksi
+                        </a>
+                    </li>
+
+                    <!-- Manajemen Akun -->
+                    <li>
+                        <a href="{{ url_for('admin.users_index') }}" class="admin-nav-link {{ 'active' if (request.endpoint or '').startswith('admin.user') else '' }}">
+                            <i class="bi bi-people"></i> Manajemen Akun
+                        </a>
+                    </li>
+
+                    <!-- Laporan Penjualan -->
+                    <li>
+                        <a href="{{ url_for('admin.sales_report') }}" class="admin-nav-link {{ 'active' if request.endpoint in ('admin.sales_report', 'admin.sales_report_export') else '' }}">
+                            <i class="bi bi-bar-chart-line"></i> Laporan Penjualan
+                        </a>
+                    </li>
+
+                </ul>
+            </nav>
         </div>
-        <a href="{{ url_for('auth.logout') }}" class="btn-admin-logout"><i class="bi bi-box-arrow-right"></i> Logout</a>
+
+        <!-- Logout -->
+        <div>
+            <a href="{{ url_for('auth.logout') }}" class="btn-admin-logout">
+                <i class="bi bi-box-arrow-left"></i> Logout
+            </a>
+        </div>
     </aside>
-    <div class="sidebar-backdrop" id="sidebarBackdrop" aria-hidden="true"></div>
+
+    <!-- Main Content -->
     <main class="admin-content-wrapper">
-        <header class="admin-topbar">
-            <button type="button" class="admin-menu-toggle" id="adminMenuToggle" aria-label="Tampilkan atau sembunyikan sidebar" aria-controls="adminSidebar" aria-expanded="true"><i class="bi bi-list"></i></button>
-            <div><div class="admin-topbar-name">KURO WEAR</div><div class="admin-topbar-caption">Admin Workspace</div></div>
-            <div class="admin-topbar-role">Administrator</div>
-        </header>
+
         {% with messages = get_flashed_messages(with_categories=true) %}
-            {% for category, message in messages %}
-            <div class="alert alert-{{ category if category in ['success','danger','warning','info','primary','secondary'] else 'info' }} alert-dismissible fade show" role="alert">{{ message }}<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Tutup"></button></div>
-            {% endfor %}
+            {% if messages %}
+                <div class="admin-flashes" aria-label="Notifikasi aplikasi">
+                    {% for category, message in messages %}
+                        {% set style = category if category in ['success', 'danger', 'warning', 'info'] else 'secondary' %}
+                        <div class="alert alert-{{ style }} alert-dismissible fade show" role="alert">
+                            {{ message }}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Tutup notifikasi"></button>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
         {% endwith %}
+
         {% block content %}{% endblock %}
     </main>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-    <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            const body = document.body, toggle = document.getElementById('adminMenuToggle');
-            const close = document.getElementById('adminCloseSidebar'), backdrop = document.getElementById('sidebarBackdrop');
-            const mobile = window.matchMedia('(max-width:900px)'), storageKey = 'kuro_admin_sidebar_collapsed';
-            let desktopCollapsed = false;
-            try { desktopCollapsed = localStorage.getItem(storageKey) === '1'; } catch (error) {}
 
-            function setCollapsed(collapsed, save = false) {
-                body.classList.toggle('sidebar-collapsed', collapsed);
-                toggle.setAttribute('aria-expanded', String(!collapsed));
-                if (save && !mobile.matches) {
-                    desktopCollapsed = collapsed;
-                    try { localStorage.setItem(storageKey, collapsed ? '1' : '0'); } catch (error) {}
-                }
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- Sidebar Interaction -->
+    <script>
+        (() => {
+            const page = document.documentElement;
+            const sidebar = document.getElementById('adminSidebar');
+            const openButton = document.getElementById('sidebarOpen');
+            const closeButton = document.getElementById('sidebarClose');
+            const backdrop = document.getElementById('sidebarBackdrop');
+
+            function setSidebar(collapsed) {
+                page.classList.toggle('sidebar-collapsed', collapsed);
+                sidebar.inert = collapsed;
+                sidebar.setAttribute('aria-hidden', String(collapsed));
+                openButton.setAttribute('aria-expanded', String(!collapsed));
+                closeButton.setAttribute('aria-expanded', String(!collapsed));
+
+                try {
+                    localStorage.setItem('kuro-sidebar-hidden', collapsed ? '1' : '0');
+                } catch (_) {}
             }
 
-            const updateLayout = () => setCollapsed(mobile.matches || desktopCollapsed);
-            toggle.addEventListener('click', () => setCollapsed(!body.classList.contains('sidebar-collapsed'), true));
-            close.addEventListener('click', () => setCollapsed(true));
-            backdrop.addEventListener('click', () => setCollapsed(true));
-            mobile.addEventListener('change', updateLayout);
-            document.addEventListener('keydown', event => { if (event.key === 'Escape' && mobile.matches) setCollapsed(true); });
-            updateLayout();
-        });
+            setSidebar(page.classList.contains('sidebar-collapsed'));
+
+            openButton.addEventListener('click', () => setSidebar(false));
+            closeButton.addEventListener('click', () => { setSidebar(true); openButton.focus(); });
+            backdrop.addEventListener('click', () => { setSidebar(true); openButton.focus(); });
+
+            document.addEventListener('keydown', event => {
+                if (event.key === 'Escape' && !page.classList.contains('sidebar-collapsed')) {
+                    setSidebar(true);
+                    openButton.focus();
+                }
+            });
+        })();
     </script>
+
     {% block extra_js %}{% endblock %}
 </body>
 </html>

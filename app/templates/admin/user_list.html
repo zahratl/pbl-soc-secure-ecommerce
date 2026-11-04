@@ -1,48 +1,49 @@
 {% extends 'admin/admin_base.html' %}
-{% block title %}Akun Pelanggan - Admin KURO WEAR{% endblock %}
+{% block title %}Manajemen Akun - Admin KURO WEAR{% endblock %}
 
 {% block extra_css %}
 <style>
     .users-page { color:#202126; }
-    .users-header { display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:20px; margin-bottom:26px; }
+    .users-header { display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:20px; margin-bottom:22px; }
     .users-header h1 { margin:0 0 7px; font-size:25px; font-weight:700; letter-spacing:-.5px; }
     .users-subtitle { margin:0; color:#777A82; font-size:12px; line-height:1.7; }
-    .users-header-actions { display:flex; align-items:center; gap:9px; flex-wrap:wrap; }
 
-    .users-metrics { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:14px; margin-bottom:30px; }
-    .users-metric { min-height:145px; padding:20px; background:#fff; border:1px solid #E6E5E2; border-radius:7px; box-shadow:none; }
-    .users-metric-top { display:flex; align-items:center; justify-content:space-between; gap:10px; }
+    .users-tabs { display:flex; gap:8px; margin-bottom:20px; border-bottom:1px solid #E6E5E2; }
+    .users-tab { display:inline-flex; align-items:center; gap:8px; padding:12px 18px; border-bottom:2px solid transparent; color:#777A82; text-decoration:none; font-size:12px; font-weight:600; }
+    .users-tab:hover { color:#202126; }
+    .users-tab.active { border-color:#202126; color:#202126; }
+
+    .users-metrics { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:14px; margin-bottom:25px; }
+    .users-metric { min-height:145px; padding:20px; background:#fff; border:1px solid #E6E5E2; border-radius:7px; }
+    .users-metric-top { display:flex; justify-content:space-between; gap:10px; }
     .users-metric-label { color:#777A82; font-size:11px; font-weight:600; }
     .users-metric-top i { color:#85878D; font-size:17px; }
-    .users-metric-value { display:block; margin:16px 0 7px; font-size:26px; font-weight:700; line-height:1.3; letter-spacing:-.6px; }
+    .users-metric-value { display:block; margin:16px 0 7px; font-size:26px; font-weight:700; }
     .users-metric-desc { color:#85878D; font-size:11px; line-height:1.6; }
 
     .users-filter { display:flex; align-items:center; flex-wrap:wrap; gap:9px; padding:16px; margin-bottom:20px; background:#fff; border:1px solid #E6E5E2; border-radius:7px; }
-    .users-filter input,.users-filter select { min-height:40px; padding:10px 13px; border:1px solid #DAD9D5; border-radius:6px; background-color:#fff; color:#202126; font-size:12px; }
+    .users-filter input,.users-filter select { min-height:40px; padding:10px 13px; border:1px solid #DAD9D5; border-radius:6px; background:#fff; color:#202126; font-size:12px; }
     .users-filter input { flex:1 1 240px; min-width:0; }
-    .users-filter select { flex:0 1 auto; min-width:145px; padding-right:40px; }
-    .users-filter input:focus,.users-filter select:focus { outline:2px solid #C9C9C5; outline-offset:1px; }
-    .users-filter-submit { display:inline-flex; align-items:center; justify-content:center; min-width:40px; min-height:40px; padding:9px 13px; border:1px solid #202126; border-radius:6px; background:#202126; color:#fff; cursor:pointer; }
-    .users-filter-submit:hover { background:#373840; }
+    .users-filter select { min-width:140px; }
+    .users-filter-submit { display:inline-flex; align-items:center; justify-content:center; min-height:40px; padding:9px 13px; border:0; border-radius:6px; background:#202126; color:#fff; cursor:pointer; }
 
     .users-layout { display:grid; grid-template-columns:minmax(0,2.1fr) minmax(280px,1fr); gap:20px; align-items:start; }
-    .users-card { min-width:0; overflow:hidden; background:#fff; border:1px solid #E6E5E2; border-radius:7px; box-shadow:none; }
+    .users-card { min-width:0; overflow:hidden; background:#fff; border:1px solid #E6E5E2; border-radius:7px; }
     .users-card-header { padding:19px 20px; border-bottom:1px solid #EEEEEB; }
     .users-card-header h2 { margin:0 0 5px; font-size:14px; font-weight:700; }
-    .users-card-header p { margin:0; }
 
     .users-table-wrap { overflow-x:auto; }
-    .users-table { width:100%; min-width:720px; border-collapse:collapse; }
-    .users-table th { padding:14px 16px; background:#FAFAF9; color:#85878D; font-size:10px; font-weight:600; letter-spacing:.4px; text-align:left; text-transform:uppercase; }
+    .users-table { width:100%; min-width:690px; border-collapse:collapse; }
+    .users-table th { padding:14px 16px; background:#FAFAF9; color:#85878D; font-size:10px; text-align:left; text-transform:uppercase; }
     .users-table td { padding:16px; border-top:1px solid #EEEEEB; font-size:11px; vertical-align:middle; }
     .users-table tbody tr:hover { background:#FAFAF9; }
     .users-profile-cell { display:flex; align-items:center; gap:12px; }
     .users-avatar { display:flex; align-items:center; justify-content:center; flex-shrink:0; width:43px; height:43px; overflow:hidden; border-radius:50%; background:#EAE7E0; color:#737783; }
     .users-avatar img { width:100%; height:100%; object-fit:cover; }
     .users-profile-name { display:block; margin-bottom:4px; font-size:12px; font-weight:700; }
-    .users-muted { color:#85878D; font-size:10px; line-height:1.6; overflow-wrap:anywhere; }
+    .users-muted { color:#85878D; font-size:10px; overflow-wrap:anywhere; }
     .users-email { font-size:11px; overflow-wrap:anywhere; }
-    .users-email-status { margin-top:7px; }
+    .users-email-status { display:flex; flex-wrap:wrap; gap:5px; margin-top:7px; }
 
     .users-badge { display:inline-flex; align-items:center; padding:6px 9px; border-radius:4px; font-size:10px; font-weight:600; white-space:nowrap; }
     .users-badge.success { background:#E4F4EA; color:#176743; }
@@ -50,28 +51,40 @@
     .users-badge.neutral { background:#F0EFED; color:#575A60; }
 
     .users-actions { display:flex; align-items:center; gap:6px; }
-    .users-action { display:inline-flex; align-items:center; justify-content:center; flex-shrink:0; width:34px; height:34px; border:1px solid #E6E5E2; border-radius:6px; background:#fff; color:#202126; text-decoration:none; cursor:pointer; }
+    .users-actions form { margin:0; }
+    .users-action { display:inline-flex; align-items:center; justify-content:center; width:34px; height:34px; border:1px solid #E6E5E2; border-radius:6px; background:#fff; color:#202126; text-decoration:none; cursor:pointer; }
     .users-action:hover { background:#F4F3F1; color:#202126; }
     .users-action.selected { background:#202126; border-color:#202126; color:#fff; }
+    .users-action.deactivate { color:#A30B14; }
+    .users-action.activate { color:#176743; }
 
     .users-detail { padding:22px; }
     .users-detail-avatar { display:flex; align-items:center; justify-content:center; width:73px; height:73px; margin:0 auto 13px; overflow:hidden; border-radius:50%; background:#EEECE7; color:#92959B; }
     .users-detail-avatar img { width:100%; height:100%; object-fit:cover; }
     .users-detail-avatar i { font-size:34px; }
     .users-detail-name { margin:0 0 5px; text-align:center; font-size:16px; font-weight:700; }
-    .users-detail-email { margin-bottom:20px; color:#85878D; font-size:11px; text-align:center; overflow-wrap:anywhere; }
+    .users-detail-email { margin:0 0 20px; color:#85878D; font-size:11px; text-align:center; overflow-wrap:anywhere; }
     .users-detail-row { display:flex; justify-content:space-between; align-items:flex-start; gap:12px; padding:13px 0; border-bottom:1px solid #EEEEEB; font-size:11px; }
     .users-detail-row span:first-child { flex-shrink:0; color:#85878D; }
     .users-detail-row span:last-child { font-weight:600; text-align:right; overflow-wrap:anywhere; }
     .users-detail-edit { width:100%; margin-top:22px; }
 
-    .users-empty { display:flex; flex-direction:column; align-items:center; justify-content:center; gap:10px; min-height:210px; padding:35px 20px; color:#85878D; text-align:center; }
-    .users-empty i { font-size:30px; }
+    .users-empty { display:flex; flex-direction:column; align-items:center; justify-content:center; gap:10px; min-height:210px; padding:35px 20px; text-align:center; }
+    .users-empty i { color:#85878D; font-size:30px; }
     .users-empty strong { color:#202126; font-size:12px; }
     .users-empty p { max-width:300px; margin:0; color:#85878D; font-size:11px; line-height:1.7; }
 
-    @media(max-width:1150px) { .users-layout { grid-template-columns:1fr; } .users-metrics { grid-template-columns:repeat(2,minmax(0,1fr)); } }
-    @media(max-width:650px) { .users-header h1 { font-size:22px; } .users-metrics { gap:10px; } .users-metric { min-height:125px; padding:15px; } .users-metric-value { font-size:23px; } .users-filter select { flex:1 1 140px; } .users-header-actions { width:100%; } .users-header-actions .admin-btn { width:100%; } }
+    @media(max-width:1150px) {
+        .users-layout { grid-template-columns:1fr; }
+        .users-metrics { grid-template-columns:repeat(2,minmax(0,1fr)); }
+    }
+
+    @media(max-width:650px) {
+        .users-header h1 { font-size:22px; }
+        .users-metric { min-height:125px; padding:15px; }
+        .users-metric-value { font-size:23px; }
+        .users-filter select { flex:1 1 140px; }
+    }
 </style>
 {% endblock %}
 
@@ -79,127 +92,342 @@
 <div class="users-page">
     <header class="users-header">
         <div>
-            <h1>Akun Pelanggan</h1>
-            <p class="users-subtitle">Kelola informasi akun customer yang terdaftar di KURO WEAR.</p>
+            <h1>Manajemen Akun</h1>
+            <p class="users-subtitle">
+                Kelola akun Customer dan lihat daftar Administrator KURO WEAR.
+            </p>
         </div>
-        <div class="users-header-actions">
-            <a href="{{ url_for('admin.users_export') }}" class="admin-btn secondary"><i class="bi bi-download"></i> Ekspor Data Pelanggan</a>
-        </div>
+
+        {% if tab == 'customer' %}
+        <a href="{{ url_for('admin.users_export') }}" class="admin-btn secondary">
+            <i class="bi bi-download"></i> Ekspor Data Pelanggan
+        </a>
+        {% endif %}
     </header>
 
-    <section class="users-metrics" aria-label="Ringkasan akun pelanggan">
+    <nav class="users-tabs" aria-label="Jenis akun">
+        <a href="{{ url_for('admin.users_index', tab='customer') }}"
+           class="users-tab {{ 'active' if tab == 'customer' else '' }}">
+            <i class="bi bi-people"></i> Customer
+        </a>
+
+        <a href="{{ url_for('admin.users_index', tab='admin') }}"
+           class="users-tab {{ 'active' if tab == 'admin' else '' }}">
+            <i class="bi bi-shield-lock"></i> Admin
+        </a>
+    </nav>
+
+    <section class="users-metrics" aria-label="Ringkasan akun">
+        {% if tab == 'admin' %}
+
         <article class="users-metric">
-            <div class="users-metric-top"><span class="users-metric-label">Total Pelanggan</span><i class="bi bi-people"></i></div>
+            <div class="users-metric-top">
+                <span class="users-metric-label">Total Admin</span>
+                <i class="bi bi-shield-lock"></i>
+            </div>
+            <strong class="users-metric-value">{{ admin_total }}</strong>
+            <div class="users-metric-desc">Seluruh akun administrator</div>
+        </article>
+
+        <article class="users-metric">
+            <div class="users-metric-top">
+                <span class="users-metric-label">Admin Aktif</span>
+                <i class="bi bi-person-check"></i>
+            </div>
+            <strong class="users-metric-value">{{ admin_active }}</strong>
+            <div class="users-metric-desc">Akun dengan akses aktif</div>
+        </article>
+
+        <article class="users-metric">
+            <div class="users-metric-top">
+                <span class="users-metric-label">Admin Nonaktif</span>
+                <i class="bi bi-person-x"></i>
+            </div>
+            <strong class="users-metric-value">{{ admin_total - admin_active }}</strong>
+            <div class="users-metric-desc">Akun yang dinonaktifkan</div>
+        </article>
+
+        <article class="users-metric">
+            <div class="users-metric-top">
+                <span class="users-metric-label">Hak Akses</span>
+                <i class="bi bi-eye"></i>
+            </div>
+            <strong class="users-metric-value" style="font-size:19px">
+                Baca Saja
+            </strong>
+            <div class="users-metric-desc">
+                Tidak dapat mengubah akun Admin
+            </div>
+        </article>
+
+        {% else %}
+
+        <article class="users-metric">
+            <div class="users-metric-top">
+                <span class="users-metric-label">Total Pelanggan</span>
+                <i class="bi bi-people"></i>
+            </div>
             <strong class="users-metric-value">{{ total_users }}</strong>
             <div class="users-metric-desc">Akun customer yang terdaftar</div>
         </article>
+
         <article class="users-metric">
-            <div class="users-metric-top"><span class="users-metric-label">Email Terverifikasi</span><i class="bi bi-shield-check"></i></div>
+            <div class="users-metric-top">
+                <span class="users-metric-label">Email Terverifikasi</span>
+                <i class="bi bi-shield-check"></i>
+            </div>
             <strong class="users-metric-value">{{ verified_users }}</strong>
-            <div class="users-metric-desc">Berdasarkan sistem verifikasi email</div>
+            <div class="users-metric-desc">
+                Berdasarkan sistem verifikasi email
+            </div>
         </article>
+
         <article class="users-metric">
-            <div class="users-metric-top"><span class="users-metric-label">Pelanggan Bertransaksi</span><i class="bi bi-bag-check"></i></div>
-            <strong class="users-metric-value">0</strong>
-            <div class="users-metric-desc">Statistik transaksi belum terhubung</div>
+            <div class="users-metric-top">
+                <span class="users-metric-label">Pelanggan Bertransaksi</span>
+                <i class="bi bi-bag-check"></i>
+            </div>
+            <strong class="users-metric-value">
+                {{ transacting_customers }}
+            </strong>
+            <div class="users-metric-desc">
+                Customer dengan minimal satu pesanan lunas
+            </div>
         </article>
+
         <article class="users-metric">
-            <div class="users-metric-top"><span class="users-metric-label">Alamat Tersimpan</span><i class="bi bi-geo-alt"></i></div>
-            <strong class="users-metric-value">0</strong>
-            <div class="users-metric-desc">Statistik alamat belum terhubung</div>
+            <div class="users-metric-top">
+                <span class="users-metric-label">Alamat Tersimpan</span>
+                <i class="bi bi-geo-alt"></i>
+            </div>
+            <strong class="users-metric-value">
+                {{ saved_addresses }}
+            </strong>
+            <div class="users-metric-desc">
+                Total alamat Customer yang tersimpan
+            </div>
         </article>
+
+        {% endif %}
     </section>
 
-    <form class="users-filter" method="GET" action="{{ url_for('admin.users_index') }}">
-        <input type="search" name="q" value="{{ request.args.get('q', '') }}" placeholder="Cari nama, email, WhatsApp..." aria-label="Cari akun pelanggan">
+    <form class="users-filter"
+          method="GET"
+          action="{{ url_for('admin.users_index') }}">
 
+        <input type="hidden" name="tab" value="{{ tab }}">
+
+        <input type="search"
+               name="q"
+               value="{{ q }}"
+               placeholder="Cari nama atau email{{ ', WhatsApp' if tab == 'customer' else '' }}..."
+               aria-label="Cari akun">
+
+        {% if tab == 'customer' %}
         <select name="status" aria-label="Filter status email">
             <option value="">Semua Status Email</option>
-            <option value="verified" {{ 'selected' if status == 'verified' else '' }}>Terverifikasi</option>
-            <option value="unverified" {{ 'selected' if status == 'unverified' else '' }}>Belum Terverifikasi</option>
+            <option value="verified"
+                    {{ 'selected' if status == 'verified' else '' }}>
+                Terverifikasi
+            </option>
+            <option value="unverified"
+                    {{ 'selected' if status == 'unverified' else '' }}>
+                Belum Terverifikasi
+            </option>
         </select>
 
         <select name="gender" aria-label="Filter gender">
             <option value="">Semua Gender</option>
-            <option value="men" {{ 'selected' if gender == 'men' else '' }}>Man</option>
-            <option value="women" {{ 'selected' if gender == 'women' else '' }}>Women</option>
-            <option value="other" {{ 'selected' if gender == 'other' else '' }}>Other</option>
+            <option value="men" {{ 'selected' if gender == 'men' else '' }}>
+                Man
+            </option>
+            <option value="women" {{ 'selected' if gender == 'women' else '' }}>
+                Women
+            </option>
+            <option value="other" {{ 'selected' if gender == 'other' else '' }}>
+                Other
+            </option>
+        </select>
+        {% endif %}
+
+        <select name="sort" aria-label="Urutkan akun">
+            <option value="newest"
+                    {{ 'selected' if sort == 'newest' else '' }}>
+                Terdaftar Terbaru
+            </option>
+            <option value="oldest"
+                    {{ 'selected' if sort == 'oldest' else '' }}>
+                Terdaftar Terlama
+            </option>
+            <option value="name"
+                    {{ 'selected' if sort == 'name' else '' }}>
+                Nama A-Z
+            </option>
         </select>
 
-        <select name="sort" aria-label="Urutkan pelanggan">
-            <option value="newest" {{ 'selected' if sort == 'newest' else '' }}>Terdaftar Terbaru</option>
-            <option value="oldest" {{ 'selected' if sort == 'oldest' else '' }}>Terdaftar Terlama</option>
-            <option value="name" {{ 'selected' if sort == 'name' else '' }}>Nama A-Z</option>
-        </select>
+        <button type="submit"
+                class="users-filter-submit"
+                title="Terapkan Filter">
+            <i class="bi bi-search"></i>
+        </button>
 
-        <button type="submit" class="users-filter-submit" title="Terapkan Filter" aria-label="Terapkan Filter"><i class="bi bi-search"></i></button>
-        <a href="{{ url_for('admin.users_index') }}" class="admin-btn secondary"><i class="bi bi-arrow-counterclockwise"></i> Reset</a>
+        <a href="{{ url_for('admin.users_index', tab=tab) }}"
+           class="admin-btn secondary">
+            <i class="bi bi-arrow-counterclockwise"></i> Reset
+        </a>
     </form>
 
     <div class="users-layout">
         <section class="users-card">
             <header class="users-card-header">
-                <h2>Daftar Pelanggan Terdaftar</h2>
+                <h2>
+                    {{ 'Daftar Administrator' if tab == 'admin' else 'Daftar Pelanggan Terdaftar' }}
+                </h2>
                 <p class="users-subtitle">{{ rows|length }} akun ditampilkan</p>
             </header>
 
             <div class="users-table-wrap">
                 <table class="users-table">
                     <thead>
-                        <tr><th>Pengguna</th><th>Email &amp; Status</th><th>WhatsApp</th><th>Gender</th><th>Aksi</th></tr>
+                        <tr>
+                            <th>Pengguna</th>
+                            <th>Email &amp; Status</th>
+                            <th>{{ 'Role' if tab == 'admin' else 'WhatsApp' }}</th>
+                            <th>{{ 'Terdaftar' if tab == 'admin' else 'Gender' }}</th>
+                            <th>Aksi</th>
+                        </tr>
                     </thead>
+
                     <tbody>
                         {% for user in rows %}
                         <tr>
                             <td>
                                 <div class="users-profile-cell">
                                     <div class="users-avatar">
-                                        {% if user.avatar %}
-                                        <img src="{{ url_for('static', filename='uploads/avatars/' ~ user.avatar) }}" alt="Foto {{ user.name }}" loading="lazy">
+                                        {% if tab == 'customer' and user.avatar %}
+                                        <img
+                                            src="{{ url_for('static', filename='uploads/avatars/' ~ user.avatar) }}"
+                                            alt="Foto {{ user.name }}"
+                                            loading="lazy">
                                         {% else %}
-                                        <i class="bi bi-person-fill"></i>
+                                        <i class="bi {{ 'bi-shield-lock' if tab == 'admin' else 'bi-person-fill' }}"></i>
                                         {% endif %}
                                     </div>
+
                                     <div>
-                                        <strong class="users-profile-name">{{ user.name }}</strong>
-                                        <span class="users-muted">ID #{{ user.id }}</span>
+                                        <strong class="users-profile-name">
+                                            {{ user.name }}
+                                        </strong>
+                                        <span class="users-muted">
+                                            ID #{{ user.id }}
+                                        </span>
                                     </div>
                                 </div>
                             </td>
+
                             <td>
                                 <div class="users-email">{{ user.email }}</div>
+
                                 <div class="users-email-status">
-                                    {% if user.verified is sameas true %}
-                                    <span class="users-badge success">Terverifikasi</span>
-                                    {% elif user.verified is sameas false %}
-                                    <span class="users-badge danger">Belum Terverifikasi</span>
-                                    {% else %}
-                                    <span class="users-badge neutral">Verifikasi Belum Tersedia</span>
+                                    {% if tab == 'customer' %}
+                                        {% if user.verified is sameas true %}
+                                        <span class="users-badge success">
+                                            Terverifikasi
+                                        </span>
+                                        {% elif user.verified is sameas false %}
+                                        <span class="users-badge danger">
+                                            Belum Terverifikasi
+                                        </span>
+                                        {% else %}
+                                        <span class="users-badge neutral">
+                                            Verifikasi Belum Tersedia
+                                        </span>
+                                        {% endif %}
+                                    {% endif %}
+
+                                    <span class="users-badge {{ 'success' if user.active else 'danger' }}">
+                                        {{ 'Akun Aktif' if user.active else 'Akun Nonaktif' }}
+                                    </span>
+                                </div>
+                            </td>
+
+                            <td>
+                                {% if tab == 'admin' %}
+                                <span class="users-badge neutral">
+                                    Administrator
+                                </span>
+                                {% else %}
+                                {{ user.phone or 'Belum diisi' }}
+                                {% endif %}
+                            </td>
+
+                            <td>
+                                {% if tab == 'admin' %}
+                                    {{ user.created_at }}
+                                {% else %}
+                                    {{ user.gender|upper if user.gender else 'Belum diisi' }}
+                                {% endif %}
+                            </td>
+
+                            <td>
+                                <div class="users-actions">
+                                    <a
+                                        href="{{ url_for('admin.users_index', tab=tab, selected=user.id, q=q, status=status, gender=gender, sort=sort) }}"
+                                        class="users-action {{ 'selected' if selected and selected.id == user.id else '' }}"
+                                        title="Lihat Detail"
+                                        aria-label="Lihat detail {{ user.name }}">
+                                        <i class="bi bi-eye"></i>
+                                    </a>
+
+                                    {% if tab == 'customer' %}
+                                    <a
+                                        href="{{ url_for('admin.user_edit', user_id=user.id) }}"
+                                        class="users-action"
+                                        title="Edit Akun"
+                                        aria-label="Edit akun {{ user.name }}">
+                                        <i class="bi bi-pencil-square"></i>
+                                    </a>
+
+                                    <form
+                                        method="POST"
+                                        action="{{ url_for('admin.user_toggle_status', user_id=user.id) }}"
+                                        onsubmit="return confirm('Yakin ingin mengubah status akun ini?')">
+
+                                        <input
+                                            type="hidden"
+                                            name="csrf_token"
+                                            value="{{ csrf_token() }}">
+
+                                        <input
+                                            type="hidden"
+                                            name="active"
+                                            value="{{ '0' if user.active else '1' }}">
+
+                                        <button
+                                            type="submit"
+                                            class="users-action {{ 'deactivate' if user.active else 'activate' }}"
+                                            title="{{ 'Nonaktifkan' if user.active else 'Aktifkan' }} Akun"
+                                            aria-label="{{ 'Nonaktifkan' if user.active else 'Aktifkan' }} akun {{ user.name }}">
+                                            <i class="bi {{ 'bi-person-x' if user.active else 'bi-person-check' }}"></i>
+                                        </button>
+                                    </form>
                                     {% endif %}
                                 </div>
                             </td>
-                            <td>{{ user.phone or 'Belum diisi' }}</td>
-                            <td>{{ user.gender|upper if user.gender else 'Belum diisi' }}</td>
-                            <td>
-                                <div class="users-actions">
-                                    <a href="{{ url_for('admin.users_index', selected=user.id, q=q, status=status, gender=gender, sort=sort) }}"
-                                       class="users-action {{ 'selected' if selected and selected.id == user.id else '' }}"
-                                       title="Lihat Detail" aria-label="Lihat detail {{ user.name }}">
-                                        <i class="bi bi-eye"></i>
-                                    </a>
-                                    <a href="{{ url_for('admin.user_edit', user_id=user.id) }}" class="users-action" title="Edit Akun" aria-label="Edit akun {{ user.name }}">
-                                        <i class="bi bi-pencil-square"></i>
-                                    </a>
-                                </div>
-                            </td>
                         </tr>
+
                         {% else %}
                         <tr>
                             <td colspan="5">
                                 <div class="users-empty">
                                     <i class="bi bi-people"></i>
-                                    <strong>Belum Ada Akun Pelanggan</strong>
-                                    <p>Data pelanggan akan muncul setelah customer melakukan registrasi di KURO WEAR.</p>
+                                    <strong>
+                                        Belum Ada Akun {{ 'Admin' if tab == 'admin' else 'Pelanggan' }}
+                                    </strong>
+                                    <p>
+                                        Belum ada akun yang cocok dengan
+                                        pencarian atau filter saat ini.
+                                    </p>
                                 </div>
                             </td>
                         </tr>
@@ -212,44 +440,103 @@
         <aside class="users-card">
             <header class="users-card-header">
                 <h2>Detail Akun Terpilih</h2>
-                <p class="users-subtitle">Informasi singkat akun customer</p>
+                <p class="users-subtitle">
+                    {{ 'Informasi administrator (baca saja)' if tab == 'admin' else 'Informasi singkat akun customer' }}
+                </p>
             </header>
 
             <div class="users-detail">
                 {% if selected %}
                 <div class="users-detail-avatar">
-                    {% if selected.avatar %}
-                    <img src="{{ url_for('static', filename='uploads/avatars/' ~ selected.avatar) }}" alt="Foto {{ selected.name }}">
+                    {% if tab == 'customer' and selected.avatar %}
+                    <img
+                        src="{{ url_for('static', filename='uploads/avatars/' ~ selected.avatar) }}"
+                        alt="Foto {{ selected.name }}">
                     {% else %}
-                    <i class="bi bi-person-fill"></i>
+                    <i class="bi {{ 'bi-shield-lock' if tab == 'admin' else 'bi-person-fill' }}"></i>
                     {% endif %}
                 </div>
 
                 <h3 class="users-detail-name">{{ selected.name }}</h3>
                 <p class="users-detail-email">{{ selected.email }}</p>
 
-                <div class="users-detail-row"><span>ID Customer</span><span>#{{ selected.id }}</span></div>
-                <div class="users-detail-row"><span>WhatsApp</span><span>{{ selected.phone or 'Belum diisi' }}</span></div>
-                <div class="users-detail-row"><span>Gender</span><span>{{ selected.gender|upper if selected.gender else 'Belum diisi' }}</span></div>
-                <div class="users-detail-row"><span>Tanggal Lahir</span><span>{{ selected.birth_date.strftime('%d-%m-%Y') if selected.birth_date else 'Belum diisi' }}</span></div>
+                <div class="users-detail-row">
+                    <span>ID {{ 'Admin' if tab == 'admin' else 'Customer' }}</span>
+                    <span>#{{ selected.id }}</span>
+                </div>
+
+                <div class="users-detail-row">
+                    <span>Status Akun</span>
+                    <span>
+                        {{ 'Aktif' if selected.active else 'Nonaktif' }}
+                    </span>
+                </div>
+
+                {% if tab == 'admin' %}
+                <div class="users-detail-row">
+                    <span>Role</span>
+                    <span>Administrator</span>
+                </div>
+
+                <div class="users-detail-row">
+                    <span>Terdaftar</span>
+                    <span>{{ selected.created_at }}</span>
+                </div>
+
+                <p class="users-subtitle" style="margin-top:20px">
+                    Akun Admin hanya dapat dilihat.
+                    Perubahan akses administrator tidak tersedia
+                    di halaman ini.
+                </p>
+
+                {% else %}
+                <div class="users-detail-row">
+                    <span>WhatsApp</span>
+                    <span>{{ selected.phone or 'Belum diisi' }}</span>
+                </div>
+
+                <div class="users-detail-row">
+                    <span>Gender</span>
+                    <span>
+                        {{ selected.gender|upper if selected.gender else 'Belum diisi' }}
+                    </span>
+                </div>
+
+                <div class="users-detail-row">
+                    <span>Tanggal Lahir</span>
+                    <span>
+                        {{ selected.birth_date.strftime('%d-%m-%Y') if selected.birth_date else 'Belum diisi' }}
+                    </span>
+                </div>
 
                 <div class="users-detail-row">
                     <span>Verifikasi Email</span>
                     <span>
-                        {% if selected.verified is sameas true %}Terverifikasi
-                        {% elif selected.verified is sameas false %}Belum Terverifikasi
-                        {% else %}Belum tersedia{% endif %}
+                        {% if selected.verified is sameas true %}
+                        Terverifikasi
+                        {% elif selected.verified is sameas false %}
+                        Belum Terverifikasi
+                        {% else %}
+                        Belum tersedia
+                        {% endif %}
                     </span>
                 </div>
 
-                <a href="{{ url_for('admin.user_edit', user_id=selected.id) }}" class="admin-btn users-detail-edit">
-                    <i class="bi bi-pencil-square"></i> Edit Akun Pelanggan
+                <a
+                    href="{{ url_for('admin.user_edit', user_id=selected.id) }}"
+                    class="admin-btn users-detail-edit">
+                    <i class="bi bi-pencil-square"></i>
+                    Edit Akun Pelanggan
                 </a>
+                {% endif %}
+
                 {% else %}
                 <div class="users-empty">
                     <i class="bi bi-person-vcard"></i>
                     <strong>Belum Ada Detail Akun</strong>
-                    <p>Pilih pelanggan dari tabel menggunakan tombol lihat detail.</p>
+                    <p>
+                        Pilih pengguna dari tabel untuk melihat detailnya.
+                    </p>
                 </div>
                 {% endif %}
             </div>

@@ -19,10 +19,9 @@
 {% endfor %}
 
 <style>
-.kw-profile-page{background:#EDEBDD;min-height:75vh;padding:30px 20px 65px;color:#1A1B22;font-family:'Inter',sans-serif}
+.kw-profile-page{background:#EDEBDD;min-height:75vh;padding:38px 20px 65px;color:#1A1B22;font-family:'Inter',sans-serif}
 .kw-profile-page *{box-sizing:border-box}
 .kwp-container{max-width:1200px;margin:auto}
-.kwp-breadcrumb{font-size:10px;font-weight:600;letter-spacing:.8px;color:#727785;margin-bottom:8px}
 .kwp-page-title{font-size:27px;font-weight:750;margin:0 0 6px}
 .kwp-page-desc{font-size:12px;color:#575E70;margin:0 0 24px}
 .kwp-layout{display:grid;grid-template-columns:265px minmax(0,1fr);gap:20px;align-items:start}
@@ -124,13 +123,12 @@
 .kwp-empty-state strong{font-size:13px}
 .kwp-empty-state p{font-size:11px;color:#667085;margin:0;line-height:1.7}
 @media(max-width:991px){.kwp-layout{grid-template-columns:220px minmax(0,1fr);gap:14px}.kwp-section{padding:20px}.kwp-order-photo,.kwp-order-no-photo{width:72px;height:96px}}
-@media(max-width:767px){.kw-profile-page{padding:23px 13px 45px}.kwp-layout{grid-template-columns:1fr}.kwp-menu{display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}.kwp-form-grid,.kwp-order-info{grid-template-columns:1fr}.kwp-page-title{font-size:23px}.kwp-photo-area{align-items:flex-start}.kwp-section-head{flex-wrap:wrap}.kwp-order-product-price{white-space:normal}.kwp-order-product{gap:11px}.kwp-progress-label{font-size:8px}}
+@media(max-width:767px){.kw-profile-page{padding:32px 13px 45px}.kwp-layout{grid-template-columns:1fr}.kwp-menu{display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}.kwp-form-grid,.kwp-order-info{grid-template-columns:1fr}.kwp-page-title{font-size:23px}.kwp-photo-area{align-items:flex-start}.kwp-section-head{flex-wrap:wrap}.kwp-order-product-price{white-space:normal}.kwp-order-product{gap:11px}.kwp-progress-label{font-size:8px}}
 @media(max-width:420px){.kwp-menu{grid-template-columns:1fr}.kwp-photo-area{flex-direction:column}.kwp-order-top{padding:13px}.kwp-order-body{padding:13px}.kwp-order-photo,.kwp-order-no-photo{width:65px;height:86px}.kwp-order-product{flex-wrap:wrap}.kwp-order-product-price{margin-left:76px}.kwp-progress{padding:11px 5px}}
 </style>
 
 <section class="kw-profile-page">
     <div class="kwp-container">
-        <div class="kwp-breadcrumb">KURO WEAR / CUSTOMER / PROFIL SAYA</div>
         <h1 class="kwp-page-title">Profil Saya</h1>
         <p class="kwp-page-desc">Kelola informasi pribadi, alamat pengiriman, dan pantau perkembangan pesananmu.</p>
 
@@ -158,8 +156,8 @@
                     </div>
                 </div>
 
-                <nav class="kwp-card kwp-menu">
-                    <a class="kwp-menu-link active" href="#profile-section">
+                <nav class="kwp-card kwp-menu" aria-label="Menu akun">
+                    <a class="kwp-menu-link" href="#profile-section">
                         <i class="bi bi-person"></i> Profil Saya
                     </a>
                     <a class="kwp-menu-link" href="#address-section">
@@ -613,6 +611,45 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     applyFilter('all');
+});
+</script>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const menu = document.querySelector('.kwp-menu');
+    if (!menu) return;
+
+    const sectionLinks = [...menu.querySelectorAll('.kwp-menu-link[href^="#"]')];
+    const defaultSection = '#profile-section';
+
+    function setActiveSection(hash) {
+        const target = sectionLinks.some(link => link.getAttribute('href') === hash)
+            ? hash
+            : defaultSection;
+
+        sectionLinks.forEach(link => {
+            const active = link.getAttribute('href') === target;
+            link.classList.toggle('active', active);
+
+            if (active) {
+                link.setAttribute('aria-current', 'location');
+            } else {
+                link.removeAttribute('aria-current');
+            }
+        });
+    }
+
+    sectionLinks.forEach(link => {
+        link.addEventListener('click', () => {
+            setActiveSection(link.getAttribute('href'));
+        });
+    });
+
+    window.addEventListener('hashchange', () => {
+        setActiveSection(window.location.hash || defaultSection);
+    });
+
+    setActiveSection(window.location.hash || defaultSection);
 });
 </script>
 {% endblock %}

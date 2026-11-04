@@ -94,17 +94,6 @@ class ProductForm(FlaskForm):
         ]
     )
 
-    cost = IntegerField(
-        'Harga Modal / HPP (Rp)',
-        validators=[
-            InputRequired(),
-            NumberRange(
-                min=0,
-                message='Harga modal tidak boleh negatif.'
-            )
-        ]
-    )
-
     # DESKRIPSI PRODUK
     description = TextAreaField(
         'Deskripsi Produk'

@@ -1,108 +1,174 @@
 {% extends 'base.html' %}
-{% block title %}Pembayaran Midtrans - KURO WEAR{% endblock %}
+{% block title %}Pembayaran - KURO WEAR{% endblock %}
 {% block content %}
+
 <style>
-.kw-payment { min-height: 70vh; background: #EDEBDD; padding: 38px 18px 70px; color: #1A1B22; }
-.kw-payment-wrap { max-width: 1120px; margin: auto; }
-.kw-payment h1 { font-size: 28px; font-weight: 700; margin-bottom: 6px; }
-.kw-payment-grid { display: grid; grid-template-columns: minmax(0, 1.6fr) minmax(290px, 1fr); gap: 22px; align-items: start; margin-top: 25px; }
-.kw-payment-card { background: #FFFFFF; border: 1px solid #E8E7F1; border-radius: 8px; padding: 24px; }
-.kw-payment-card h2 { font-size: 16px; font-weight: 700; margin-bottom: 14px; }
-.kw-payment-muted { color: #575E70; font-size: 12px; line-height: 1.7; }
-.kw-payment-channels { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; margin: 18px 0; }
-.kw-payment-channel { display: flex; align-items: center; gap: 10px; padding: 14px; border: 1px solid #E5E0D5; border-radius: 4px; background: #FAF9F5; color: #1A1B22; font-size: 12px; font-weight: 600; text-align: left; cursor: pointer; transition: border-color .2s, background .2s, box-shadow .2s; }
-.kw-payment-channel i { color: #810100; font-size: 19px; }
-.kw-payment-channel:hover { border-color: #810100; background: #FFF9F7; }
-.kw-payment-channel.active { border: 2px solid #810100; background: #FFF4F1; padding: 13px; box-shadow: 0 0 0 1px rgba(129,1,0,.06); }
-.kw-payment-channel.active::after { content: "\2713"; margin-left: auto; color: #810100; font-size: 16px; font-weight: 700; }
-.kw-payment-channel:focus-visible { outline: 2px solid #810100; outline-offset: 3px; }
-.kw-payment-selected { font-size: 12px; color: #575E70; margin: 15px 0 5px; }
-.kw-payment-selected strong { color: #810100; }
-.kw-payment-button { width: 100%; min-height: 47px; padding: 11px; background: #1A1B22; color: #FFFFFF; border: 0; border-radius: 4px; font-size: 12px; font-weight: 700; margin-top: 12px; cursor: pointer; }
-.kw-payment-button:hover:not(:disabled) { background: #333333; }
-.kw-payment-button.secondary { background: #FFFFFF; border: 1px solid #1A1B22; color: #1A1B22; }
-.kw-payment-button.secondary:hover:not(:disabled) { background: #F5F2EB; }
-.kw-payment-button:disabled { opacity: .45; cursor: not-allowed; }
-.kw-payment-status { padding: 15px; margin: 16px 0; background: #FAF9F5; border: 1px solid #E5E0D5; border-radius: 5px; font-size: 12px; line-height: 1.7; }
-.kw-payment-status[data-state="paid"] { background: #E8F7ED; border-color: #A5D9B5; }
-.kw-payment-status[data-state="failed"] { background: #FDE8E8; border-color: #E8B1B1; }
-.kw-payment-product { display: flex; justify-content: space-between; gap: 12px; border-bottom: 1px solid #E8E7F1; padding: 13px 0; font-size: 12px; }
-.kw-payment-product small { display: block; margin-top: 4px; color: #575E70; }
-.kw-payment-total { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; padding-top: 16px; margin-top: 14px; border-top: 1px solid #E8E7F1; font-weight: 700; }
-.kw-payment-total strong { font-size: 23px; white-space: nowrap; }
-@media (max-width: 850px) {
-    .kw-payment-grid { grid-template-columns: 1fr; }
+.kw-payment{min-height:70vh;background:#EDEBDD;padding:38px 18px 70px;color:#1A1B22}
+.kw-payment-wrap{max-width:1120px;margin:auto}
+.kw-payment h1{font-size:28px;font-weight:700;margin-bottom:6px}
+.kw-payment-grid{display:grid;grid-template-columns:minmax(0,1.6fr) minmax(290px,1fr);gap:22px;align-items:start;margin-top:25px}
+.kw-payment-card{background:#fff;border:1px solid #E8E7F1;border-radius:8px;padding:24px}
+.kw-payment-card h2{font-size:16px;font-weight:700;margin-bottom:14px}
+.kw-payment-muted{color:#575E70;font-size:12px;line-height:1.7}
+.kw-payment-channels{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin:18px 0}
+.kw-payment-channel{display:flex;align-items:center;gap:10px;padding:14px;border:1px solid #E5E0D5;border-radius:4px;background:#FAF9F5;color:#1A1B22;font-size:12px;font-weight:600;text-align:left;cursor:pointer;transition:border-color .2s,background .2s,box-shadow .2s}
+.kw-payment-channel i{color:#810100;font-size:19px}
+.kw-payment-channel:hover{border-color:#810100;background:#FFF9F7}
+.kw-payment-channel.active{border:2px solid #810100;background:#FFF4F1;padding:13px;box-shadow:0 0 0 1px rgba(129,1,0,.06)}
+.kw-payment-channel.active::after{content:"\2713";margin-left:auto;color:#810100;font-size:16px;font-weight:700}
+.kw-payment-channel:focus-visible{outline:2px solid #810100;outline-offset:3px}
+.kw-payment-selected{font-size:12px;color:#575E70;margin:15px 0 5px}
+.kw-payment-selected strong{color:#810100}
+.kw-payment-button{width:100%;min-height:47px;padding:11px;background:#1A1B22;color:#fff;border:0;border-radius:4px;font-size:12px;font-weight:700;margin-top:12px;cursor:pointer}
+.kw-payment-button:hover:not(:disabled){background:#333}
+.kw-payment-button.secondary{background:#fff;border:1px solid #1A1B22;color:#1A1B22}
+.kw-payment-button.secondary:hover:not(:disabled){background:#F5F2EB}
+.kw-payment-button:disabled{opacity:.45;cursor:not-allowed}
+.kw-payment-status{padding:15px;margin:16px 0;background:#FAF9F5;border:1px solid #E5E0D5;border-radius:5px;font-size:12px;line-height:1.7}
+.kw-payment-status[data-state="paid"]{background:#E8F7ED;border-color:#A5D9B5;color:#176743}
+.kw-payment-status[data-state="failed"]{background:#FDE8E8;border-color:#E8B1B1;color:#A30B14}
+.kw-payment-product{display:flex;justify-content:space-between;gap:12px;border-bottom:1px solid #E8E7F1;padding:13px 0;font-size:12px}
+.kw-payment-product small{display:block;margin-top:4px;color:#575E70}
+.kw-payment-total{display:flex;justify-content:space-between;align-items:baseline;gap:12px;padding-top:16px;margin-top:14px;border-top:1px solid #E8E7F1;font-weight:700}
+.kw-payment-total strong{font-size:23px;white-space:nowrap}
+
+@media(max-width:850px){
+    .kw-payment-grid{grid-template-columns:1fr}
 }
-@media (max-width: 480px) {
-    .kw-payment { padding: 24px 12px 45px; }
-    .kw-payment-card { padding: 17px; }
-    .kw-payment-channels { grid-template-columns: 1fr; }
+@media(max-width:480px){
+    .kw-payment{padding:24px 12px 45px}
+    .kw-payment-card{padding:17px}
+    .kw-payment-channels{grid-template-columns:1fr}
 }
 </style>
 
-<section class="kw-payment" id="paymentRoot" data-create-url="{{ url_for('cart.create_snap_token') }}" data-status-url="{{ url_for('cart.payment_status') }}" data-items="{{ selected_item_ids }}" data-order="{{ last_order_id }}" data-csrf="{{ csrf_token() }}" data-configured="{{ 'true' if midtrans_client_key else 'false' }}">
+<section class="kw-payment" id="paymentRoot"
+    data-create-url="{{ url_for('cart.create_snap_token') }}"
+    data-status-url="{{ url_for('cart.payment_status') }}"
+    data-items="{{ selected_item_ids }}"
+    data-order="{{ last_order_id }}"
+    data-csrf="{{ csrf_token() }}"
+    data-configured="{{ 'true' if midtrans_client_key else 'false' }}">
+
     <div class="kw-payment-wrap">
+
         <h1>Pembayaran</h1>
-        <p class="kw-payment-muted">Pilih metode pembayaran resmi melalui Midtrans Sandbox.</p>
+        <p class="kw-payment-muted">
+            Pilih metode pembayaran yang paling nyaman untukmu.
+        </p>
 
         <div class="kw-payment-grid">
             <main>
                 <div class="kw-payment-card">
-                    <div class="d-flex align-items-center justify-content-between gap-2 mb-2">
-                        <h2 class="mb-0">METODE PEMBAYARAN</h2>
-                        <span class="badge text-bg-secondary">SANDBOX</span>
-                    </div>
+
+                    <h2>METODE PEMBAYARAN</h2>
 
                     <p class="kw-payment-muted mt-3">
-                        Pilih salah satu metode pembayaran, kemudian lanjutkan transaksi melalui Midtrans.
+                        Pilih salah satu metode pembayaran yang tersedia untuk menyelesaikan pesananmu.
                     </p>
 
-                    <div class="kw-payment-channels" role="group" aria-label="Pilih metode pembayaran">
-                        <button type="button" class="kw-payment-channel" data-method="other_qris" data-label="QRIS" aria-pressed="false">
-                            <i class="bi bi-qr-code"></i> QRIS
+                    <div class="kw-payment-channels"
+                         role="group"
+                         aria-label="Pilih metode pembayaran">
+
+                        <button type="button"
+                                class="kw-payment-channel"
+                                data-method="other_qris"
+                                data-label="QRIS"
+                                aria-pressed="false">
+                            <i class="bi bi-qr-code"></i>
+                            QRIS
                         </button>
-                        <button type="button" class="kw-payment-channel" data-method="gopay" data-label="GoPay" aria-pressed="false">
-                            <i class="bi bi-wallet2"></i> GoPay
+
+                        <button type="button"
+                                class="kw-payment-channel"
+                                data-method="gopay"
+                                data-label="GoPay"
+                                aria-pressed="false">
+                            <i class="bi bi-wallet2"></i>
+                            GoPay
                         </button>
-                        <button type="button" class="kw-payment-channel" data-method="bca_va" data-label="BCA Virtual Account" aria-pressed="false">
-                            <i class="bi bi-bank"></i> BCA Virtual Account
+
+                        <button type="button"
+                                class="kw-payment-channel"
+                                data-method="bca_va"
+                                data-label="BCA Virtual Account"
+                                aria-pressed="false">
+                            <i class="bi bi-bank"></i>
+                            BCA Virtual Account
                         </button>
-                        <button type="button" class="kw-payment-channel" data-method="bni_va" data-label="BNI Virtual Account" aria-pressed="false">
-                            <i class="bi bi-bank"></i> BNI Virtual Account
+
+                        <button type="button"
+                                class="kw-payment-channel"
+                                data-method="bni_va"
+                                data-label="BNI Virtual Account"
+                                aria-pressed="false">
+                            <i class="bi bi-bank"></i>
+                            BNI Virtual Account
                         </button>
-                        <button type="button" class="kw-payment-channel" data-method="bri_va" data-label="BRI Virtual Account" aria-pressed="false">
-                            <i class="bi bi-bank"></i> BRI Virtual Account
+
+                        <button type="button"
+                                class="kw-payment-channel"
+                                data-method="bri_va"
+                                data-label="BRI Virtual Account"
+                                aria-pressed="false">
+                            <i class="bi bi-bank"></i>
+                            BRI Virtual Account
                         </button>
+
                     </div>
 
-                    <p class="kw-payment-selected">Metode dipilih: <strong id="selectedMethodLabel">Belum dipilih</strong></p>
+                    <p class="kw-payment-selected">
+                        Metode dipilih:
+                        <strong id="selectedMethodLabel">Belum dipilih</strong>
+                    </p>
 
-                    <button type="button" id="payButton" class="kw-payment-button" disabled>
-                        <i class="bi bi-lock-fill me-1"></i> LANJUTKAN PEMBAYARAN
+                    <button type="button"
+                            id="payButton"
+                            class="kw-payment-button"
+                            disabled>
+                        <i class="bi bi-lock-fill me-1"></i>
+                        LANJUTKAN PEMBAYARAN
                     </button>
 
-                    <button type="button" id="checkButton" class="kw-payment-button secondary" {% if not last_order_id %}disabled{% endif %}>
-                        <i class="bi bi-arrow-repeat me-1"></i> CEK STATUS PEMBAYARAN
+                    <button type="button"
+                            id="checkButton"
+                            class="kw-payment-button secondary"
+                            {% if not last_order_id %}disabled{% endif %}>
+                        <i class="bi bi-arrow-repeat me-1"></i>
+                        CEK STATUS PEMBAYARAN
                     </button>
 
-                    <div class="kw-payment-status" id="paymentStatus" data-state="pending" role="status" aria-live="polite">
+                    <div class="kw-payment-status"
+                         id="paymentStatus"
+                         data-state="pending"
+                         role="status"
+                         aria-live="polite">
+
                         {% if midtrans_client_key %}
-                        Pilih salah satu metode pembayaran untuk melanjutkan.
+                            Pilih salah satu metode pembayaran untuk melanjutkan.
                         {% else %}
-                        Midtrans Client Key Sandbox belum dikonfigurasi.
+                            Layanan pembayaran sedang tidak tersedia. Silakan coba kembali nanti.
                         {% endif %}
                     </div>
 
                     <p class="kw-payment-muted mb-0">
-                        Nomor pesanan: <strong id="orderId">{{ last_order_id or 'Belum dibuat' }}</strong>
+                        Nomor pesanan:
+                        <strong id="orderId">
+                            {{ last_order_id or 'Belum dibuat' }}
+                        </strong>
                     </p>
+
                     <p class="kw-payment-muted mt-2 mb-0">
-                        Status lunas hanya ditampilkan setelah server memverifikasi transaksi melalui Midtrans.
+                        Status pesanan akan diperbarui setelah pembayaran dikonfirmasi.
                     </p>
+
                 </div>
 
-                <a class="d-inline-block text-dark text-decoration-none fw-semibold small mt-3" href="{{ url_for('cart.checkout', items=selected_item_ids) }}">
-                    <i class="bi bi-arrow-left me-1"></i> Kembali ke checkout
+                <a class="d-inline-block text-dark text-decoration-none fw-semibold small mt-3"
+                   href="{{ url_for('cart.checkout', items=selected_item_ids) }}">
+                    <i class="bi bi-arrow-left me-1"></i>
+                    Kembali ke checkout
                 </a>
             </main>
 
@@ -113,8 +179,11 @@
                 <div class="kw-payment-product">
                     <div>
                         <strong>{{ item.name }}</strong>
-                        <small>{{ item.color }} / {{ item.size }} · {{ item.quantity }} pcs</small>
+                        <small>
+                            {{ item.color }} / {{ item.size }} · {{ item.quantity }} pcs
+                        </small>
                     </div>
+
                     <strong>{{ rupiah(item.line_total) }}</strong>
                 </div>
                 {% endfor %}
@@ -130,7 +199,7 @@
                 </div>
 
                 <p class="kw-payment-muted mt-3 mb-0">
-                    Harga dan stok diperiksa ulang oleh backend sebelum meminta Snap Token.
+                    Pastikan rincian pesanan dan total pembayaran sudah sesuai sebelum melanjutkan.
                 </p>
             </aside>
         </div>
@@ -138,7 +207,8 @@
 </section>
 
 {% if midtrans_client_key %}
-<script src="https://app.sandbox.midtrans.com/snap/snap.js" data-client-key="{{ midtrans_client_key }}"></script>
+<script src="https://app.sandbox.midtrans.com/snap/snap.js"
+        data-client-key="{{ midtrans_client_key }}"></script>
 {% endif %}
 
 <script>
@@ -149,6 +219,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const statusBox = document.getElementById('paymentStatus');
     const methodLabel = document.getElementById('selectedMethodLabel');
     const methods = [...document.querySelectorAll('.kw-payment-channel')];
+
     const configured = root.dataset.configured === 'true';
     let selectedMethod = null;
     let orderId = root.dataset.order;
@@ -170,56 +241,98 @@ document.addEventListener('DOMContentLoaded', () => {
         });
 
         payButton.disabled = !configured || isPaid;
-        showStatus(`Metode ${button.dataset.label} dipilih. Klik Lanjutkan Pembayaran untuk membuka Midtrans.`);
+
+        showStatus(
+            `${button.dataset.label} dipilih. Silakan lanjutkan pembayaran.`
+        );
     }
 
     async function checkPayment() {
-        if (!orderId) return showStatus('Nomor pesanan belum dibuat.', 'failed');
+        if (!orderId) {
+            return showStatus('Nomor pesanan belum tersedia.', 'failed');
+        }
 
         checkButton.disabled = true;
-        showStatus('Memeriksa transaksi ke server Midtrans...');
+        showStatus('Sedang memeriksa status pembayaran...');
 
         try {
             const url = new URL(root.dataset.statusUrl, window.location.origin);
             url.searchParams.set('order_id', orderId);
 
-            const response = await fetch(url, { credentials: 'same-origin' });
+            const response = await fetch(url, {
+                credentials: 'same-origin'
+            });
+
             const data = await response.json();
-            if (!response.ok) throw new Error(data.message || 'Status pembayaran belum dapat diperiksa.');
+
+            if (!response.ok) {
+                throw new Error('Status pembayaran belum dapat diperiksa. Silakan coba lagi.');
+            }
 
             if (data.status === 'paid') {
                 isPaid = true;
                 payButton.disabled = true;
-                showStatus('Pembayaran berhasil diverifikasi oleh Midtrans. Pencatatan ke dashboard admin belum diintegrasikan.', 'paid');
+
+                showStatus(
+                    'Pembayaran berhasil! Terima kasih sudah berbelanja di KURO WEAR. Pesananmu sedang diproses.',
+                    'paid'
+                );
+
             } else if (data.status === 'pending') {
-                showStatus('Pembayaran masih menunggu. Selesaikan instruksi dari Midtrans, lalu cek kembali.');
+                showStatus(
+                    'Pembayaran masih menunggu konfirmasi. Selesaikan pembayaran, lalu periksa kembali statusnya.'
+                );
+
             } else {
-                showStatus(`Pembayaran belum berhasil: ${data.transaction_status || 'gagal atau dibatalkan'}.`, 'failed');
+                showStatus(
+                    'Pembayaran belum berhasil atau telah dibatalkan. Silakan periksa kembali pesananmu.',
+                    'failed'
+                );
             }
+
         } catch (error) {
             showStatus(error.message, 'failed');
+
         } finally {
             checkButton.disabled = false;
         }
     }
 
     async function startPayment() {
-        if (!selectedMethod) return showStatus('Pilih metode pembayaran terlebih dahulu.', 'failed');
-        if (!window.snap) return showStatus('Midtrans Snap belum termuat. Periksa koneksi internet atau Client Key.', 'failed');
+        if (!selectedMethod) {
+            return showStatus('Pilih metode pembayaran terlebih dahulu.', 'failed');
+        }
+
+        if (!window.snap) {
+            return showStatus(
+                'Layanan pembayaran belum dapat dibuka. Silakan coba kembali.',
+                'failed'
+            );
+        }
 
         payButton.disabled = true;
-        showStatus('Menyiapkan transaksi Midtrans...');
+        showStatus('Sedang menyiapkan pembayaran...');
 
         try {
             const response = await fetch(root.dataset.createUrl, {
                 method: 'POST',
                 credentials: 'same-origin',
-                headers: { 'Content-Type': 'application/json', 'X-CSRFToken': root.dataset.csrf },
-                body: JSON.stringify({ items: root.dataset.items })
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': root.dataset.csrf
+                },
+                body: JSON.stringify({
+                    items: root.dataset.items
+                })
             });
 
             const data = await response.json();
-            if (!response.ok || data.status !== 'success' || !data.snap_token) throw new Error(data.message || 'Gagal membuat Snap Token.');
+
+            if (!response.ok || data.status !== 'success' || !data.snap_token) {
+                throw new Error(
+                    data.message || 'Pembayaran belum dapat diproses. Silakan coba lagi.'
+                );
+            }
 
             orderId = data.order_id;
             document.getElementById('orderId').textContent = orderId;
@@ -228,29 +341,56 @@ document.addEventListener('DOMContentLoaded', () => {
             const options = {
                 language: 'id',
                 enabledPayments: [selectedMethod],
+
                 onSuccess: () => {
-                    showStatus('Midtrans melaporkan pembayaran selesai. Memverifikasi ulang...');
+                    showStatus('Pembayaran selesai. Sedang mengonfirmasi status pesanan...');
                     checkPayment();
                 },
-                onPending: () => showStatus('Menunggu pembayaran. Ikuti instruksi di Midtrans, lalu cek status pembayaran.'),
-                onError: () => showStatus('Midtrans melaporkan pembayaran gagal. Silakan periksa kembali.', 'failed'),
-                onClose: () => showStatus('Jendela pembayaran ditutup. Jika sudah membayar, gunakan tombol Cek Status Pembayaran.')
+
+                onPending: () => {
+                    showStatus(
+                        'Pembayaran sedang menunggu konfirmasi. Ikuti instruksi pembayaran yang tersedia.'
+                    );
+                },
+
+                onError: () => {
+                    showStatus(
+                        'Pembayaran belum berhasil. Silakan coba kembali.',
+                        'failed'
+                    );
+                },
+
+                onClose: () => {
+                    if (!isPaid) {
+                        showStatus(
+                            'Jendela pembayaran ditutup. Kamu dapat melanjutkan pembayaran atau memeriksa statusnya.'
+                        );
+                    }
+                }
             };
 
-            if (['bca_va', 'bni_va'].includes(selectedMethod)) options.selectedPaymentType = selectedMethod;
+            if (['bca_va', 'bni_va'].includes(selectedMethod)) {
+                options.selectedPaymentType = selectedMethod;
+            }
 
-            showStatus(`Membuka Midtrans untuk pembayaran ${methodLabel.textContent}...`);
+            showStatus(`Membuka pembayaran ${methodLabel.textContent}...`);
             window.snap.pay(data.snap_token, options);
+
         } catch (error) {
             showStatus(error.message, 'failed');
+
         } finally {
             payButton.disabled = isPaid || !configured || !selectedMethod;
         }
     }
 
-    methods.forEach(button => button.addEventListener('click', () => selectMethod(button)));
+    methods.forEach(button => {
+        button.addEventListener('click', () => selectMethod(button));
+    });
+
     payButton.addEventListener('click', startPayment);
     checkButton.addEventListener('click', checkPayment);
 });
 </script>
+
 {% endblock %}

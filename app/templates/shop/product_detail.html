@@ -10,21 +10,20 @@
     {% set rating_total.value = rating_total.value + (review.rating|int) %}
 {% endfor %}
 {% set average_rating = (rating_total.value / review_count) if review_count else 0 %}
+{% set gallery_images = product.initial_images|default(product.images, true) %}
+{% set initial_image = product.initial_image|default(product.image, true) %}
+{% set initial_color = product.initial_color_name|default(product.primary_color_name, true) %}
 
 <style>
 .kpd{background:#EDEBDD;color:#1A1B22;min-height:65vh}
 .kpd *{box-sizing:border-box}
 .kpd-container{max-width:1180px;width:100%;margin:auto}
-.kpd-breadcrumb-area{background:#fff;padding:19px 20px}
-.kpd-breadcrumb{display:flex;align-items:center;gap:10px;flex-wrap:wrap;font-size:11px;font-weight:600;letter-spacing:.4px;color:#687184}
-.kpd-breadcrumb a{color:inherit;text-decoration:none}
-.kpd-breadcrumb a:hover{color:#B7000C}
-.kpd-breadcrumb strong{color:#1A1B22}
 .kpd-main{padding:35px 20px 65px}
 .kpd-layout{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,.85fr);gap:28px;align-items:start}
 .kpd-gallery,.kpd-info{min-width:0}
 .kpd-photo{position:relative;aspect-ratio:3/4;overflow:hidden;background:#E8E5DC}
 .kpd-photo>img{width:100%;height:100%;object-fit:cover;display:block}
+.kpd-photo>img[hidden],.kpd-no-photo[hidden],.kpd-thumbnails[hidden]{display:none!important}
 .kpd-no-photo{display:flex;align-items:center;justify-content:center;height:100%;font-size:43px;color:#9CA3AF}
 .kpd-labels{position:absolute;left:15px;top:15px;z-index:2;display:flex;flex-direction:column;align-items:flex-start;gap:7px}
 .kpd-label{padding:7px 12px;background:#2F3038;color:#fff;font-size:10px;font-weight:700;letter-spacing:.4px}
@@ -81,17 +80,6 @@
 .kpd-care p{margin:0;color:#575E70;font-size:11px;line-height:1.65;white-space:pre-line}
 .kpd-desc-title{display:inline-block;border-bottom:2px solid #E60012;padding-bottom:8px;margin-bottom:12px;font-size:11px;font-weight:700}
 .kpd-description{margin:0;color:#575E70;font-size:12px;line-height:1.8;white-space:pre-line}
-.kpd-reviews{margin-top:38px;scroll-margin-top:95px}
-.kpd-reviews-heading{font-size:22px;font-weight:750;margin:0 0 20px}
-.kpd-review-summary{display:flex;align-items:center;gap:20px;background:#fff;padding:22px;margin-bottom:18px}
-.kpd-review-score{padding:20px 28px;background:#E3E3E3;text-align:center}
-.kpd-review-score strong{display:block;font-size:40px;line-height:1.1}
-.kpd-review-card{background:#fff;padding:22px;margin-bottom:14px}
-.kpd-review-card p{font-size:12px;color:#575E70;line-height:1.8;white-space:pre-line}
-.kpd-empty-review{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:9px;min-height:175px;padding:30px;background:#fff;text-align:center}
-.kpd-empty-review i{font-size:28px;color:#9CA3AF}
-.kpd-empty-review strong{font-size:15px}
-.kpd-empty-review p{margin:0;color:#687184;font-size:11px}
 .kpd-guide-dialog{position:fixed;inset:0;z-index:1055;margin:auto;width:min(740px,calc(100vw - 28px));max-width:740px;max-height:calc(100vh - 48px);overflow-y:auto;padding:0;border:1px solid #E3E3E3;border-radius:8px;background:#fff;color:#1A1B22;box-shadow:0 15px 45px #0003}
 .kpd-guide-dialog::backdrop{background:#0008}
 .kpd-guide-inner{padding:27px 30px 30px}
@@ -114,33 +102,14 @@
 .kpd-guide-note{margin-top:20px;padding:15px;background:#F3F2EF;border-left:3px solid #B7000C;color:#575E70;font-size:11px;line-height:1.8}
 .kpd-guide-note strong{display:block;color:#1A1B22}
 @media(max-width:991px){.kpd-container{max-width:750px}.kpd-layout{grid-template-columns:1fr;gap:20px}.kpd-info{padding:22px}}
-@media(max-width:575px){.kpd-main{padding:19px 12px 40px}.kpd-breadcrumb-area{padding:15px 12px}.kpd-thumbnails{gap:7px}.kpd-info{padding:17px}.kpd-title{font-size:22px}.kpd-price{font-size:28px}.kpd-sizes{gap:5px}.kpd-size{height:39px}.kpd-add-btn,.kpd-buy-btn{font-size:9px}.kpd-reviews-heading{font-size:19px}.kpd-guide-inner{padding:20px 15px}.kpd-guide-title{font-size:20px}.kpd-guide-table{font-size:11px}.kpd-guide-table th,.kpd-guide-table td{padding:10px 7px}}
+@media(max-width:575px){.kpd-main{padding:19px 12px 40px}.kpd-thumbnails{gap:7px}.kpd-info{padding:17px}.kpd-title{font-size:22px}.kpd-price{font-size:28px}.kpd-sizes{gap:5px}.kpd-size{height:39px}.kpd-add-btn,.kpd-buy-btn{font-size:9px}.kpd-guide-inner{padding:20px 15px}.kpd-guide-title{font-size:20px}.kpd-guide-table{font-size:11px}.kpd-guide-table th,.kpd-guide-table td{padding:10px 7px}}
 </style>
 
 <div class="kpd">
-    <div class="kpd-breadcrumb-area">
-        <div class="kpd-container">
-            <nav class="kpd-breadcrumb" aria-label="Breadcrumb">
-                <a href="{{ url_for('shop.index') }}">HOME</a>
-                <span>/</span>
-                {% if product.gender == 'women' %}
-                <a href="{{ url_for('shop.women') }}">WOMEN</a>
-                {% elif product.gender == 'men' %}
-                <a href="{{ url_for('shop.man') }}">MAN</a>
-                {% else %}
-                <a href="{{ url_for('shop.catalog_all') }}">ALL</a>
-                {% endif %}
-                <span>/</span>
-                <span>{{ product.category_badge }}</span>
-                <span>/</span>
-                <strong>{{ product.name }}</strong>
-            </nav>
-        </div>
-    </div>
-
     <main class="kpd-main">
         <div class="kpd-container">
             <div class="kpd-layout">
+
                 <section class="kpd-gallery" aria-label="Galeri produk">
                     <div class="kpd-photo">
                         <div class="kpd-labels">
@@ -149,22 +118,32 @@
                             <span class="kpd-label kpd-label-red">{{ product.collection_label }}</span>
                             {% endif %}
                         </div>
-                        {% if product.image %}
-                        <img id="kpdMainImage" src="{{ product.image }}" alt="{{ product.name }}">
-                        {% else %}
-                        <div class="kpd-no-photo"><i class="bi bi-image"></i></div>
-                        {% endif %}
+
+                        <img id="kpdMainImage"
+                             src="{{ initial_image }}"
+                             alt="{{ product.name }}"
+                             {% if not initial_image %}hidden{% endif %}>
+
+                        <div id="kpdNoPhoto" class="kpd-no-photo"
+                             {% if initial_image %}hidden{% endif %}>
+                            <i class="bi bi-image"></i>
+                        </div>
                     </div>
 
-                    {% if product.images %}
-                    <div class="kpd-thumbnails">
-                        {% for image in product.images %}
-                        <button type="button" class="kpd-thumbnail {{ 'active' if loop.first else '' }}" data-image="{{ image }}" aria-label="Lihat foto {{ loop.index }}">
-                            <img src="{{ image }}" alt="{{ product.name }} - foto {{ loop.index }}" loading="lazy">
+                    <div class="kpd-thumbnails" id="kpdThumbnails"
+                         {% if not gallery_images %}hidden{% endif %}>
+                        {% for image in gallery_images %}
+                        <button type="button"
+                                class="kpd-thumbnail {{ 'active' if loop.first else '' }}"
+                                data-image="{{ image }}"
+                                aria-label="Lihat foto {{ loop.index }}"
+                                aria-pressed="{{ 'true' if loop.first else 'false' }}">
+                            <img src="{{ image }}"
+                                 alt="{{ product.name }} - foto {{ loop.index }}"
+                                 loading="lazy">
                         </button>
                         {% endfor %}
                     </div>
-                    {% endif %}
                 </section>
 
                 <section class="kpd-info" aria-label="Informasi produk">
@@ -194,7 +173,12 @@
 
                     <div class="kpd-price">{{ product.price_formatted }}</div>
 
-                    <form id="kpdCartForm" action="{{ url_for('cart.add_item') }}" method="POST">
+                    <form id="kpdCartForm"
+                          action="{{ url_for('cart.add_item') }}"
+                          method="POST"
+                          data-initial-color="{{ initial_color|e }}"
+                          data-product-name="{{ product.name|e }}">
+
                         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                         <input type="hidden" name="product_id" value="{{ product.id }}">
                         <input type="hidden" name="color_name" id="kpdCartColor">
@@ -205,13 +189,19 @@
                             <div class="kpd-field-heading">
                                 <span class="kpd-field-title">
                                     WARNA:
-                                    <span id="kpdSelectedColor">{{ product.primary_color_name or 'Belum tersedia' }}</span>
+                                    <span id="kpdSelectedColor">{{ initial_color or 'Belum tersedia' }}</span>
                                 </span>
                                 <span class="kpd-muted">{{ product.colors|length }} Pilihan Warna</span>
                             </div>
+
                             <div class="kpd-colors">
                                 {% for color in product.colors %}
-                                <button type="button" class="kpd-swatch" data-color="{{ color.name }}" data-hex="{{ color.hex }}" aria-label="Pilih warna {{ color.name }}" aria-pressed="{{ 'true' if loop.first else 'false' }}"></button>
+                                <button type="button"
+                                        class="kpd-swatch"
+                                        data-color="{{ color.name }}"
+                                        data-hex="{{ color.hex }}"
+                                        aria-label="Pilih warna {{ color.name }}"
+                                        aria-pressed="false"></button>
                                 {% endfor %}
                             </div>
                         </div>
@@ -222,13 +212,18 @@
                                     PILIHAN UKURAN:
                                     <span id="kpdSelectedSize">Belum dipilih</span>
                                 </span>
+
                                 <button type="button" class="kpd-size-guide" id="kpdOpenGuide">
                                     <i class="bi bi-rulers"></i> Size Guide
                                 </button>
                             </div>
+
                             <div class="kpd-sizes">
                                 {% for size in product.sizes %}
-                                <button type="button" class="kpd-size" data-size="{{ size }}" aria-pressed="false">{{ size }}</button>
+                                <button type="button"
+                                        class="kpd-size"
+                                        data-size="{{ size }}"
+                                        aria-pressed="false">{{ size }}</button>
                                 {% else %}
                                 <span class="kpd-muted">Ukuran belum tersedia.</span>
                                 {% endfor %}
@@ -251,6 +246,7 @@
                                 <span id="kpdQtyValue">1</span>
                                 <button type="button" id="kpdQtyPlus" aria-label="Tambah jumlah">&plus;</button>
                             </div>
+
                             <div class="kpd-actions-right">
                                 <button type="button"
                                         class="kpd-icon-btn"
@@ -262,22 +258,38 @@
                                         aria-label="Tambah atau hapus Wishlist">
                                     <i class="bi {{ 'bi-heart-fill text-danger' if product.wishlisted else 'bi-heart text-dark' }}"></i>
                                 </button>
-                                <button type="button" class="kpd-icon-btn" id="kpdShare" aria-label="Bagikan produk">
+
+                                <button type="button"
+                                        class="kpd-icon-btn"
+                                        id="kpdShare"
+                                        aria-label="Bagikan produk">
                                     <i class="bi bi-share-fill"></i>
                                 </button>
                             </div>
                         </div>
 
                         <div class="kpd-buy-actions">
-                            <button type="submit" class="kpd-add-btn" id="kpdAddCart" {% if product.stock_qty|int <= 0 %}disabled{% endif %}>
-                                <i class="bi bi-handbag"></i> TAMBAH KE KERANJANG
+                            <button type="submit"
+                                    class="kpd-add-btn"
+                                    id="kpdAddCart"
+                                    {% if product.stock_qty|int <= 0 %}disabled{% endif %}>
+                                <i class="bi bi-handbag"></i>
+                                TAMBAH KE KERANJANG
                             </button>
-                            <button type="button" class="kpd-buy-btn" disabled title="Checkout langsung belum tersedia">
-                                <i class="bi bi-lightning-charge"></i> BELI SEKARANG
+
+                            <button type="submit"
+                                    class="kpd-buy-btn"
+                                    name="buy_now"
+                                    value="1"
+                                    {% if product.stock_qty|int <= 0 %}disabled{% endif %}>
+                                <i class="bi bi-lightning-charge"></i>
+                                BELI SEKARANG
                             </button>
                         </div>
 
-                        <p class="kpd-help">Pilih warna dan ukuran sesuai stok sebelum menambahkan produk ke keranjang.</p>
+                        <p class="kpd-help">
+                            Pilih warna, ukuran, dan jumlah sesuai stok sebelum melanjutkan pembelian.
+                        </p>
                     </form>
 
                     <div class="kpd-care">
@@ -309,21 +321,39 @@
         <div class="kpd-guide-header">
             <div>
                 <h2 id="kpdGuideTitle" class="kpd-guide-title">Size Guide</h2>
-                <p class="kpd-guide-description">Panduan ukuran tubuh Pria dan Wanita dalam sentimeter (cm).</p>
+                <p class="kpd-guide-description">
+                    Panduan ukuran tubuh Pria dan Wanita dalam sentimeter (cm).
+                </p>
             </div>
-            <button type="button" class="kpd-guide-close" id="kpdCloseGuide" aria-label="Tutup Size Guide">&times;</button>
+            <button type="button"
+                    class="kpd-guide-close"
+                    id="kpdCloseGuide"
+                    aria-label="Tutup Size Guide">&times;</button>
         </div>
 
         <div class="kpd-guide-tabs" role="tablist" aria-label="Kategori ukuran">
-            <button type="button" id="kpdTabWomen" class="kpd-guide-tab" role="tab"
-                    data-size-gender="women" aria-controls="kpdPanelWomen"
+            <button type="button"
+                    id="kpdTabWomen"
+                    class="kpd-guide-tab"
+                    role="tab"
+                    data-size-gender="women"
+                    aria-controls="kpdPanelWomen"
                     aria-selected="false">WANITA</button>
-            <button type="button" id="kpdTabMen" class="kpd-guide-tab" role="tab"
-                    data-size-gender="men" aria-controls="kpdPanelMen"
+
+            <button type="button"
+                    id="kpdTabMen"
+                    class="kpd-guide-tab"
+                    role="tab"
+                    data-size-gender="men"
+                    aria-controls="kpdPanelMen"
                     aria-selected="false">PRIA</button>
         </div>
 
-        <section id="kpdPanelWomen" class="kpd-guide-panel" role="tabpanel" aria-labelledby="kpdTabWomen" hidden>
+        <section id="kpdPanelWomen"
+                 class="kpd-guide-panel"
+                 role="tabpanel"
+                 aria-labelledby="kpdTabWomen"
+                 hidden>
             <h3 class="kpd-guide-panel-title">Panduan Ukuran Wanita</h3>
             <div class="kpd-guide-table-wrapper">
                 <table class="kpd-guide-table">
@@ -347,7 +377,11 @@
             </div>
         </section>
 
-        <section id="kpdPanelMen" class="kpd-guide-panel" role="tabpanel" aria-labelledby="kpdTabMen" hidden>
+        <section id="kpdPanelMen"
+                 class="kpd-guide-panel"
+                 role="tabpanel"
+                 aria-labelledby="kpdTabMen"
+                 hidden>
             <h3 class="kpd-guide-panel-title">Panduan Ukuran Pria</h3>
             <div class="kpd-guide-table-wrapper">
                 <table class="kpd-guide-table">
@@ -363,9 +397,9 @@
                         <tr><td>XS</td><td>84–88</td><td>68–72</td><td>84–88</td></tr>
                         <tr><td>S</td><td>88–92</td><td>72–76</td><td>88–92</td></tr>
                         <tr><td>M</td><td>92–96</td><td>76–80</td><td>92–96</td></tr>
-                        <tr><td>L</td><td>96–102</td><td>80–86</td><td>96–102</td></tr>
-                        <tr><td>XL</td><td>102–108</td><td>86–92</td><td>102–108</td></tr>
-                        <tr><td>XXL</td><td>108–114</td><td>92–98</td><td>108–114</td></tr>
+                        <tr><td>L</td><td>96–102</td><td>80–86</td><td>102–108</td></tr>
+                        <tr><td>XL</td><td>102–108</td><td>86–92</td><td>108–114</td></tr>
+                        <tr><td>XXL</td><td>108–114</td><td>92–98</td><td>114–120</td></tr>
                     </tbody>
                 </table>
             </div>
@@ -381,6 +415,8 @@
 </dialog>
 
 <script type="application/json" id="kpdVariantData">{{ product.variants|tojson }}</script>
+<script type="application/json" id="kpdColorImages">{{ product.color_images|default({}, true)|tojson }}</script>
+<script type="application/json" id="kpdFallbackImages">{{ product.fallback_images|default([], true)|tojson }}</script>
 
 <script>
 document.addEventListener('DOMContentLoaded', () => {
@@ -388,25 +424,122 @@ document.addEventListener('DOMContentLoaded', () => {
     if (!form) return;
 
     const variants = JSON.parse(document.getElementById('kpdVariantData').textContent);
+    const colorImages = JSON.parse(document.getElementById('kpdColorImages').textContent);
+    const fallbackImages = JSON.parse(document.getElementById('kpdFallbackImages').textContent);
+
     const colors = [...document.querySelectorAll('.kpd-swatch')];
     const sizes = [...document.querySelectorAll('.kpd-size')];
-    const thumbnails = [...document.querySelectorAll('.kpd-thumbnail')];
+
+    const mainImage = document.getElementById('kpdMainImage');
+    const noPhoto = document.getElementById('kpdNoPhoto');
+    const thumbnailContainer = document.getElementById('kpdThumbnails');
+
     const colorLabel = document.getElementById('kpdSelectedColor');
     const sizeLabel = document.getElementById('kpdSelectedSize');
     const stockText = document.getElementById('kpdStockText');
     const stockFill = document.getElementById('kpdStockFill');
     const qtyText = document.getElementById('kpdQtyValue');
     const cartButton = document.getElementById('kpdAddCart');
+    const buyButton = form.querySelector('[name="buy_now"]');
+
+    const productName = form.dataset.productName || 'Produk KURO WEAR';
+    const normalize = value => String(value || '').trim().toLowerCase();
 
     const totalStock = variants.reduce(
-        (sum, variant) => sum + Math.max(0, Number(variant.stock) || 0), 0
+        (sum, variant) => sum + Math.max(0, Number(variant.stock) || 0),
+        0
     );
 
-    const normalize = value => String(value || '').trim().toLowerCase();
-    const firstAvailable = variants.find(variant => Number(variant.stock) > 0);
+    const firstAvailable = variants.find(
+        variant => Number(variant.stock) > 0
+    );
 
-    let selectedColor = firstAvailable?.color_name || colors[0]?.dataset.color || '';
+    let selectedColor =
+        form.dataset.initialColor ||
+        firstAvailable?.color_name ||
+        colors[0]?.dataset.color ||
+        '';
+
     let selectedSize = '';
+
+    function photosForColor(color) {
+        const specificImages = colorImages?.[normalize(color)];
+
+        if (Array.isArray(specificImages) && specificImages.length) {
+            return specificImages;
+        }
+
+        return Array.isArray(fallbackImages)
+            ? fallbackImages
+            : [];
+    }
+
+    function setMainPhoto(path, buttons = [], activeIndex = -1) {
+        if (path) {
+            mainImage.hidden = false;
+            noPhoto.hidden = true;
+            mainImage.alt = `${productName} - ${selectedColor || 'produk'}`;
+            mainImage.src = path;
+        } else {
+            mainImage.removeAttribute('src');
+            mainImage.hidden = true;
+            noPhoto.hidden = false;
+        }
+
+        buttons.forEach((button, index) => {
+            const active = index === activeIndex;
+            button.classList.toggle('active', active);
+            button.setAttribute('aria-pressed', String(active));
+        });
+    }
+
+    function refreshGallery() {
+        const photos = photosForColor(selectedColor).filter(
+            path => typeof path === 'string' && path.length > 0
+        );
+
+        thumbnailContainer.replaceChildren();
+        thumbnailContainer.hidden = photos.length === 0;
+
+        const buttons = [];
+
+        photos.forEach((path, index) => {
+            const button = document.createElement('button');
+            button.type = 'button';
+            button.className = 'kpd-thumbnail';
+            button.dataset.image = path;
+            button.setAttribute(
+                'aria-label',
+                `Lihat foto ${index + 1} warna ${selectedColor}`
+            );
+            button.setAttribute('aria-pressed', 'false');
+
+            const image = document.createElement('img');
+            image.src = path;
+            image.alt = `${productName} - ${selectedColor} - foto ${index + 1}`;
+            image.loading = 'lazy';
+
+            button.appendChild(image);
+
+            button.addEventListener('click', () => {
+                setMainPhoto(path, buttons, index);
+            });
+
+            buttons.push(button);
+            thumbnailContainer.appendChild(button);
+        });
+
+        setMainPhoto(
+            photos[0] || '',
+            buttons,
+            photos.length ? 0 : -1
+        );
+    }
+
+    mainImage.addEventListener('error', () => {
+        mainImage.hidden = true;
+        noPhoto.hidden = false;
+    });
 
     function getVariant(color, size) {
         return variants.find(variant =>
@@ -417,7 +550,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function refreshSelection() {
         colors.forEach(button => {
-            const active = normalize(button.dataset.color) === normalize(selectedColor);
+            const active =
+                normalize(button.dataset.color) === normalize(selectedColor);
+
             button.setAttribute('aria-pressed', String(active));
         });
 
@@ -427,13 +562,18 @@ document.addEventListener('DOMContentLoaded', () => {
             const variant = getVariant(selectedColor, button.dataset.size);
             button.disabled = !variant || Number(variant.stock) <= 0;
 
-            if (button.disabled && normalize(selectedSize) === normalize(button.dataset.size)) {
+            if (
+                button.disabled &&
+                normalize(selectedSize) === normalize(button.dataset.size)
+            ) {
                 selectedSize = '';
             }
         });
 
         sizes.forEach(button => {
-            const active = normalize(button.dataset.size) === normalize(selectedSize);
+            const active =
+                normalize(button.dataset.size) === normalize(selectedSize);
+
             button.classList.toggle('selected', active);
             button.setAttribute('aria-pressed', String(active));
         });
@@ -441,7 +581,9 @@ document.addEventListener('DOMContentLoaded', () => {
         sizeLabel.textContent = selectedSize || 'Belum dipilih';
 
         const variant = getVariant(selectedColor, selectedSize);
-        const stock = variant ? Math.max(0, Number(variant.stock) || 0) : 0;
+        const stock = variant
+            ? Math.max(0, Number(variant.stock) || 0)
+            : 0;
 
         stockText.textContent = variant
             ? `Stok Tersisa: ${stock} pcs`
@@ -450,7 +592,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 : 'Stok produk habis.';
 
         stockFill.style.width = `${
-            variant && totalStock ? Math.min(100, stock / totalStock * 100) : 0
+            variant && totalStock
+                ? Math.min(100, stock / totalStock * 100)
+                : 0
         }%`;
 
         if (!variant || Number(qtyText.textContent) > stock) {
@@ -458,6 +602,10 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         cartButton.disabled = totalStock <= 0;
+
+        if (buyButton) {
+            buyButton.disabled = totalStock <= 0;
+        }
     }
 
     colors.forEach(button => {
@@ -467,7 +615,9 @@ document.addEventListener('DOMContentLoaded', () => {
             selectedColor = button.dataset.color;
             selectedSize = '';
             qtyText.textContent = '1';
+
             refreshSelection();
+            refreshGallery();
         });
     });
 
@@ -477,6 +627,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             selectedSize = button.dataset.size;
             qtyText.textContent = '1';
+
             refreshSelection();
         });
     });
@@ -489,12 +640,21 @@ document.addEventListener('DOMContentLoaded', () => {
         if (maximum < 1) return;
 
         qtyText.textContent = String(
-            Math.max(1, Math.min(maximum, Number(qtyText.textContent) + delta))
+            Math.max(
+                1,
+                Math.min(
+                    maximum,
+                    Number(qtyText.textContent) + delta
+                )
+            )
         );
     }
 
-    document.getElementById('kpdQtyMinus').addEventListener('click', () => changeQuantity(-1));
-    document.getElementById('kpdQtyPlus').addEventListener('click', () => changeQuantity(1));
+    document.getElementById('kpdQtyMinus')
+        .addEventListener('click', () => changeQuantity(-1));
+
+    document.getElementById('kpdQtyPlus')
+        .addEventListener('click', () => changeQuantity(1));
 
     form.addEventListener('submit', event => {
         const variant = getVariant(selectedColor, selectedSize);
@@ -516,17 +676,6 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('kpdCartColor').value = variant.color_name;
         document.getElementById('kpdCartSize').value = variant.size;
         document.getElementById('kpdCartQuantity').value = String(quantity);
-    });
-
-    thumbnails.forEach(button => {
-        button.addEventListener('click', () => {
-            const image = document.getElementById('kpdMainImage');
-            if (image) image.src = button.dataset.image;
-
-            thumbnails.forEach(item => {
-                item.classList.toggle('active', item === button);
-            });
-        });
     });
 
     document.getElementById('kpdShare').addEventListener('click', async () => {
@@ -555,7 +704,10 @@ document.addEventListener('DOMContentLoaded', () => {
         men: document.getElementById('kpdPanelMen')
     };
 
-    const defaultGender = dialog.dataset.productGender === 'women' ? 'women' : 'men';
+    const defaultGender =
+        dialog.dataset.productGender === 'women'
+            ? 'women'
+            : 'men';
 
     function activateGuideTab(gender) {
         tabs.forEach(tab => {
@@ -570,33 +722,50 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     tabs.forEach(tab => {
-        tab.addEventListener('click', () => activateGuideTab(tab.dataset.sizeGender));
+        tab.addEventListener('click', () => {
+            activateGuideTab(tab.dataset.sizeGender);
+        });
 
         tab.addEventListener('keydown', event => {
             if (!['ArrowLeft', 'ArrowRight'].includes(event.key)) return;
 
             event.preventDefault();
 
-            const gender = tab.dataset.sizeGender === 'women' ? 'men' : 'women';
+            const gender =
+                tab.dataset.sizeGender === 'women'
+                    ? 'men'
+                    : 'women';
+
             activateGuideTab(gender);
 
-            tabs.find(item => item.dataset.sizeGender === gender)?.focus();
+            tabs.find(
+                item => item.dataset.sizeGender === gender
+            )?.focus();
         });
     });
 
     document.getElementById('kpdOpenGuide').addEventListener('click', () => {
         activateGuideTab(defaultGender);
-        if (!dialog.open) dialog.showModal();
+
+        if (!dialog.open) {
+            dialog.showModal();
+        }
     });
 
-    document.getElementById('kpdCloseGuide').addEventListener('click', () => dialog.close());
+    document.getElementById('kpdCloseGuide').addEventListener('click', () => {
+        dialog.close();
+    });
 
     dialog.addEventListener('click', event => {
-        if (event.target === dialog) dialog.close();
+        if (event.target === dialog) {
+            dialog.close();
+        }
     });
 
     activateGuideTab(defaultGender);
     refreshSelection();
+    refreshGallery();
 });
 </script>
+
 {% endblock %}

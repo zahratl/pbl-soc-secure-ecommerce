@@ -1,12 +1,13 @@
-<!--alamat pengiriman, JNE, ringkasan belanja, dan Midtrans. Perbedaannya, form alamat sekarang juga memuat kode pos dan akan mengirim datanya ke backend untuk disimpan secara permanen.-->
 {% extends 'base.html' %}
 {% block title %}Checkout - KURO WEAR{% endblock %}
 {% block content %}
+
 <style>
 .kw-checkout{min-height:70vh;padding:34px 18px 70px;background:#F5F2EB;color:#1A1B22}
 .kw-checkout-wrap{max-width:1190px;margin:auto}
 .kw-checkout-steps{display:flex;justify-content:center;gap:15px;align-items:center;flex-wrap:wrap;margin-bottom:28px;font-size:12px;font-weight:700}
-.kw-checkout-steps span{color:#575E70}.kw-checkout-steps strong{color:#810100}
+.kw-checkout-steps span{color:#575E70}
+.kw-checkout-steps strong{color:#810100}
 .kw-checkout-grid{display:grid;grid-template-columns:minmax(0,1.6fr) minmax(300px,1fr);gap:22px;align-items:start}
 .kw-checkout-card{background:#fff;border:1px solid #E5E0D5;border-radius:8px;padding:25px;margin-bottom:18px}
 .kw-checkout-card h2{font-size:15px;font-weight:700;letter-spacing:.5px;margin:0}
@@ -16,23 +17,35 @@
 .kw-checkout-address strong{display:block;font-size:14px;margin-bottom:6px}
 .kw-checkout-address p{margin:0;font-size:12px;line-height:1.7;color:#575E70;overflow-wrap:anywhere}
 .kw-checkout-courier{padding:15px;border:1px solid #D5D1C3;background:#FAF9F5;display:flex;align-items:center;justify-content:space-between;gap:15px;margin-top:15px}
-.kw-checkout-courier strong{font-size:13px}.kw-checkout-courier span{font-size:12px;color:#25804C;font-weight:700}
+.kw-checkout-courier strong{font-size:13px}
+.kw-checkout-courier span{font-size:12px;color:#25804C;font-weight:700}
 .kw-checkout-methods{display:flex;flex-wrap:wrap;gap:8px;margin-top:15px}
 .kw-checkout-method{padding:9px 11px;background:#F5F2EB;border:1px solid #E5E0D5;font-size:12px;font-weight:600}
 .kw-checkout-item{display:flex;gap:12px;align-items:flex-start;border-bottom:1px solid #E8E7F1;padding:14px 0}
 .kw-checkout-item img,.kw-checkout-thumb{width:64px;height:82px;object-fit:cover;background:#F4F2FD;border-radius:3px;flex-shrink:0}
-.kw-checkout-item strong{display:block;font-size:13px;margin-bottom:5px}.kw-checkout-item small{font-size:11px;color:#575E70}
+.kw-checkout-item strong{display:block;font-size:13px;margin-bottom:5px}
+.kw-checkout-item small{font-size:11px;color:#575E70}
 .kw-checkout-price{margin-left:auto;white-space:nowrap;font-size:12px;font-weight:700}
 .kw-checkout-row{display:flex;justify-content:space-between;gap:15px;margin-top:15px;font-size:12px;color:#575E70}
 .kw-checkout-total{border-top:1px solid #E8E7F1;padding-top:17px;margin-top:19px;display:flex;align-items:center;justify-content:space-between;gap:12px}
 .kw-checkout-total strong{font-size:24px;color:#810100}
 .kw-checkout-pay{border:0;background:#1A1B22;color:#fff;border-radius:4px;min-height:49px;padding:12px;width:100%;margin-top:20px;font-size:12px;font-weight:700}
-.kw-checkout-pay:hover{background:#333}.kw-checkout-pay:disabled{opacity:.5;cursor:not-allowed}
-.kw-checkout-field{margin-bottom:15px}.kw-checkout-field label{display:block;font-size:12px;font-weight:700;margin-bottom:6px}
+.kw-checkout-pay:hover{background:#333}
+.kw-checkout-pay:disabled{opacity:.5;cursor:not-allowed}
+.kw-checkout-field{margin-bottom:15px}
+.kw-checkout-field label{display:block;font-size:12px;font-weight:700;margin-bottom:6px}
 .kw-checkout-field input,.kw-checkout-field textarea{width:100%;border:1px solid #D5D1C3;border-radius:4px;padding:10px 12px;font-size:13px}
 .kw-checkout-field textarea{resize:vertical;min-height:96px}
-@media(max-width:900px){.kw-checkout-grid{grid-template-columns:1fr}}
-@media(max-width:550px){.kw-checkout{padding:22px 12px 45px}.kw-checkout-card{padding:17px}.kw-checkout-item{flex-wrap:wrap}.kw-checkout-price{margin-left:76px}}
+
+@media(max-width:900px){
+    .kw-checkout-grid{grid-template-columns:1fr}
+}
+@media(max-width:550px){
+    .kw-checkout{padding:22px 12px 45px}
+    .kw-checkout-card{padding:17px}
+    .kw-checkout-item{flex-wrap:wrap}
+    .kw-checkout-price{margin-left:76px}
+}
 </style>
 
 <section class="kw-checkout" id="checkoutRoot"
@@ -43,17 +56,23 @@
     data-has-address="{{ 'true' if address else 'false' }}">
 
     <div class="kw-checkout-wrap">
+
         <div class="kw-checkout-steps">
-            <span>1. Keranjang</span><i class="bi bi-arrow-right"></i>
-            <strong>2. Checkout</strong><i class="bi bi-arrow-right"></i>
+            <span>1. Keranjang</span>
+            <i class="bi bi-arrow-right"></i>
+            <strong>2. Checkout</strong>
+            <i class="bi bi-arrow-right"></i>
             <span>3. Pembayaran</span>
         </div>
 
         <div class="kw-checkout-grid">
             <div>
+
+                <!-- ALAMAT PENGIRIMAN -->
                 <div class="kw-checkout-card">
                     <div class="d-flex justify-content-between align-items-center gap-3">
                         <h2>ALAMAT PENGIRIMAN</h2>
+
                         <button type="button" class="kw-checkout-link" id="editAddressButton">
                             {{ 'UBAH ALAMAT' if address else 'TAMBAH ALAMAT' }}
                         </button>
@@ -62,43 +81,50 @@
                     <div class="kw-checkout-address">
                         <div id="addressEmpty" {% if address %}hidden{% endif %}>
                             <strong>Belum ada alamat pengiriman</strong>
-                            <p>Tambahkan alamat tujuan sebelum melanjutkan ke pembayaran.</p>
+                            <p>Tambahkan alamat tujuan untuk melanjutkan pesanan.</p>
                         </div>
 
                         <div id="addressSaved" {% if not address %}hidden{% endif %}>
                             <strong>
                                 <span id="addressRecipient">{{ address.recipient_name if address else '' }}</span>
-                                · <span id="addressPhone">{{ address.phone if address else '' }}</span>
+                                ·
+                                <span id="addressPhone">{{ address.phone if address else '' }}</span>
                             </strong>
+
                             <p id="addressCity">{{ address.city if address else '' }}</p>
-                            <p id="addressPostal">{{ 'Kode pos: ' ~ address.postal_code if address and address.postal_code else '' }}</p>
+                            <p id="addressPostal">
+                                {{ 'Kode pos: ' ~ address.postal_code if address and address.postal_code else '' }}
+                            </p>
                             <p id="addressText">{{ address.full_address if address else '' }}</p>
                         </div>
                     </div>
 
                     <p class="kw-checkout-muted mt-2 mb-0">
-                        Alamat yang disimpan di sini juga tersimpan sebagai alamat utama di halaman Profil.
-                        Alamat pada pesanan lama tidak berubah.
+                        Alamat ini juga akan tersimpan di profilmu untuk memudahkan pembelian berikutnya.
                     </p>
 
+                    <!-- PENGIRIMAN -->
                     <h2 class="mt-4">PENGIRIMAN</h2>
+
                     <div class="kw-checkout-courier">
                         <div>
                             <strong>JNE Express Reguler</strong>
-                            <div class="kw-checkout-muted">Satu layanan pengiriman · Ongkir Rp0 untuk pengujian Sandbox</div>
+                            <div class="kw-checkout-muted">
+                                Layanan pengiriman pesanan
+                            </div>
                         </div>
                         <span>Rp 0</span>
                     </div>
-                    <p class="kw-checkout-muted mt-2 mb-0">
-                        Resi resmi JNE akan tersedia setelah integrasi API pengiriman diaktifkan.
-                    </p>
                 </div>
 
+                <!-- METODE PEMBAYARAN -->
                 <div class="kw-checkout-card">
                     <h2>METODE PEMBAYARAN</h2>
+
                     <p class="kw-checkout-muted mt-2 mb-0">
-                        Midtrans Snap Sandbox. Pilih metode pembayaran akhir melalui Midtrans.
+                        Pilih metode pembayaran yang tersedia pada langkah berikutnya.
                     </p>
+
                     <div class="kw-checkout-methods">
                         <span class="kw-checkout-method">QRIS</span>
                         <span class="kw-checkout-method">GoPay</span>
@@ -106,36 +132,51 @@
                         <span class="kw-checkout-method">BNI VA</span>
                         <span class="kw-checkout-method">BRI VA</span>
                     </div>
+
                     <p class="kw-checkout-muted mt-3 mb-0">
-                        <i class="bi bi-shield-lock me-1"></i> Pembayaran diproses melalui Midtrans.
+                        <i class="bi bi-shield-lock me-1"></i>
+                        Pembayaran diproses melalui Midtrans.
                     </p>
                 </div>
             </div>
 
+            <!-- RINGKASAN BELANJA -->
             <aside class="kw-checkout-card">
                 <h2>RINGKASAN BELANJA</h2>
 
                 {% for item in items %}
                 <div class="kw-checkout-item">
                     {% if item.image %}
-                    <img src="{{ item.image }}" alt="{{ item.name }}" loading="lazy">
+                        <img src="{{ item.image }}" alt="{{ item.name }}" loading="lazy">
                     {% else %}
-                    <div class="kw-checkout-thumb d-flex justify-content-center align-items-center">
-                        <i class="bi bi-image text-muted"></i>
-                    </div>
+                        <div class="kw-checkout-thumb d-flex justify-content-center align-items-center">
+                            <i class="bi bi-image text-muted"></i>
+                        </div>
                     {% endif %}
 
                     <div class="flex-grow-1">
                         <strong>{{ item.name }}</strong>
                         <small>{{ item.color }} · {{ item.size }} · {{ item.quantity }} pcs</small>
                     </div>
+
                     <span class="kw-checkout-price">{{ item.line_total_text }}</span>
                 </div>
                 {% endfor %}
 
-                <div class="kw-checkout-row"><span>Subtotal Produk</span><strong>{{ rupiah(subtotal) }}</strong></div>
-                <div class="kw-checkout-row"><span>Ongkos JNE (uji)</span><strong>Rp 0</strong></div>
-                <div class="kw-checkout-row"><span>Voucher</span><span>Belum tersedia</span></div>
+                <div class="kw-checkout-row">
+                    <span>Subtotal Produk</span>
+                    <strong>{{ rupiah(subtotal) }}</strong>
+                </div>
+
+                <div class="kw-checkout-row">
+                    <span>Ongkos Kirim</span>
+                    <strong>Rp 0</strong>
+                </div>
+
+                <div class="kw-checkout-row">
+                    <span>Voucher</span>
+                    <span>Belum tersedia</span>
+                </div>
 
                 <div class="kw-checkout-total">
                     <span class="fw-bold">TOTAL PEMBAYARAN</span>
@@ -147,46 +188,56 @@
                     LANJUT KE PEMBAYARAN
                     <i class="bi bi-arrow-right ms-1"></i>
                 </button>
+
                 <p class="kw-checkout-muted mt-3 mb-0 text-center">
-                    Harga dan stok diperiksa ulang oleh backend sebelum membuat transaksi.
+                    Pastikan alamat pengiriman dan pesananmu sudah sesuai sebelum melanjutkan.
                 </p>
             </aside>
         </div>
 
-        <a class="text-decoration-none text-dark fw-semibold small" href="{{ url_for('cart.view_cart') }}">
-            <i class="bi bi-arrow-left me-1"></i> Kembali ke keranjang
+        <a class="text-decoration-none text-dark fw-semibold small"
+           href="{{ url_for('cart.view_cart') }}">
+            <i class="bi bi-arrow-left me-1"></i>
+            Kembali ke keranjang
         </a>
     </div>
 </section>
 
+<!-- MODAL ALAMAT PENGIRIMAN -->
 <div class="modal fade" id="addressModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
             <form id="addressForm">
                 <div class="modal-header">
                     <h2 class="modal-title fs-6 fw-bold">ALAMAT PENGIRIMAN</h2>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Tutup"></button>
+                    <button type="button" class="btn-close"
+                            data-bs-dismiss="modal" aria-label="Tutup"></button>
                 </div>
 
                 <div class="modal-body">
                     <div class="kw-checkout-field">
                         <label for="recipientName">Nama Penerima</label>
-                        <input id="recipientName" maxlength="100" required value="{{ address.recipient_name if address else current_user.name }}">
+                        <input id="recipientName" maxlength="100" required
+                               value="{{ address.recipient_name if address else current_user.name }}">
                     </div>
 
                     <div class="kw-checkout-field">
                         <label for="recipientPhone">Nomor WhatsApp</label>
-                        <input id="recipientPhone" maxlength="25" required value="{{ address.phone if address else '' }}">
+                        <input id="recipientPhone" maxlength="25" required
+                               value="{{ address.phone if address else '' }}">
                     </div>
 
                     <div class="kw-checkout-field">
                         <label for="recipientCity">Kota / Kecamatan</label>
-                        <input id="recipientCity" maxlength="100" required value="{{ address.city if address else '' }}">
+                        <input id="recipientCity" maxlength="100" required
+                               value="{{ address.city if address else '' }}">
                     </div>
 
                     <div class="kw-checkout-field">
-                        <label for="recipientPostal">Kode Pos (opsional saat Sandbox)</label>
-                        <input id="recipientPostal" inputmode="numeric" maxlength="5" pattern="[0-9]{5}" value="{{ address.postal_code if address and address.postal_code else '' }}">
+                        <label for="recipientPostal">Kode Pos (Opsional)</label>
+                        <input id="recipientPostal" inputmode="numeric"
+                               maxlength="5" pattern="[0-9]{5}"
+                               value="{{ address.postal_code if address and address.postal_code else '' }}">
                     </div>
 
                     <div class="kw-checkout-field mb-0">
@@ -196,7 +247,10 @@
                 </div>
 
                 <div class="modal-footer">
-                    <button type="submit" id="saveAddressButton" class="btn btn-dark w-100 fw-bold">SIMPAN ALAMAT</button>
+                    <button type="submit" id="saveAddressButton"
+                            class="btn btn-dark w-100 fw-bold">
+                        SIMPAN ALAMAT
+                    </button>
                 </div>
             </form>
         </div>
@@ -210,7 +264,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const saveButton = document.getElementById('saveAddressButton');
     let hasAddress = root.dataset.hasAddress === 'true';
 
-    document.getElementById('editAddressButton').addEventListener('click', () => modal.show());
+    document.getElementById('editAddressButton')
+        .addEventListener('click', () => modal.show());
 
     document.getElementById('addressForm').addEventListener('submit', async event => {
         event.preventDefault();
@@ -243,11 +298,14 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             const saved = result.address;
+
             document.getElementById('addressRecipient').textContent = saved.recipient_name;
             document.getElementById('addressPhone').textContent = saved.phone;
             document.getElementById('addressCity').textContent = saved.city;
-            document.getElementById('addressPostal').textContent = saved.postal_code ? `Kode pos: ${saved.postal_code}` : '';
+            document.getElementById('addressPostal').textContent =
+                saved.postal_code ? `Kode pos: ${saved.postal_code}` : '';
             document.getElementById('addressText').textContent = saved.full_address;
+
             document.getElementById('addressEmpty').hidden = true;
             document.getElementById('addressSaved').hidden = false;
             document.getElementById('editAddressButton').textContent = 'UBAH ALAMAT';
@@ -256,12 +314,21 @@ document.addEventListener('DOMContentLoaded', () => {
             modal.hide();
 
             if (window.Swal) {
-                Swal.fire({ icon: 'success', title: 'Alamat tersimpan', timer: 1600, showConfirmButton: false });
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Alamat berhasil disimpan',
+                    timer: 1600,
+                    showConfirmButton: false
+                });
             }
 
         } catch (error) {
             if (window.Swal) {
-                Swal.fire({ icon: 'error', title: 'Gagal menyimpan alamat', text: error.message });
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Gagal menyimpan alamat',
+                    text: error.message
+                });
             } else {
                 alert(error.message);
             }
@@ -271,7 +338,10 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     document.getElementById('proceedPayment').addEventListener('click', () => {
-        if (!hasAddress) return modal.show();
+        if (!hasAddress) {
+            modal.show();
+            return;
+        }
 
         const url = new URL(root.dataset.paymentUrl, window.location.origin);
         url.searchParams.set('items', root.dataset.items);
@@ -279,4 +349,5 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 });
 </script>
+
 {% endblock %}

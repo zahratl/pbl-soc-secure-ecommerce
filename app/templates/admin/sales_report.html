@@ -1,0 +1,270 @@
+{% extends 'admin/admin_base.html' %}
+{% block title %}Laporan Penjualan - Admin KURO WEAR{% endblock %}
+
+{% block extra_css %}
+<style>
+    .report-page { color:#202126; }
+    .report-header { display:flex; justify-content:space-between; align-items:flex-start; gap:16px; flex-wrap:wrap; margin-bottom:25px; }
+    .report-header h1 { margin:0 0 7px; font-size:25px; font-weight:700; }
+    .report-muted { margin:0; font-size:12px; color:#85878D; line-height:1.7; }
+
+    .report-card { background:#fff; border:1px solid #E6E5E2; border-radius:7px; overflow:hidden; }
+    .report-filter { display:flex; align-items:end; flex-wrap:wrap; gap:14px; padding:20px; margin-bottom:23px; }
+    .report-field { display:flex; flex-direction:column; gap:7px; flex:1 1 180px; }
+    .report-field label { font-size:11px; font-weight:600; color:#575A60; }
+    .report-field input { width:100%; height:42px; padding:10px 12px; border:1px solid #DAD9D5; border-radius:6px; color:#202126; background:#fff; font-size:12px; }
+
+    .report-btn { display:inline-flex; align-items:center; justify-content:center; gap:8px; min-height:42px; padding:10px 16px; border:1px solid #202126; border-radius:6px; background:#202126; color:#fff; text-decoration:none; font-size:12px; font-weight:600; cursor:pointer; }
+    .report-btn:hover { background:#393A40; color:#fff; }
+    .report-btn.secondary { background:#fff; color:#202126; border-color:#DAD9D5; }
+    .report-btn.secondary:hover { background:#F5F4F2; }
+
+    .report-metrics { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:14px; margin-bottom:24px; }
+    .report-metric { padding:21px; min-height:142px; background:#fff; border:1px solid #E6E5E2; border-radius:7px; }
+    .report-metric-top { display:flex; align-items:center; justify-content:space-between; gap:10px; }
+    .report-metric-label { color:#777A82; font-size:11px; font-weight:600; }
+    .report-metric-top i { color:#85878D; font-size:18px; }
+    .report-metric-value { display:block; margin:19px 0 7px; font-size:24px; font-weight:700; overflow-wrap:anywhere; }
+    .report-metric-desc { font-size:11px; color:#85878D; line-height:1.6; }
+
+    .report-table-header { display:flex; justify-content:space-between; align-items:center; gap:12px; flex-wrap:wrap; padding:20px; border-bottom:1px solid #EEEEEB; }
+    .report-table-header h2 { margin:0 0 5px; font-size:15px; font-weight:700; }
+    .report-export { display:flex; gap:9px; flex-wrap:wrap; }
+
+    .report-table-wrap { overflow-x:auto; }
+    .report-table { width:100%; min-width:750px; border-collapse:collapse; }
+    .report-table th { padding:15px 18px; background:#FAFAF9; color:#85878D; text-align:left; font-size:10px; text-transform:uppercase; letter-spacing:.3px; }
+    .report-table td { padding:17px 18px; border-top:1px solid #EEEEEB; font-size:12px; }
+    .report-table tbody tr:hover { background:#FAFAF9; }
+    .report-table .amount { text-align:right; font-weight:700; white-space:nowrap; }
+    .report-table th:last-child { text-align:right; }
+
+    .report-badge { display:inline-flex; align-items:center; gap:5px; padding:6px 10px; border-radius:4px; background:#E4F4EA; color:#176743; font-size:10px; font-weight:600; }
+    .report-number { font-weight:700; }
+    .report-empty { padding:55px 20px; text-align:center; color:#85878D; }
+    .report-empty i { display:block; font-size:32px; margin-bottom:12px; }
+    .report-empty strong { display:block; color:#202126; font-size:13px; margin-bottom:6px; }
+
+    @media(max-width:1100px) {
+        .report-metrics { grid-template-columns:repeat(2,minmax(0,1fr)); }
+    }
+
+    @media(max-width:600px) {
+        .report-header h1 { font-size:22px; }
+        .report-metric { padding:15px; min-height:120px; }
+        .report-metric-value { font-size:19px; }
+        .report-export { width:100%; }
+        .report-export .report-btn { flex:1; }
+        .report-filter .report-btn { width:100%; }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="report-page">
+
+    <!-- HEADER -->
+    <header class="report-header">
+        <div>
+            <h1>Laporan Penjualan</h1>
+            <p class="report-muted">
+                Pantau pendapatan dan transaksi penjualan KURO WEAR berdasarkan periode.
+            </p>
+        </div>
+
+        <span class="report-badge">
+            <i class="bi bi-database-check"></i>
+            Data Transaksi Lunas
+        </span>
+    </header>
+
+    <!-- FILTER PERIODE -->
+    <form class="report-card report-filter"
+          action="{{ url_for('admin.sales_report') }}"
+          method="GET">
+
+        <div class="report-field">
+            <label for="start">Tanggal Mulai</label>
+            <input type="date"
+                   id="start"
+                   name="start"
+                   value="{{ start }}"
+                   required>
+        </div>
+
+        <div class="report-field">
+            <label for="end">Tanggal Akhir</label>
+            <input type="date"
+                   id="end"
+                   name="end"
+                   value="{{ end }}"
+                   min="{{ start }}"
+                   required>
+        </div>
+
+        <button type="submit" class="report-btn">
+            <i class="bi bi-funnel"></i>
+            Terapkan Filter
+        </button>
+
+        <a href="{{ url_for('admin.sales_report') }}"
+           class="report-btn secondary">
+            <i class="bi bi-arrow-counterclockwise"></i>
+            Reset
+        </a>
+    </form>
+
+    <!-- RINGKASAN PENJUALAN -->
+    <section class="report-metrics" aria-label="Ringkasan penjualan">
+
+        <article class="report-metric">
+            <div class="report-metric-top">
+                <span class="report-metric-label">Total Pendapatan</span>
+                <i class="bi bi-cash-stack"></i>
+            </div>
+
+            <strong class="report-metric-value">
+                {{ rupiah(summary['revenue']) }}
+            </strong>
+
+            <span class="report-metric-desc">
+                Nilai pesanan dengan pembayaran lunas
+            </span>
+        </article>
+
+        <article class="report-metric">
+            <div class="report-metric-top">
+                <span class="report-metric-label">Pesanan Lunas</span>
+                <i class="bi bi-bag-check"></i>
+            </div>
+
+            <strong class="report-metric-value">
+                {{ summary['orders'] }}
+            </strong>
+
+            <span class="report-metric-desc">
+                Total transaksi berhasil
+            </span>
+        </article>
+
+        <article class="report-metric">
+            <div class="report-metric-top">
+                <span class="report-metric-label">Produk Terjual</span>
+                <i class="bi bi-box-seam"></i>
+            </div>
+
+            <strong class="report-metric-value">
+                {{ summary['items'] }}
+            </strong>
+
+            <span class="report-metric-desc">
+                Total unit dari pesanan lunas
+            </span>
+        </article>
+
+        <article class="report-metric">
+            <div class="report-metric-top">
+                <span class="report-metric-label">Rata-rata Pesanan</span>
+                <i class="bi bi-graph-up-arrow"></i>
+            </div>
+
+            <strong class="report-metric-value">
+                {{ rupiah(summary['average']) }}
+            </strong>
+
+            <span class="report-metric-desc">
+                Rata-rata nilai per transaksi lunas
+            </span>
+        </article>
+
+    </section>
+
+    <!-- RIWAYAT PENJUALAN -->
+    <section class="report-card">
+
+        <div class="report-table-header">
+            <div>
+                <h2>Riwayat Penjualan</h2>
+                <p class="report-muted">
+                    Periode {{ start }} sampai {{ end }} (WIB)
+                    — {{ rows|length }} transaksi ditemukan.
+                </p>
+            </div>
+
+            <div class="report-export">
+                <a href="{{ url_for('admin.sales_report_export', file_type='xlsx', start=start, end=end) }}"
+                   class="report-btn secondary">
+                    <i class="bi bi-file-earmark-excel"></i>
+                    Ekspor Excel
+                </a>
+
+                <a href="{{ url_for('admin.sales_report_export', file_type='pdf', start=start, end=end) }}"
+                   class="report-btn">
+                    <i class="bi bi-file-earmark-pdf"></i>
+                    Ekspor PDF
+                </a>
+            </div>
+        </div>
+
+        <div class="report-table-wrap">
+            <table class="report-table">
+                <thead>
+                    <tr>
+                        <th>Nomor Pesanan</th>
+                        <th>Tanggal Pembayaran</th>
+                        <th>Customer</th>
+                        <th>Jumlah Produk</th>
+                        <th>Status</th>
+                        <th>Total</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    {% for row in rows %}
+                    <tr>
+                        <td>
+                            <span class="report-number">
+                                {{ row['number'] }}
+                            </span>
+                        </td>
+
+                        <td>{{ row['date'] }}</td>
+
+                        <td>{{ row['customer'] }}</td>
+
+                        <td>{{ row['items'] }} unit</td>
+
+                        <td>
+                            <span class="report-badge">
+                                <i class="bi bi-check-circle"></i>
+                                Lunas
+                            </span>
+                        </td>
+
+                        <td class="amount">
+                            {{ rupiah(row['total']) }}
+                        </td>
+                    </tr>
+
+                    {% else %}
+                    <tr>
+                        <td colspan="6">
+                            <div class="report-empty">
+                                <i class="bi bi-receipt"></i>
+                                <strong>Belum Ada Transaksi Lunas</strong>
+                                <p class="report-muted">
+                                    Tidak ditemukan penjualan yang sudah dibayar
+                                    pada periode yang dipilih.
+                                </p>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+    </section>
+
+</div>
+{% endblock %}
